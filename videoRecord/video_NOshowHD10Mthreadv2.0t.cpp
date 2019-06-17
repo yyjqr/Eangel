@@ -9,7 +9,7 @@
 	using namespace std; 
 	
     char buf[50]={0}; //全局变量，用于获取文件名的时间
-
+    int recordFlag=0;
 void* record_thread(void *args);
 
   int main()  
@@ -17,7 +17,7 @@ void* record_thread(void *args);
 	string str[20]={"cam0"}; //数组设置过小，导致只能拍摄100张图片，现已修改为2000
 	time_t timep,t,NOW;
 	tm* local;
-	//char buf[30]={0};  
+	char stop_cmd[30]={0};  
 	double elapsedseconds;
 	VideoCapture videoCapturer(0);//如果是笔记本，0打开的是自带的摄像头，1 打开外接的相机  
 	//char play_cmd[80];
@@ -60,9 +60,10 @@ void* record_thread(void *args);
 	cout<<"FileName:"<<pVideoFileName<<endl;
 	VideoWriter writer(pVideoFileName, CV_FOURCC('M', 'P','4', '2'), videoCapturer.get(CV_CAP_PROP_FPS),Size(videoCapturer.get(CV_CAP_PROP_FRAME_WIDTH),
 	videoCapturer.get(CV_CAP_PROP_FRAME_HEIGHT)));//AVI 0901   avi格式 MJPG编码
-	 
+	
+        recordFlag=1; 
         pthread_create(&record_thread_t,NULL,record_thread,NULL);
-
+  
 	while (videoCapturer.isOpened())  
 	{
 		Mat frame;  
@@ -78,27 +79,32 @@ void* record_thread(void *args);
 		videoCapturer >> frame;  
 		
 		writer << frame;  
-		//imshow("EangelUSBVideo", frame); 
+		imshow("EangelUSBVideo", frame); 
 		if(elapsedseconds>10*60) //录制10分钟左右的视频
 		{
 		//cout<<"recording time is over"<<endl;
-		printf("Recording time is %f  minutes,finished!", elapsedseconds/60);		
-		exit(0);
-		//break;
+                recordFlag=0;
+		printf("Recording time is %f  minutes,finished!", elapsedseconds/60);
+		videoCapturer.release();   //增加，避免声音录制未退出 201906
+                //return 0;
+		//exit(0);
+		break;
 		}
 		
-		/*if (char(waitKey(5)) == 27||char(waitKey(5)) == 'q')//27是键盘摁下esc时，计算机接收到的ascii码值  
+		if (char(waitKey(5)) == 27||char(waitKey(5)) == 'q')//27是键盘摁下esc时，计算机接收到的ascii码值  
 // ----->如果waitKey函数不进行数据格式转换为char类型，则该程序在VS中可以正常运行，但是在linux系统不能运行，主要是由于数据格式的问题linux char() 1118
 		{  
 		break;  
-		} */ 
+		}  
 	}
+        //pthread_cancel(record_thread_t);
+     sprintf(stop_cmd,"pkill arecord");
+     system(stop_cmd);
 	writer.release();
 	//videoCapturer.release();
 	return 0;  
 }  
 	
-
 
 void* record_thread(void *args)
 {
@@ -115,8 +121,16 @@ void* record_thread(void *args)
  -D, --device=NAME
 		指定PCM设备名称.
 */
-   sprintf(play_cmd,"arecord  -f cd -t wav -r 10000 -D plughw:1,0 %s.wav",buf); 
-        system(play_cmd); //增加录音 20190601
+   sprintf(play_cmd,"arecord  -f cd -t wav -r 10000 -D plughw:1,0 %s.wav",buf); //buf 为时间名称 
+   if(recordFlag){
+    system(play_cmd); //增加录音 20190601
+ 
+
+ }     
+   else{
+  printf("finsh recording!");
+   exit(0);  //结束录制进程 
+}
    return 0;    
 }
 
