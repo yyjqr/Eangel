@@ -1,18 +1,18 @@
-	 #include <stdio.h>
-        #include <opencv2/opencv.hpp> 
-	#include <time.h> 
-	#include <string> //add 20180904
+#include <stdio.h>
+#include <opencv2/opencv.hpp> 
+#include <time.h> 
+#include <string> //add 20180904
 	
-	#include <stdlib.h>
-      #include <pthread.h>  //pthread create
-	using namespace cv;  
-	using namespace std; 
+#include <stdlib.h>
+#include <pthread.h>  //pthread create
+using namespace cv;  
+using namespace std; 
 	
-    char buf[50]={0}; //全局变量，用于获取文件名的时间
-    int recordFlag=0;
+char buf[50]={0}; //全局变量，用于获取文件名的时间
+int recordFlag=0;
 void* record_thread(void *args);
 
-  int main()  
+int main()  
 	{  
 	string str[20]={"cam0"}; //数组设置过小，导致只能拍摄100张图片，现已修改为2000
 	time_t timep,t,NOW;
