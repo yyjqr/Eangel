@@ -1,6 +1,6 @@
 #拼接字符串并换行## -*- coding: UTF-8 -*-
 #!/usr/bin/python3.5
-#@author: JACK YANG 201902  yyjqr789@sina.com
+#@author: JACK YANG 201902-->06  yyjqr789@sina.com
 
 import smtplib
 #from smtplib import SMTP
@@ -17,18 +17,18 @@ import time
 import glob  #查找通配文件 201902
 
 from email.utils import formataddr
-import neteaseSpider #0207
+import neteaseSpiderV2 #0207--->0629
 from lxml.html import etree
 from lxml.html.clean import Cleaner #html cleaner 0415
 import RPi.GPIO as GPIO
 
 
 my_sender='xxx@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
-#receiver='yyjqr789@sina.com'
-receiver=my_sender
-_pwd = "xxx"  #0603
+receiver='xxx@xxx.com'
+#receiver=my_sender
+#_pwd = "xxx"  #0603
 #_user = "你的qq邮箱"
-#_pwd  = "cppfdkkotkehbdjj"   #需在qq邮箱开启SMTP服务并获取授权码20180505
+_pwd = "xxx"   #需在qq邮箱开启SMTP服务并获取授权码20180505
 GPIO.setwarnings(False)
 pin0=11
 pin1=13
@@ -45,7 +45,6 @@ def make_txt_msg(fn):
     f.close()
     print("attach text")
     #txt=MIMEText(data,name=fn)
-#att1 = MIMEText(open(attachment_txt, 'rb').read(), 'base64', 'utf-8')
     txt=MIMEText(data,'plain','utf-8')
     #image.add_header('Content-ID','attachment;filenam="%s" ' %fn)
     txt.add_header('Content-ID','Spider2019')  #发送的图片附件名称 0603
@@ -53,8 +52,6 @@ def make_txt_msg(fn):
 
 
 def make_img_msg(fn):
-    #msg = MIMEMultipart('alternative')
-    
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -81,7 +78,7 @@ def get_file_list(file_path):
 def net_spiderNews():
     print("网易新闻排行榜爬取spidering")
     start_url = "http://news.163.com/rank/"
-    spider=neteaseSpider.Spider(start_url)
+    spider=neteaseSpiderV2.Spider(start_url)
 
 
 def parseHtml(file):
@@ -108,8 +105,6 @@ def parseNews(file):
     # 假设content为已经拿到的html
     fr = open(file)   #add 0404
     content = fr.read() 
-    # Ctext取周围k行(k<5),定为3
-
     blocksWidth = 3
     # 每一个Cblock的长度
     Ctext_len = []
@@ -132,7 +127,6 @@ def mail():
   ret=True
   try:
     msg = MIMEMultipart('alternative')
-    #txt=MIMEText('这是一封来自Eangel机器人的邮件，谢谢!2019012','plain','utf-8')
  #获取文件路径
  
     #txtFile=make_txt_msg('/home/pi/Documents/news网易新闻抓取/科技.txt')
@@ -146,14 +140,10 @@ def mail():
         file='/home/pi/news网易新闻抓取/新闻.txt'
     else:
         file='/home/pi/news网易新闻抓取/教育.txt'
-    #parseNews(file)
     print (file)
-    #parseHtml(file)
-    #file=filterHtml(file)
     txtFile=make_txt_msg(file)
     msg.attach(txtFile)   #添加附件
     #part_attach1 = MIMEApplication(open(file,'rb').read()) #打开附件
-    #txt=MIMEText(newsA,'plain','utf-8')
 
     path = '/tmp'         # 替换为你的路径
     dir = os.listdir(path)                  # dir是目录下的全部文件
@@ -167,7 +157,7 @@ def mail():
     #msg.attach(make_img_msg('/home/pi/EangelCam2019.jpg'))    #  single ''!!! 0603
     msg['From']=formataddr(["Eangel Robot Ⅱ",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
-    msg['Subject']="SE2 Cam 2019" #邮件的主题，也可以说是标题
+    msg['Subject']="SE3 Cam 2019" #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
@@ -189,5 +179,6 @@ def mail():
    #GPIO.output(pin1,GPIO.HIGH)
 
 if __name__ == '__main__':
+  net_spiderNews()  
   mail()
         
