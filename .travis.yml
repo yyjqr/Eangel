@@ -1,14 +1,10 @@
 language: c
 
 os: linux
-dist: trusty
+dist: bionic
 
 
 compiler: gcc
-
-
-before_install:
-  -  sudo apt-get update -q
 
 
 
