@@ -1,0 +1,17 @@
+language: c
+
+os: linux
+dist: trusty
+
+
+compiler: gcc
+
+
+before_install:
+  -  sudo apt-get update -q
+
+
+
+script:
+  -  cd Eangel/videoRecord
+  -  make
