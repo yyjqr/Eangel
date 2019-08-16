@@ -9,5 +9,5 @@ compiler: gcc
 
 
 script:
-  -  cd Eangel/videoRecord
+  -  cd videoRecord
   -  make
