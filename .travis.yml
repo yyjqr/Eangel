@@ -1,4 +1,4 @@
-language: c
+language: cpp
 
 os: linux
 dist: bionic
@@ -6,7 +6,11 @@ dist: bionic
 
 compiler: gcc
 
-
+env:
+  global:
+    # Dependencies
+    - DEPS_DIR="`readlink -f $TRAVIS_BUILD_DIR/..`"
+    - OPENCV_BUILD_DIR=$DEPS_DIR/opencv/build
 
 script:
   -  cd videoRecord
