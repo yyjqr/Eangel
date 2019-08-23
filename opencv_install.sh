@@ -8,9 +8,10 @@ libopenexr-dev
 
 cd /home/opencv
 wget -O opencv4.1.0.zip https://github.com/opencv/opencv/archive/4.1.0.zip
-unzip opencv4.1.0.zip
+pwd
+sudo unzip opencv4.1.0.zip
 sudo mkdir -p /home/opencv/opencv4.1.0/build
-wget -o opencv_contrib-4.1.0.tar.gz https://github.com/opencv/opencv_contrib/archive/4.1.0.tar.gz
+wget -O opencv_contrib-4.1.0.tar.gz https://github.com/opencv/opencv_contrib/archive/4.1.0.tar.gz
 tar -zxf opencv_contrib-4.1.0.tar.gz
 cd /home/opencv/opencv4.1.0/build
 #以下cmake命令可选[不支持xfeatures2d]
