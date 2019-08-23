@@ -13,5 +13,7 @@ env:
     - OPENCV_BUILD_DIR=$DEPS_DIR/opencv/build
 
 script:
+  -  chmod +x opencv_install.sh
+  -  ./opencv_install.sh
   -  cd videoRecord
   -  make
