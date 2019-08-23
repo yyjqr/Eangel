@@ -1,5 +1,5 @@
 sudo mkdir /home/opencv
-sudo apt-get install -y wget build-essential libgtk2.0-dev pkg-config \
+sudo apt-get install -y wget build-essential cmake libgtk2.0-dev pkg-config \
 libavcodec-dev libavformat-dev libswscale-dev python-dev \
 python-numpy  libtbb2 libtbb-dev libjpeg-dev
 
@@ -20,7 +20,10 @@ cmake  -DWITH_CUDA=ON -DBUILD_opencv_xfeatures2d=OFF  ..
 #带pkgconfig[不可用]
 cmake  -DOPENCV_GENERATE_PKGCONFIG=ON  ..
 #带xfeatures2d全带[可用]
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/home/opencv4.1.0/ -DOPENCV_EXTRA_MODULES_PATH=/home/opencv/opencv_contrib-4.1.0/modules/ -DWITH_CUDA=ON  -DOPENCV_GENERATE_PKGCONFIG=ON -DBUILD_opencv_xfeatures2d=ON OPENCV_ENABLE_NONFREE=NO -DWITH_TBB = ON -DBUILD_TBB = ON ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/home/opencv4.1.0/ \
+-DOPENCV_EXTRA_MODULES_PATH=/home/opencv/opencv_contrib-4.1.0/modules/ -DWITH_CUDA=ON  \
+-DOPENCV_GENERATE_PKGCONFIG=ON -DBUILD_opencv_xfeatures2d=ON OPENCV_ENABLE_NONFREE=NO \
+-DWITH_TBB = ON -DBUILD_TBB = ON ..
 make -j4
 sudo make install
 
@@ -28,12 +31,12 @@ echo "/home/opencv/opencv4.1.0/lib" >/etc/ld.so.conf.d/opencv.conf
 ldconfig
 
 
-nano ~/.bashrc
+#nano ~/.bashrc
 #在文件最后边输入
-export PKG_CONFIG_PATH=/home/opencv/lib/pkgconfig:$PKG_CONFIG_PATH
-export LD_LIBRARY_PATH=/home/opencv/lib:$LD_LIBRARY_PATH
+#export PKG_CONFIG_PATH=/home/opencv/lib/pkgconfig:$PKG_CONFIG_PATH
+#export LD_LIBRARY_PATH=/home/opencv/lib:$LD_LIBRARY_PATH
 #ctrl+o 回车保存  ctrl+x 退出
-source ~/.bashrc
+#source ~/.bashrc
 
 
 echo"opencv版本及库信息："
