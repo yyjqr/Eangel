@@ -1,3 +1,4 @@
+su
 mkdir /home/opencv4.1.0
 apt-get install -y wget
 apt-get install -y build-essential
