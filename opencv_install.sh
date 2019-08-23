@@ -1,8 +1,10 @@
-sudo mkdir /home/opencv4.1.0
+sudo mkdir /home/opencv
 sudo apt-get install -y wget build-essential libgtk2.0-dev pkg-config \
 libavcodec-dev libavformat-dev libswscale-dev python-dev \
 python-numpy  libtbb2 libtbb-dev libjpeg-dev
-sudo apt-get install -y libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+
+sudo apt-get install -y libtiff-dev libjasper-dev libdc1394-22-dev
+libopenexr-dev
 
 cd /home/opencv
 wget -o opencv4.1.0.zip https://github.com/opencv/opencv/archive/4.1.0.zip
@@ -27,18 +29,18 @@ ldconfig
 
 
 nano ~/.bashrc
-在文件最后边输入
-export PKG_CONFIG_PATH=/home/opencv4.1.0/lib/pkgconfig:$PKG_CONFIG_PATH
-export LD_LIBRARY_PATH=/home/opencv4.1.0/lib:$LD_LIBRARY_PATH
+#在文件最后边输入
+export PKG_CONFIG_PATH=/home/opencv/lib/pkgconfig:$PKG_CONFIG_PATH
+export LD_LIBRARY_PATH=/home/opencv/lib:$LD_LIBRARY_PATH
 #ctrl+o 回车保存  ctrl+x 退出
 source ~/.bashrc
 
 
 echo"opencv版本及库信息："
 
-pkg-config --modversion opencv4
+#pkg-config --modversion opencv4
 # 4.0.1
-pkg-config --libs opencv4
-pkg-config --cflags opencv4
+#pkg-config --libs opencv4
+#pkg-config --cflags opencv4
 
 #原文链接：https://blog.csdn.net/weixin_43299649/article/details/93995444
