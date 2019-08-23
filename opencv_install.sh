@@ -7,7 +7,7 @@ sudo apt-get install -y libtiff-dev libjasper-dev libdc1394-22-dev
 libopenexr-dev
 
 cd /home/opencv
-wget -o opencv4.1.0.zip https://github.com/opencv/opencv/archive/4.1.0.zip
+wget -O opencv4.1.0.zip https://github.com/opencv/opencv/archive/4.1.0.zip
 unzip opencv4.1.0.zip
 sudo mkdir -p /home/opencv/opencv4.1.0/build
 wget -o opencv_contrib-4.1.0.tar.gz https://github.com/opencv/opencv_contrib/archive/4.1.0.tar.gz
@@ -39,7 +39,7 @@ ldconfig
 #source ~/.bashrc
 
 
-echo"opencv版本及库信息："
+echo "opencv版本及库信息："
 
 #pkg-config --modversion opencv4
 # 4.0.1
