@@ -1,4 +1,4 @@
-mkdir /home/opencv4.1.0
+sudo mkdir /home/opencv4.1.0
 sudo apt-get install -y wget build-essential libgtk2.0-dev pkg-config \
 libavcodec-dev libavformat-dev libswscale-dev python-dev \
 python-numpy  libtbb2 libtbb-dev libjpeg-dev
@@ -7,7 +7,7 @@ sudo apt-get install -y libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
 cd /home/opencv
 wget -o opencv4.1.0.zip https://github.com/opencv/opencv/archive/4.1.0.zip
 unzip opencv4.1.0.zip
-mkdir /home/opencv/opencv4.1.0/build
+sudo mkdir -p /home/opencv/opencv4.1.0/build
 wget -o opencv_contrib-4.1.0.tar.gz https://github.com/opencv/opencv_contrib/archive/4.1.0.tar.gz
 tar -zxf opencv_contrib-4.1.0.tar.gz
 cd /home/opencv/opencv4.1.0/build
