@@ -45,11 +45,11 @@ before_install:
         # https://gist.github.com/itguy51/4239282
         # ------------------------------------------
         
-   - echo "/usr/local/lib" | sudo tee -a /etc/ld.so.conf.d/opencv.conf
-   - sudo ldconfig
-   - echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" | sudo tee -a /etc/bash.bashrc
-   - echo "export PKG_CONFIG_PATH" | sudo tee -a /etc/bash.bashrc
-   - export PYTHONPATH=$OPENCV_BUILD_DIR/lib/python3.3/site-packages:$PYTHONPATH 
+  - echo "/usr/local/lib" | sudo tee -a /etc/ld.so.conf.d/opencv.conf
+  - sudo ldconfig
+  - echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" | sudo tee -a /etc/bash.bashrc
+  - echo "export PKG_CONFIG_PATH" | sudo tee -a /etc/bash.bashrc
+  - export PYTHONPATH=$OPENCV_BUILD_DIR/lib/python3.3/site-packages:$PYTHONPATH 
 
 
 
