@@ -6,6 +6,12 @@ dist: bionic
 
 compiler: gcc
 
+env:
+  global:
+    # Dependencies
+    - DEPS_DIR="`readlink -f $TRAVIS_BUILD_DIR/..`"
+    - OPENCV_BUILD_DIR=$DEPS_DIR/opencv/build
+
 before_install:
   - which python
   - python --version
@@ -45,14 +51,10 @@ before_install:
         #export PYTHONPATH=$OPENCV_BUILD_DIR/lib/python3.3/site-packages:$PYTHONPATH 
 
 
-env:
-  global:
-    # Dependencies
-    - DEPS_DIR="`readlink -f $TRAVIS_BUILD_DIR/..`"
-    - OPENCV_BUILD_DIR=$DEPS_DIR/opencv/build
+
 
 script:
   #  chmod +x opencv_install.sh
   # ./opencv_install.sh
-  - cd videoRecord
+  - cd $TRAVIS_BUILD_DIR/videoRecord
   - make
