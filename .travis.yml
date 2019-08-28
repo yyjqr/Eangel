@@ -55,18 +55,18 @@ before_install:
   - sudo mkdir pkgconfig
   - cd pkgconfig
   - sudo touch opencv.pc
-  - echo "prefix=/usr/local exec_prefix=${prefix} 
-libdir=${exec_prefix}/lib
-includedir_old=${prefix}/include/opencv4
-includedir_new=${prefix}/include
-Name: OpenCV
-Description: Open Source Computer Vision Library
-Version: 4.1.0
-Libs: -L${exec_prefix}/lib -lopencv_world
-Libs.private: -ldl -lm -lpthread -lrt
-Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
+  - echo "prefix=/usr/local exec_prefix=${prefix}" | sudo tee -a opencv.pc
+  - echo "libdir=${exec_prefix}/lib" | sudo tee -a opencv.pc
+  - echo "includedir_old=${prefix}/include/opencv4" | sudo tee -a opencv.pc
+  - echo "includedir_new=${prefix}/include" | sudo tee -a opencv.pc
+#Name: OpenCV
+#Description: Open Source Computer Vision Library
+#Version: 4.1.0  
+  - echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
+  - echo "Libs.private: -ldl -lm -lpthread -lrt" | sudo tee -a opencv.pc
+  - echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc" | sudo tee -a opencv.pc
 
-  
+
 
 
 
