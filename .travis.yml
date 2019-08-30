@@ -59,6 +59,7 @@ before_install:
   - echo "libdir=${exec_prefix}/lib" | sudo tee -a opencv.pc
   - echo "includedir_old=${prefix}/include/opencv4" | sudo tee -a opencv.pc
   - echo "includedir_new=${prefix}/include" | sudo tee -a opencv.pc
+  - echo "Libs:-L${exec_prefix}/lib" | sudo tee -a opencv.pc
   #echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
   - echo "Libs.private: -ldl -lm -lpthread -lrt" | sudo tee -a opencv.pc
   - echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
