@@ -13,7 +13,8 @@ OPENCV=`pkg-config --cflags opencv --libs opencv`
 LIBS = $(OPENCV)
 
 #编译包含的头文件所在目录 
-INCLUDES   := -I /usr/local/include/opencv4/opencv2/  
+#INCLUDES   := -I /usr/local/include/opencv4/opencv2/  
+INCLUDES   := -I /usr/include/opencv4/opencv2/
  #所有用到的源文件，注意：非当前目录的要+上详细地址
 SRCS    =  cam_NewflexSave10minHD_opencv4.1_V2.2.cpp
 #把源文件SRCS字符串的后缀.c改为.o 
