@@ -50,16 +50,16 @@ before_install:
   - echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" | sudo tee -a /etc/bash.bashrc
   - echo "export PKG_CONFIG_PATH" | sudo tee -a /etc/bash.bashrc
   - export PYTHONPATH=$OPENCV_BUILD_DIR/lib/python3.3/site-packages:$PYTHONPATH 
-  # configure opencv.pc
+  # configure opencv.pc add Jack
   - cd /usr/local/lib
   - sudo mkdir pkgconfig
   - cd pkgconfig
   - sudo touch opencv.pc
   - echo "prefix=/usr/local exec_prefix=${prefix}" | sudo tee -a opencv.pc
-  - echo "libdir=${exec_prefix}/lib" | sudo tee -a opencv.pc
-  - echo "includedir_old=${prefix}/include/opencv4" | sudo tee -a opencv.pc
-  - echo "includedir_new=${prefix}/include" | sudo tee -a opencv.pc
-  - echo "Libs:-L${exec_prefix}/lib" | sudo tee -a opencv.pc
+  - echo "libdir=/usr/local/lib" | sudo tee -a opencv.pc
+  - echo "includedir_old=/usr/local/include/opencv4" | sudo tee -a opencv.pc
+  - echo "includedir_new=/usr/local/include" | sudo tee -a opencv.pc
+  - echo "Libs:-L/usr/local/lib" | sudo tee -a opencv.pc
   #echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
   #- echo "Libs.private: -ldl -lm -lpthread -lrt" | sudo tee -a opencv.pc
   #- echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
