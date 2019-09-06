@@ -63,7 +63,7 @@ before_install:
   #echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
   #- echo "Libs.private: -ldl -lm -lpthread -lrt" | sudo tee -a opencv.pc
   #- echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
-  - cd /usr/local/include
+  - cd /usr/include
   - ls -alh
 
 #Name: OpenCV
