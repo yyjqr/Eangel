@@ -5,8 +5,8 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。
 **/
 
 #include <stdio.h>
+#include <opencv2/core.hpp>  //change to the first order
 #include <opencv2/opencv.hpp> 
-#include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
 
 #include <time.h> 
