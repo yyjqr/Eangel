@@ -27,7 +27,7 @@ SRCS    =  video_thread_Record_v1.3.cpp
 #重定义隐藏规则，匹配上述目标：myhello.o & ./common/abc.c & ./common/test/test.c
 #%.o:%.c 
 default:
-	$(CC)   $(CFLAGS) $(INCLUDES) $(SRCS)  -o $(TARGET) $(LIBS)
+	$(CC)    $(INCLUDES) $(SRCS)  -o $(TARGET) $(LIBS) $(CFLAGS)
 #清空除源文件外的所有生成文件 
 #clean:     rm -rf $(basename $(TARGET)) $(SRCS:.c=.o)
 clean:  
