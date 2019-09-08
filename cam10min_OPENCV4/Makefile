@@ -7,15 +7,15 @@ CC	   := g++
 #编译的参数
 #CFLAG	   := -g -Wall  
 CFLAGS = -g -Wall 
-# OPENCV3---->OPENCV4 库文件有所不同 201907
 OPENCV=`pkg-config --cflags opencv --libs opencv` 
 #OPENCV=`pkg-config --cflags --libs opencv`
 LIBS = $(OPENCV)
 
 #编译包含的头文件所在目录 
+# OPENCV3---->OPENCV4 库文件有所不同 201907
 INCLUDES   := -I /usr/local/include/opencv4/opencv2/  
  #所有用到的源文件，注意：非当前目录的要+上详细地址
-SRCS    =  cam_NewflexSave10minHD_opencv4.1_V2.2.cpp
+SRCS    =  cam10min_Save_v2.3.cpp
 #把源文件SRCS字符串的后缀.c改为.o 
 #OBJS    = $(SRCS:.c=.o)  
 #匹配所有的伪目标依赖，即执行目标myhello.o & ./common/abc.c & ./common/test/test.c 

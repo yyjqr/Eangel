@@ -3,11 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include "highgui_c.h"  //opencv4 文件名有变动
-//#include "videoio/videoio_c.h"    //revise the header file
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>   //writer 0306
-//#include "opencv.hpp"
 #include "iostream"
 #include <time.h>
 #include <string>
@@ -85,10 +82,7 @@ int main(int argc, char **argv) {
 
             str[j]+=".jpg"; //gmtime
 
-
-
             pImageFileName=str[j].c_str();
-            // char name[100];
 
             //sprintf(pImageFileName,"%d.jpg",i);
             printf("%s\n",pImageFileName);
