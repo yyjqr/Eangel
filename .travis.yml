@@ -63,8 +63,10 @@ before_install:
   #echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
   #- echo "Libs.private: -ldl -lm -lpthread -lrt" | sudo tee -a opencv.pc
   #- echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
-  - cd /usr/include
+  - cd /usr/include/opencv4
   - ls -alh
+  - cd /usr/local/lib/pkgconfig
+  - cat opencv.pc
 
 #Name: OpenCV
 #Description: Open Source Computer Vision Library
