@@ -67,7 +67,7 @@ before_install:
   #- echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
   - cd /usr/include/opencv4
   - ls -alh
-  - cd /usr/local/lib/pkgconfig
+  - cd /usr/lib/x86_64-linux-gnu
   - cat opencv.pc
 
 #Name: OpenCV
