@@ -51,15 +51,17 @@ before_install:
   - echo "export PKG_CONFIG_PATH" | sudo tee -a /etc/bash.bashrc
   - export PYTHONPATH=$OPENCV_BUILD_DIR/lib/python3.3/site-packages:$PYTHONPATH 
   # configure opencv.pc add Jack
-  - cd /usr/local/lib
+  #cd /usr/local/lib
+  # CICD ENV INSTALL LIB IN DIFFERENT DIR!!!SO CHANGE TO TEST.
+  - cd /usr/lib/x86_64-linux-gnu
   - sudo mkdir pkgconfig
   - cd pkgconfig
   - sudo touch opencv.pc
-  - echo "prefix=/usr/local exec_prefix=${prefix}" | sudo tee -a opencv.pc
+  - echo "prefix=/usr/lib/x86_64-linux-gnu exec_prefix=${prefix}" | sudo tee -a opencv.pc
   - echo "libdir=/usr/local/lib" | sudo tee -a opencv.pc
   - echo "includedir_old=/usr/include/opencv4" | sudo tee -a opencv.pc
   - echo "includedir_new=/usr/include" | sudo tee -a opencv.pc
-  - echo "Libs:-L/usr/local/lib -lopencv_gapi -lopencv_stitching  -lopencv_dnn  -lopencv_video  -lopencv_shape -lopencv_ml  -lopencv_objdetect -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_flann  -lopencv_photo -lopencv_imgproc -lopencv_core" | sudo tee -a opencv.pc
+  - echo "Libs:-L/usr/lib/x86_64-linux-gnu -lopencv_gapi -lopencv_stitching  -lopencv_dnn  -lopencv_video  -lopencv_shape -lopencv_ml  -lopencv_objdetect -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_flann  -lopencv_photo -lopencv_imgproc -lopencv_core" | sudo tee -a opencv.pc
   #echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
   #- echo "Libs.private: -ldl -lm -lpthread -lrt" | sudo tee -a opencv.pc
   #- echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
