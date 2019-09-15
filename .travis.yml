@@ -54,7 +54,8 @@ before_install:
   #cd /usr/local/lib
   # CICD ENV INSTALL LIB IN DIFFERENT DIR!!!SO CHANGE TO TEST.
   - cd /usr/lib/x86_64-linux-gnu
-  - sudo mkdir pkgconfig
+  #containing the dir
+  # sudo mkdir pkgconfig     
   - cd pkgconfig
   - sudo touch opencv.pc
   - echo "prefix=/usr/lib/x86_64-linux-gnu exec_prefix=${prefix}" | sudo tee -a opencv.pc
