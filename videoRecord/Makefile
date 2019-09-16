@@ -14,7 +14,10 @@ LIBS = $(OPENCV)
 
 #编译包含的头文件所在目录 
 #INCLUDES   := -I /usr/local/include/opencv4/opencv2/ 
-INCLUDES   := -I /usr/include/opencv4/opencv2/   
+#INCLUDES   := -I /usr/include/opencv4/opencv2/   
+#去掉OpenCV2 目录，测试编译
+INCLUDES   := -I /usr/include/opencv4/   
+
  #所有用到的源文件，注意：非当前目录的要+上详细地址
 SRCS    =  video_thread_Record_v1.3.cpp
 #把源文件SRCS字符串的后缀.c改为.o 
