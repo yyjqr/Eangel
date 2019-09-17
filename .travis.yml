@@ -67,6 +67,11 @@ before_install:
   #echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
   #- echo "Libs.private: -ldl -lm -lpthread -lrt" | sudo tee -a opencv.pc
   #- echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
+  
+  - echo "OpenCV" | sudo tee -a opencv.pc
+  #must add Version ,否则会报Package 'opencv' has no Name: field ,然后编译会出错！！
+  - echo "Version: 4.1.0" | sudo tee -a opencv.pc
+  
   - cd /usr/include/opencv4/opencv2
   - ls -alh
   - cd /usr/lib/x86_64-linux-gnu
