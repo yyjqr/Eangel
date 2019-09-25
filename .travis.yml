@@ -66,6 +66,7 @@ before_install:
   
   - echo "Name:OpenCV" | sudo tee -a opencv.pc
   #must add Version ,否则会报Package 'opencv' has no Name: field ,然后编译会出错！！
+  - echo "Description:Open Source Computer Vision Library" | sudo tee -a opencv.pc
   - echo "Version:4.1.0" | sudo tee -a opencv.pc
   - echo "Libs:-L/usr/lib/x86_64-linux-gnu -lopencv_gapi -lopencv_stitching  -lopencv_dnn  -lopencv_video  -lopencv_shape -lopencv_ml  -lopencv_objdetect -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_flann  -lopencv_photo -lopencv_imgproc -lopencv_core" | sudo tee -a opencv.pc
   #echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
@@ -81,6 +82,7 @@ before_install:
   - cd /usr/lib/x86_64-linux-gnu/pkgconfig
   - ls -alh
   - cat opencv.pc
+  - pkg-config --modversion opencv
 
 #Name: OpenCV
 #Description: Open Source Computer Vision Library
