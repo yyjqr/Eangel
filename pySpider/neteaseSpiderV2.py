@@ -64,7 +64,12 @@ def filterHtml(new_page):
     content = re.sub(r'\?+', ' ', content)
     content = re.sub(r'( *\n+)+', '\n', content)
     content = re.sub(r'\u3000', '', content)
-    # 清理网页头标题之类
+    content = re.sub(r'<tr>', '', content)  #add Test 1023
+    content = re.sub(r'</tr>', '', content)  #add Test 1023
+    content = re.sub(r'<td?>', '', content)  #add 匹配td开始的字符串
+    content = re.sub(r'</td>', '', content)  #add Test 1023  
+    content = re.sub(r'</?^class+>', '', content)   #<td class=  
+ # 清理网页头标题之类
     #content = content.split('本周点击排行')[1]
     content = content.split('点击数')[1]
     content = content.split('返回顶部')[0]
