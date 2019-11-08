@@ -68,7 +68,9 @@ def filterHtml(new_page):
     content = re.sub(r'</tr>', '', content)  #add Test 1023
     content = re.sub(r'<td?>', '', content)  #add 匹配td开始的字符串
     content = re.sub(r'</td>', '', content)  #add Test 1023  
-    content = re.sub(r'</?^class+>', '', content)   #<td class=  
+    #content = re.sub(r'</?^class+>', '', content)   #<td class=
+    content = re.sub(r'<td class="rank">', '', content)  #<td class=  
+    content = re.sub(r'<td class="gray">', '', content)  #<td class="gray">
  # 清理网页头标题之类
     #content = content.split('本周点击排行')[1]
     content = content.split('点击数')[1]
