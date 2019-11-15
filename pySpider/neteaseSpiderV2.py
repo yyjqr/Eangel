@@ -79,12 +79,10 @@ def filterHtml(new_page):
 
 def Spider(url):
     i = 0
-    print ("downloading ", url)
     myPage = requests.get(url).content.decode("gbk")
     myPageResults = Page_Info(myPage)
     save_path = "news网易新闻抓取"
     filename = str(i)+"_网易新闻排行榜"
-    StringListSave(save_path, filename, myPageResults)
     i += 1
     for item, url in myPageResults:
         print ("downloading", url)
@@ -92,10 +90,10 @@ def Spider(url):
         new_page=filterHtml(new_page)
         testNewPage(save_path, item, new_page)
         newPageResults = New_Page_Info(new_page)
-        filename = str(i) + "_" + item
-        StringListSave(save_path, filename, newPageResults)
-        i += 1
-
+        #filename = str(i) + "_" + item
+        #StringListSave(save_path, filename, newPageResults)
+        #i += 1
+        #print (i)
 
 if __name__ == '__main__':
     print ("start")
