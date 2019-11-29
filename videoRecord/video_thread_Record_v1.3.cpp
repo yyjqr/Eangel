@@ -14,6 +14,10 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。
 
 #include <stdlib.h>
 #include <pthread.h>  //pthread create
+
+#define STR_OK          "[\x1b[1;32m OK \x1b[0m]"
+#define STR_FAIL        "[\x1b[1;31mFAIL\x1b[0m]"
+
 using namespace cv;  
 using namespace std; 
 
@@ -43,14 +47,14 @@ int main(int argc, char** argv)
 		unsigned int width = videoCapturer.get(CAP_PROP_FRAME_WIDTH),
 		height = videoCapturer.get(CAP_PROP_FRAME_HEIGHT);
 
-		cout << "video info"<<"[Width:" << width << ", Height:" << height
+		cout << " "STR_OK " video info"<<"[Width:" << width << ", Height:" << height
 		<< ", FPS: " << videoCapturer.get(CAP_PROP_FPS)
 		<< ", FrameCount: " << " " << "]" << std::endl;  //from Github
 
 		}
 		else
 		{
-		cout<<"Capture not OK";
+		cout<<" "STR_FAIL" Capture not OK";
 		return -1;
 		}
 		//Mat frame;  
