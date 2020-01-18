@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "unistd.h": "c",
+        "types.h": "c",
+        "stdlib.h": "c",
+        "bmi088.h": "c",
+        "bmi088_defs.h": "c",
+        "stdint.h": "c",
+        "stddef.h": "c",
+        "cstdint": "c",
+        "spi_interface.h": "c",
+        "spi.h": "c",
+        "ctype.h": "c",
+        "int-ll64.h": "c",
+        "fb.h": "c",
+        "hi_spi.h": "c",
+        "io.h": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c"
+    }
+}
