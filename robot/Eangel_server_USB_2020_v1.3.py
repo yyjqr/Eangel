@@ -1,7 +1,7 @@
 
 #import necessary package
-# encoding: utf-8
-#codeing:gb18030
+#-*-coding: utf-8 -*-
+#coding:gb18030
 import socket
 import time
 import sys,subprocess
