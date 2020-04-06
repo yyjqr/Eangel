@@ -169,26 +169,21 @@ def mail():
     path = '/tmp'         # 替换为你的路径
     dir = os.listdir(path)                  # dir是目录下的全部文件
     listN=get_file_list(path)
-    #print (listN)
-    imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
-    print('Send IMG is "%s" ' %imgPath)
-    #get_file_list(path)
-    #for d in dir:                        # d是每一个文件的文件名
-    #imgPath = path +'/'+ imgPath     #拼接字符串并换行
+    print (listN)
+    if listN:
+        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
+        print('Send IMG is "%s" ' %imgPath)
     
-    #for imgPath in glob.glob("/tmp/*.jpg"):        
-         #print (imgPath)    
     
-    #imgPath=get_file_list(imgPath) 
-    pic=make_img_msg(imgPath) 
-    if pic is None:
-        print ("no picture captured!")
-    else:
-        msg.attach(make_img_msg(imgPath))
+        pic=make_img_msg(imgPath) 
+        if pic is None:
+           print ("no picture captured!")
+        else:
+           msg.attach(make_img_msg(imgPath))
     #msg.attach(make_img_msg('/home/pi/EangelCam2019.jpg'))    #  single ''!!! 0603
     msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
-    msg['Subject']="SE3 Cam 2019" #邮件的主题，也可以说是标题
+    msg['Subject']="SE3 Cam LEIPH 2020" #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
@@ -200,17 +195,6 @@ def mail():
     ret=False
   return ret
 
-#ret=mail()
-#if ret:
- # print 'ok' #如果发送成功则会返回ok，稍等20秒左右就可以收到邮件
-  #GPIO.output(pin0,GPIO.HIGH)
-   #time.sleep(10)
-   #GPIO.output(pin0,GPIO.LOW)
- #else:
-   #print 'send failed' #如果发送失败则会返回failed
-   #GPIO.output(pin1,GPIO.HIGH)
-   #time.sleep(15)
-   #GPIO.output(pin1,GPIO.LOW)
 
 if __name__ == '__main__':
   mail()
