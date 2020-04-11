@@ -98,3 +98,6 @@ script:
   # ./opencv_install.sh
   - cd $TRAVIS_BUILD_DIR/videoRecord
   - make
+  
+  - cd $TRAVIS_BUILD_DIR/cam10min_OPENCV4
+  - make
