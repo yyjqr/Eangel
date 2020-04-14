@@ -15,8 +15,8 @@ LIBS = $(OPENCV)
 
 # OPENCV3---->OPENCV4 库文件有所不同 201907
 #INCLUDES   := -I /usr/local/include/opencv4/opencv2/ 
-#CI/CD DEPLOY .CHANGE INCLUDES 202004
-INCLUDES   := -I /usr/local/include/opencv4/
+#CI/CD DEPLOY .CHANGE INCLUDES, doesn't have /local dir!! 202004
+INCLUDES   := -I /usr/include/opencv4/
  #所有用到的源文件，注意：非当前目录的要+上详细地址
 SRCS    =  cam10min_Save_v2.3.cpp
 #把源文件SRCS字符串的后缀.c改为.o 
