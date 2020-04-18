@@ -3,8 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <opencv2/core/core.hpp>   //writer 0306 ---> //change to the first order 202004
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/core/core.hpp>   //writer 0306
+
 #include "iostream"
 #include <time.h>
 #include <string>
