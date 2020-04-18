@@ -83,30 +83,36 @@ def ReceiveDataThread(socket_tcp,address):
                 data=socket_tcp.recv(8192)
                 #print ("Rev data ...")
                 if len(data)>0:
-                    print("Received:%s" %data)
+                    print("Received:%s" %data ,address)  #%s--->%c 目前接受的是字符为主
+#利用字节串的decode()方法将字节串解码成字符串（对象）
+                    #print(data,type(data))
+                    #data=data.decode()  #add  利用字符串的encode()方法将字符串编码成字节对象（bytes），默认使用utf-8字符集  0331
+                    data=bytes.decode(data)
                     logger.info(data)
+                    #print(data,type(data))
                     if  data=='F':
                        # GPIO.output(11,GPIO.HIGH)
-                       ser.write('F')
+##TypeError: unicode strings are not supported, please encode to bytes: 'P'!!! 发送的字符，需要变成字节！！20200418
+                       ser.write(str.encode('F'))
                        print("car go Forward")
                     elif data=='L':
                        # GPIO.output(11,GPIO.HIGH)
-                       ser.write('L')
+                       ser.write(str.encode('L'))
                        print("car turn left")
 
                     elif data=='R':
                        # GPIO.output(11,GPIO.LOW)
-                    #socket_con.send(data)
-                       ser.write('R')
+                       ser.write(str.encode('R'))
                        print("car turn Right")
                     elif data=='B':
-                       ser.write('B')
+                       ser.write(str.encode('B'))
                        print("car turn Back")
                     elif data=='P':
-                       ser.write('P')
+                       #ser.write('P')
+                       ser.write(str.encode('P'))
                        print("car Pause")
                     elif data=='S':    #slow down  add 202003
-                       ser.write('S')
+                       ser.write(str.encode('S'))
                        print("car SLOW DOWN!")   
         # "C" 20200301ADD            
                     elif data=='C':
@@ -132,13 +138,18 @@ def ReceiveDataThread(socket_tcp,address):
                        
                        print (" Robot running time is %d seconds ..."%runtime)  #20180625   
                     #continue
-        except Exception:
+                    if not data:
+                         print("RECEIVE WRONG!")
+                         break
+        except Exception as e:
+                    print("出错了，错误类型是{}".format(type(e)))
                     socket_tcp.close()
                     print(address,'offline')
                     _index = conn_list.index(address)
                     #gui.listBox.delete(_index)
                     conn_dt.pop(address)
                     conn_list.pop(_index)
+                    break
                     #sys.exit(1)
 
 def accept_client():
@@ -162,6 +173,7 @@ def accept_client():
 
         # 设置成守护线程
         #thread.setDaemon(True)
+        thread.Daemon=True #add 0405
         thread.start()
 
 if __name__ == '__main__':
