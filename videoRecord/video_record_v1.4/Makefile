@@ -1,7 +1,7 @@
 #g++ -std=c++11  -I/usr/include/opencv/ -I/usr/include/opencv2/  cam18minHD201807V1.4.cpp 
 #   -o camFS18m  `pkg-config --cflags opencv --libs opencv` 
 #目标（要生成的文件名）
-TARGET     := videorRecord_fps
+TARGET     := videoRecord_fps
 #编译器的选择（在Linux中其实可以忽略，因为cc指向的本来就是gcc）   
 CC	   := g++  
 #编译的参数
