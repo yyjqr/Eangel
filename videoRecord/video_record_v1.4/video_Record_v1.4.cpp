@@ -15,6 +15,8 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。 2019--->202004
 #include <stdlib.h>
 #include <pthread.h>  //pthread create
 
+#include "log.h"
+
 #define STR_OK          "[\x1b[1;32m OK \x1b[0m]"
 #define STR_FAIL        "[\x1b[1;31mFAIL\x1b[0m]"
 
@@ -81,7 +83,7 @@ int main(int argc, char** argv)
 
 		pthread_t card_monitor_thread;
         pthread_create(&card_monitor_thread, NULL, monitor_mem_thread_proc, NULL);
-		namedWindow("Capture", WINDOW_AUTOSIZE);
+		//namedWindow("Capture", WINDOW_AUTOSIZE);
 		while (videoCapturer.isOpened())  
 		{
 			Mat frame;  
@@ -96,7 +98,7 @@ int main(int argc, char** argv)
 					videoCapturer >> frame;  
 
 					writer << frame;  
-					imshow("EangelUSBVideo", frame); 
+					//imshow("EangelUSBVideo", frame); 
 					if(elapsedseconds>10*60) //录制10分钟左右的视频
 					{
 					//cout<<"recording time is over"<<endl;
@@ -114,8 +116,12 @@ int main(int argc, char** argv)
 					break;  
 					}  
 
-			} 
-			
+			    }
+                        else{
+                       printf("DEVICE IS FULL, STOP RECORD VIDEO!\n"); 
+		   	log_error("DEVICE IS FULL, STOP RECORD VIDEO!\n"); 
+                        break;
+                        }
 		}
 		//pthread_cancel(record_thread_t);
 		sprintf(stop_cmd,"pkill arecord");
