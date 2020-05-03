@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python3
-
+# 2019-202005 爬取科技新闻，去掉大部分tag标签
 import os
 import re
 import requests
@@ -66,11 +66,20 @@ def filterHtml(new_page):
     content = re.sub(r'\u3000', '', content)
     content = re.sub(r'<tr>', '', content)  #add Test 1023
     content = re.sub(r'</tr>', '', content)  #add Test 1023
-    content = re.sub(r'<td?>', '', content)  #add 匹配td开始的字符串
-    content = re.sub(r'</td>', '', content)  #add Test 1023  
-    #content = re.sub(r'</?^class+>', '', content)   #<td class=
-    content = re.sub(r'<td class="rank">', '', content)  #<td class=  
-    content = re.sub(r'<td class="gray">', '', content)  #<td class="gray">
+    #content = re.sub(r'<td?>', '', content)  #add 匹配td开始的字符串
+    #content = re.sub(r'<td[^>]*>(.*?)</td>', '', content)  #add 匹配td开始的字符串
+    content = re.sub(r'<td[^>]*>', '', content)  #add 匹配td开始的字符串  20200502!
+    content = re.sub(r'<img[^>]*>', '', content)  #add 匹配img 开始的字符串
+    content = re.sub(r'<td class="rank">', '', content)  #add 匹配td开始的字符串
+    content = re.sub(r'<td class="cBlue">', '', content)  #add 匹配td开始的字符串
+    content = re.sub(r'<td class="gray">', '', content)  #add 匹配td开始的字符串
+    #content = re.sub(r'<span>^[0-9]*</span>', '', content)  #add 匹配span开始的字符串
+    content = re.sub(r'<span>[^>]*</span>', '', content)  #add 匹配span开始的字符串
+    
+    #content = re.sub(r'<td class="^[A-Za-z0-9]+$>"', '', content)  #add Test 0502  
+    #content = re.sub(r'<td ^class>', '', content)  #add Test 0502  
+    #content = re.sub(r'<^td>', '', content)   #<td class=  
+    content = re.sub(r'</td>', '', content)   #<td class=  
  # 清理网页头标题之类
     #content = content.split('本周点击排行')[1]
     content = content.split('点击数')[1]
@@ -79,10 +88,12 @@ def filterHtml(new_page):
 
 def Spider(url):
     i = 0
+    print ("downloading ", url)
     myPage = requests.get(url).content.decode("gbk")
     myPageResults = Page_Info(myPage)
     save_path = "news网易新闻抓取"
     filename = str(i)+"_网易新闻排行榜"
+    StringListSave(save_path, filename, myPageResults)
     i += 1
     for item, url in myPageResults:
         print ("downloading", url)
@@ -90,10 +101,10 @@ def Spider(url):
         new_page=filterHtml(new_page)
         testNewPage(save_path, item, new_page)
         newPageResults = New_Page_Info(new_page)
-        #filename = str(i) + "_" + item
-        #StringListSave(save_path, filename, newPageResults)
-        #i += 1
-        #print (i)
+        filename = str(i) + "_" + item
+        StringListSave(save_path, filename, newPageResults)
+        i += 1
+
 
 if __name__ == '__main__':
     print ("start")
