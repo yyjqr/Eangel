@@ -5,177 +5,181 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。 2019--->202004
 **/
 
 #include <stdio.h>
-#include <opencv2/core.hpp>  //change to the first order
-#include <opencv2/opencv.hpp> 
+#include <opencv2/core.hpp> //change to the first order
+#include <opencv2/opencv.hpp>
 #include <opencv2/videoio.hpp>
 
-#include <time.h> 
+#include <time.h>
 #include <string> //add 20180904
 
 #include <stdlib.h>
-#include <pthread.h>  //pthread create
-#include <unistd.h>  //getopt 202005
+#include <pthread.h> //pthread create
+#include <unistd.h>	 //getopt 202005
 
 #include "log.h"
 #include "debug.h"
 
 #include "log.h"
 
-#define STR_OK          "[\x1b[1;32m OK \x1b[0m]"
-#define STR_FAIL        "[\x1b[1;31mFAIL\x1b[0m]"
+#define STR_OK "[\x1b[1;32m OK \x1b[0m]"
+#define STR_FAIL "[\x1b[1;31mFAIL\x1b[0m]"
 #define VIDEO_LOG_FILE "./video_cap.log"
 
-using namespace cv;  
-using namespace std; 
+using namespace cv;
+using namespace std;
 
-char buf[50]={0}; //全局变量，用于获取文件名的时间
-int recordFlag=0;
-void* record_thread(void *args);
-extern void* monitor_mem_thread_proc(void* arg);  //ADD 0427
-static int program_para(int argc, char ** argv, int * fps);
+char buf[50] = {0}; //全局变量，用于获取文件名的时间
+int recordFlag = 0;
+void *record_thread(void *args);
+extern void *monitor_mem_thread_proc(void *arg); //ADD 0427
+static int program_para(int argc, char **argv, int *fps);
 void printHelp(void);
 
-int  bCapture=1;
+int bCapture = 1;
 int trace_level = MSG_LEVEL_OFF;
-int b_dump=0;
+int b_dump = 0;
 
-int main(int argc, char** argv)  
-{  
-		
-		time_t timep,t,NOW;
-		tm* local;
-		char stop_cmd[30]={0};  
-		double elapsedseconds;
-		VideoCapture videoCapturer(0);//   Numerical value 0 cv::CAP_ANY  
-		string str[20]={" "};
-		int level=-1;
-		int fps=-1;
-		char imu_module[LOG_MOD_NAME_LEN] = "[video_cap]";
-        FILE *log_file = NULL;
-        if (argc >= 2) {
+int main(int argc, char **argv)
+{
+
+	time_t timep, t, NOW;
+	tm *local;
+	char stop_cmd[30] = {0};
+	double elapsedseconds;
+	VideoCapture videoCapturer(0); //   Numerical value 0 cv::CAP_ANY
+	string str[20] = {" "};
+	int level = -1;
+	int fps = -1;
+	char imu_module[LOG_MOD_NAME_LEN] = "[video_cap]";
+	FILE *log_file = NULL;
+	if (argc >= 2)
+	{
 		program_para(argc, argv, &fps);
-		}
-		else {
-			printHelp();
-			printf("\nerror :Need more arguments!!  main program exit...\n");
-			exit(1);
-		}
-	
+	}
+	else
+	{
+		printHelp();
+		printf("\nerror :Need more arguments!!  main program exit...\n");
+		exit(1);
+	}
 
-			log_file = fopen(VIDEO_LOG_FILE, "a");
-			if (log_file != NULL)
-			{
-				log_set_fp(log_file);
-				log_set_module_name(imu_module);
+	log_file = fopen(VIDEO_LOG_FILE, "a");
+	if (log_file != NULL)
+	{
+		log_set_fp(log_file);
+		log_set_module_name(imu_module);
 
-				if (b_dump)
-				{
-					log_set_level(LOG_INFO);
-					log_set_quiet(0);
-				}
-				else
-				{
-					log_set_level(LOG_ERROR);
-					log_set_quiet(1);
-				}
-
-				log_info("Open log file success");
-			}
-
-		/**
-		* Get some information of the video and print them
-		*/  
-		//videoCapturer.set(CAP_PROP_FOURCC,CV_FOURCC('M', 'P','4', '2'));
-		videoCapturer.set(CAP_PROP_FRAME_WIDTH, 960);
-		videoCapturer.set(CAP_PROP_FRAME_HEIGHT, 540);
-		videoCapturer.set(CAP_PROP_FPS, 20);
-		if(videoCapturer.isOpened())
+		if (b_dump)
 		{
-		//double totalFrameCount = videoCapturer.get(CAP_PROP_FRAME_COUNT);  //这个参数获取会报错！！ VIDEOIO ERROR: V4L2: getting property #7 is not supported
-		unsigned int width = videoCapturer.get(CAP_PROP_FRAME_WIDTH),
-		height = videoCapturer.get(CAP_PROP_FRAME_HEIGHT);
-
-		cout << " "STR_OK " video info"<<"[Width:" << width << ", Height:" << height
-		<< ", FPS: " << videoCapturer.get(CAP_PROP_FPS)
-		<< ", FrameCount: " << " " << "]" << std::endl;  //from Github
-
+			log_set_level(LOG_INFO);
+			log_set_quiet(0);
 		}
 		else
 		{
-		cout<<" "STR_FAIL" Capture not OK";
-		return -1;
+			log_set_level(LOG_ERROR);
+			log_set_quiet(1);
 		}
-		//Mat frame;  
-		t=time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
-		//local=asctime(localtime(&timep));    //gmtime(WRONG)--->localtime(0903)
-		local = localtime(&t); //转为本地时间
-		strftime(buf, 64, "%Y-%m-%d_%H:%M:%S", local);
-		str[0]=buf;
-		str[0]+=".avi"; //gmtime
 
-		pthread_t record_thread_t;
-		string pVideoFileName;
-		pVideoFileName=str[0];  
-		cout<<str[0]<<endl;
-		cout<<"FileName:"<<pVideoFileName<<endl;
-		//VideoWriter writer(pVideoFileName, CV_FOURCC('M', 'P','4', '2'), videoCapturer.get(CAP_PROP_FPS),Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH),videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));//AVI 0901   avi格式 MJPG编码
-		VideoWriter writer(pVideoFileName, VideoWriter::fourcc('M', 'P','4', '2'), videoCapturer.get(CAP_PROP_FPS),\
-		Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH),videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
-		recordFlag=1; 
-		pthread_create(&record_thread_t,NULL,record_thread,NULL);
+		log_info("Open log file success");
+	}
 
-		pthread_t card_monitor_thread;
-        pthread_create(&card_monitor_thread, NULL, monitor_mem_thread_proc, NULL);
-		//namedWindow("Capture", WINDOW_AUTOSIZE);
-		while (videoCapturer.isOpened())  
+	/**
+		* Get some information of the video and print them
+		*/
+	//videoCapturer.set(CAP_PROP_FOURCC,CV_FOURCC('M', 'P','4', '2'));
+	videoCapturer.set(CAP_PROP_FRAME_WIDTH, 960);
+	videoCapturer.set(CAP_PROP_FRAME_HEIGHT, 540);
+	videoCapturer.set(CAP_PROP_FPS, 20);
+	if (videoCapturer.isOpened())
+	{
+		//double totalFrameCount = videoCapturer.get(CAP_PROP_FRAME_COUNT);  //这个参数获取会报错！！ VIDEOIO ERROR: V4L2: getting property #7 is not supported
+		unsigned int width = videoCapturer.get(CAP_PROP_FRAME_WIDTH),
+					 height = videoCapturer.get(CAP_PROP_FRAME_HEIGHT);
+
+		cout << " " STR_OK " video info"
+			 << "[Width:" << width << ", Height:" << height
+			 << ", FPS: " << videoCapturer.get(CAP_PROP_FPS)
+			 << ", FrameCount: "
+			 << " "
+			 << "]" << std::endl; //from Github
+	}
+	else
+	{
+		cout << " " STR_FAIL " Capture not OK";
+		return -1;
+	}
+	//Mat frame;
+	t = time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
+	//local=asctime(localtime(&timep));    //gmtime(WRONG)--->localtime(0903)
+	local = localtime(&t); //转为本地时间
+	strftime(buf, 64, "%Y-%m-%d_%H:%M:%S", local);
+	str[0] = buf;
+	str[0] += ".avi"; //gmtime
+
+	pthread_t record_thread_t;
+	string pVideoFileName;
+	pVideoFileName = str[0];
+	cout << str[0] << endl;
+	cout << "FileName:" << pVideoFileName << endl;
+	//VideoWriter writer(pVideoFileName, CV_FOURCC('M', 'P','4', '2'), videoCapturer.get(CAP_PROP_FPS),Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH),videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));//AVI 0901   avi格式 MJPG编码
+	VideoWriter writer(pVideoFileName, VideoWriter::fourcc('M', 'P', '4', '2'), videoCapturer.get(CAP_PROP_FPS),
+					   Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH), videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
+	recordFlag = 1;
+	pthread_create(&record_thread_t, NULL, record_thread, NULL);
+
+	pthread_t card_monitor_thread;
+	pthread_create(&card_monitor_thread, NULL, monitor_mem_thread_proc, NULL);
+	//namedWindow("Capture", WINDOW_AUTOSIZE);
+	while (videoCapturer.isOpened())
+	{
+		Mat frame;
+		//frame=cvQueryFrame(capture); //首先取得摄像头中的一帧     add
+		if (bCapture == 1)
 		{
-			Mat frame;  
-			//frame=cvQueryFrame(capture); //首先取得摄像头中的一帧     add
-			if (bCapture==1){
-						elapsedseconds=difftime(time(&NOW),t);  //比较前后时间差 0912
-					/*if ((frame.rows==0)||(frame.cols==0))
+			elapsedseconds = difftime(time(&NOW), t); //比较前后时间差 0912
+			/*if ((frame.rows==0)||(frame.cols==0))
 					{
 					printf("frame capture failed\n");
 					exit(0);
-					}*/  //这里运行提示捕获失败！！
-					videoCapturer >> frame;  
+					}*/
+			//这里运行提示捕获失败！！
+			videoCapturer >> frame;
 
-					writer << frame;  
-					//imshow("EangelUSBVideo", frame); 
-					if(elapsedseconds>10*60) //录制10分钟左右的视频
-					{
-					//cout<<"recording time is over"<<endl;
-					recordFlag=0;
-					printf("Recording time is %f  minutes,finished!", elapsedseconds/60);
-					videoCapturer.release();   //增加，避免声音录制未退出 201906
-					//return 0;
-					//exit(0);
-					break;
-					}
+			writer << frame;
+			//imshow("EangelUSBVideo", frame);
+			if (elapsedseconds > 10 * 60) //录制10分钟左右的视频
+			{
+				//cout<<"recording time is over"<<endl;
+				recordFlag = 0;
+				printf("Recording time is %f  minutes,finished!", elapsedseconds / 60);
+				videoCapturer.release(); //增加，避免声音录制未退出 201906
+				//return 0;
+				//exit(0);
+				break;
+			}
 
-					if (char(waitKey(5)) == 27||char(waitKey(5)) == 'q')//27是键盘摁下esc时，计算机接收到的ascii码值  
-					// ----->如果waitKey函数不进行数据格式转换为char类型，则该程序在VS中可以正常运行，但是在linux系统不能运行，主要是由于数据格式的问题linux char() 1118
-					{  
-					break;  
-					}  
-
-			    }
-                        else{
-                       printf("DEVICE IS FULL, STOP RECORD VIDEO!\n"); 
-		   			   log_error("DEVICE IS FULL, STOP RECORD VIDEO!\n"); 
-                        break;
-                        }
+			if (char(waitKey(5)) == 27 || char(waitKey(5)) == 'q') //27是键盘摁下esc时，计算机接收到的ascii码值
+			// ----->如果waitKey函数不进行数据格式转换为char类型，则该程序在VS中可以正常运行，但是在linux系统不能运行，主要是由于数据格式的问题linux char() 1118
+			{
+				break;
+			}
 		}
-		//pthread_cancel(record_thread_t);
-		sprintf(stop_cmd,"pkill arecord");
-		system(stop_cmd);
-		writer.release();
-		//videoCapturer.release();
-		return 0;  
-}  
+		else
+		{
+			printf("DEVICE IS FULL, STOP RECORD VIDEO!\n");
+			log_error("DEVICE IS FULL, STOP RECORD VIDEO!\n");
+			break;
+		}
+	}
+	//pthread_cancel(record_thread_t);
+	sprintf(stop_cmd, "pkill arecord");
+	system(stop_cmd);
+	writer.release();
+	//videoCapturer.release();
+	return 0;
+}
 
-
-void* record_thread(void *args)
+void *record_thread(void *args)
 {
 	char play_cmd[80];
 	/*
@@ -190,89 +194,86 @@ void* record_thread(void *args)
 	-D, --device=NAME
 	指定PCM设备名称.
 	*/
-	sprintf(play_cmd,"arecord  -f cd -t wav -r 10000 -D plughw:1,0 %s.wav",buf); //buf 为时间名称 
-	if(recordFlag){
-	system(play_cmd); //增加录音 20190601
-
-
-	}     
-	else{
-	printf("finsh recording!");
-	exit(0);  //结束录制进程 
+	sprintf(play_cmd, "arecord  -f cd -t wav -r 10000 -D plughw:1,0 %s.wav", buf); //buf 为时间名称
+	if (recordFlag)
+	{
+		system(play_cmd); //增加录音 20190601
 	}
-	return 0;    
+	else
+	{
+		printf("finsh recording!");
+		exit(0); //结束录制进程
+	}
+	return 0;
 }
 
-
-static int program_para(int argc, char ** argv, int * fps)
+static int program_para(int argc, char **argv, int *fps)
 {
-    int c;
-    const char * opts;
-    int level = -1;
+	int c;
+	const char *opts;
+	int level = -1;
 
-    opts = "dD:f";
+	opts = "dD:f";
 
-    while((c = getopt(argc, argv, opts)) != -1) {
-        switch(c) {
-		// case 'a':
-		//     log_set_level(LOG_ERROR);
-        //     log_set_quiet(1);
-		// 	strncpy(appkey, optarg, strlen(optarg));
-		// 	ac_traces(MSG_LEVEL_DEBUG, "appkey = %s\n", appkey); 
+	while ((c = getopt(argc, argv, opts)) != -1)
+	{
+		switch (c)
+		{
+			// case 'a':
+			//     log_set_level(LOG_ERROR);
+			//     log_set_quiet(1);
+			// 	strncpy(appkey, optarg, strlen(optarg));
+			// 	ac_traces(MSG_LEVEL_DEBUG, "appkey = %s\n", appkey);
 
-		// 	break;
+			// 	break;
 
-		
-		
-		// case 'c':
-		// 	strncpy(devicecode, optarg, strlen(optarg));
-		// 	ac_traces(MSG_LEVEL_DEBUG, "device code = %s\n", devicecode); 
+			// case 'c':
+			// 	strncpy(devicecode, optarg, strlen(optarg));
+			// 	ac_traces(MSG_LEVEL_DEBUG, "device code = %s\n", devicecode);
 
-		// 	break;
+			// 	break;
 
-        case 'd':
-            trace_level = MSG_LEVEL_OFF;
-            break;
+		case 'd':
+			trace_level = MSG_LEVEL_OFF;
+			break;
 
-        case 'D':
-            level = atoi(optarg);
-            trace_level = level;
-            b_dump = 1;
-            if (level < MSG_LEVEL_OFF)
-                trace_level = MSG_LEVEL_OFF;
-            else if (level > MSG_LEVEL_MAX)
-                trace_level = MSG_LEVEL_MAX;
-            log_set_level(level);  //revise 根据参数来设置日志级别
-            log_set_quiet(0);
-            ac_traces(MSG_LEVEL_DEBUG, "trace_level = %d level = %d\n", trace_level, level); 
+		case 'D':
+			level = atoi(optarg);
+			trace_level = level;
+			b_dump = 1;
+			if (level < MSG_LEVEL_OFF)
+				trace_level = MSG_LEVEL_OFF;
+			else if (level > MSG_LEVEL_MAX)
+				trace_level = MSG_LEVEL_MAX;
+			log_set_level(level); //revise 根据参数来设置日志级别
+			log_set_quiet(0);
+			ac_traces(MSG_LEVEL_DEBUG, "trace_level = %d level = %d\n", trace_level, level);
 
-            break;
+			break;
 		case 'f':
-			
 
 			break;
 		}
 	}
 }
 
-
-	void printHelp(void)
+void printHelp(void)
 {
-    printf("Usage:video_noshow  [options]\n");
-    printf("options:\n");
+	printf("Usage:video_noshow  [options]\n");
+	printf("options:\n");
 	//printf("  -a Str appkey \t\t Connect remote server\n");
 	//printf("  -b Num baudrate \t\t Com baudrate\n");
 	//printf("  -c Str device code \t\t Connect remote server\n");
-    printf("  -d no debug-level \t\t Increase debug verbosity level\n");
-    printf("  -D Num set-debug-level \t Set the debug verbosity level\n");
-    printf("      0  minimum\n");
-    printf("      1  debug\n");
-    printf("      2  info\n");
-    printf("      3  warning\n");
-    printf("      4  error\n");
-    printf("      5  FATAL error\n");
-    printf("      6  maximum\n");
+	printf("  -d no debug-level \t\t Increase debug verbosity level\n");
+	printf("  -D Num set-debug-level \t Set the debug verbosity level\n");
+	printf("      0  minimum\n");
+	printf("      1  debug\n");
+	printf("      2  info\n");
+	printf("      3  warning\n");
+	printf("      4  error\n");
+	printf("      5  FATAL error\n");
+	printf("      6  maximum\n");
 	printf("  -s Num \t\t\t first serial number\n");
 	printf("  -t Num \t\t\t second serial number\n");
-    printf("  -h help \t\t\t Display this information\n");
+	printf("  -h help \t\t\t Display this information\n");
 }
