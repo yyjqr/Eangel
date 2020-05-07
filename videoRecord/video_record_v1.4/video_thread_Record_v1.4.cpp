@@ -14,9 +14,14 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。 2019--->202004
 
 #include <stdlib.h>
 #include <pthread.h>  //pthread create
+#include <unistd.h>  //getopt 202005
+
+#include "log.h"
+#include "debug.h"
 
 #define STR_OK          "[\x1b[1;32m OK \x1b[0m]"
 #define STR_FAIL        "[\x1b[1;31mFAIL\x1b[0m]"
+#define VIDEO_LOG_FILE "./video_cap.log"
 
 using namespace cv;  
 using namespace std; 
@@ -25,8 +30,12 @@ char buf[50]={0}; //全局变量，用于获取文件名的时间
 int recordFlag=0;
 void* record_thread(void *args);
 extern void* monitor_mem_thread_proc(void* arg);  //ADD 0427
-int  bCapture=1;
+static int program_para(int argc, char ** argv, int * fps);
+void printHelp(void);
 
+int  bCapture=1;
+int trace_level = MSG_LEVEL_OFF;
+int b_dump=0;
 
 int main(int argc, char** argv)  
 {  
@@ -37,6 +46,40 @@ int main(int argc, char** argv)
 		double elapsedseconds;
 		VideoCapture videoCapturer(0);//   Numerical value 0 cv::CAP_ANY  
 		string str[20]={" "};
+		int level=-1;
+		int fps=-1;
+		char imu_module[LOG_MOD_NAME_LEN] = "[video_cap]";
+        FILE *log_file = NULL;
+        if (argc >= 2) {
+		program_para(argc, argv, &fps);
+		}
+		else {
+			printHelp();
+			printf("\nerror :Need more arguments!!  main program exit...\n");
+			exit(1);
+		}
+	
+
+			log_file = fopen(VIDEO_LOG_FILE, "a");
+			if (log_file != NULL)
+			{
+				log_set_fp(log_file);
+				log_set_module_name(imu_module);
+
+				if (b_dump)
+				{
+					log_set_level(LOG_INFO);
+					log_set_quiet(0);
+				}
+				else
+				{
+					log_set_level(LOG_ERROR);
+					log_set_quiet(1);
+				}
+
+				log_info("Open log file success");
+			}
+
 		/**
 		* Get some information of the video and print them
 		*/  
@@ -115,6 +158,12 @@ int main(int argc, char** argv)
 					}  
 
 			} 
+			else{
+				printf("Device mem is full \n");
+				log_error("Device mem is full \n");
+				break;
+				exit(0);
+			}
 			
 		}
 		//pthread_cancel(record_thread_t);
@@ -154,3 +203,76 @@ void* record_thread(void *args)
 	return 0;    
 }
 
+
+static int program_para(int argc, char ** argv, int * fps)
+{
+    int c;
+    const char * opts;
+    int level = -1;
+
+    opts = "dD:f";
+
+    while((c = getopt(argc, argv, opts)) != -1) {
+        switch(c) {
+		// case 'a':
+		//     log_set_level(LOG_ERROR);
+        //     log_set_quiet(1);
+		// 	strncpy(appkey, optarg, strlen(optarg));
+		// 	ac_traces(MSG_LEVEL_DEBUG, "appkey = %s\n", appkey); 
+
+		// 	break;
+
+		
+		
+		// case 'c':
+		// 	strncpy(devicecode, optarg, strlen(optarg));
+		// 	ac_traces(MSG_LEVEL_DEBUG, "device code = %s\n", devicecode); 
+
+		// 	break;
+
+        case 'd':
+            trace_level = MSG_LEVEL_OFF;
+            break;
+
+        case 'D':
+            level = atoi(optarg);
+            trace_level = level;
+            b_dump = 1;
+            if (level < MSG_LEVEL_OFF)
+                trace_level = MSG_LEVEL_OFF;
+            else if (level > MSG_LEVEL_MAX)
+                trace_level = MSG_LEVEL_MAX;
+            log_set_level(level);  //revise 根据参数来设置日志级别
+            log_set_quiet(0);
+            ac_traces(MSG_LEVEL_DEBUG, "trace_level = %d level = %d\n", trace_level, level); 
+
+            break;
+		case 'f':
+			
+
+			break;
+		}
+	}
+}
+
+
+	void printHelp(void)
+{
+    printf("Usage:video_noshow  [options]\n");
+    printf("options:\n");
+	//printf("  -a Str appkey \t\t Connect remote server\n");
+	//printf("  -b Num baudrate \t\t Com baudrate\n");
+	//printf("  -c Str device code \t\t Connect remote server\n");
+    printf("  -d no debug-level \t\t Increase debug verbosity level\n");
+    printf("  -D Num set-debug-level \t Set the debug verbosity level\n");
+    printf("      0  minimum\n");
+    printf("      1  debug\n");
+    printf("      2  info\n");
+    printf("      3  warning\n");
+    printf("      4  error\n");
+    printf("      5  FATAL error\n");
+    printf("      6  maximum\n");
+	printf("  -s Num \t\t\t first serial number\n");
+	printf("  -t Num \t\t\t second serial number\n");
+    printf("  -h help \t\t\t Display this information\n");
+}
