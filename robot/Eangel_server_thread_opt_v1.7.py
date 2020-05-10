@@ -1,7 +1,7 @@
 #import necessary package
 # encoding: utf-8
 ##基于python3 采用线程，socket支持多客户端连接
-# 202003  Jack   yyjqr789@sina.com
+# 202003-05  Jack   yyjqr789@sina.com
 # 部分参考 https://www.cnblogs.com/liyang93/p/9117387.html
 #codeing:gb18030
 import socket
@@ -81,6 +81,7 @@ try:
 except serial.SerialException as e:
     #return None
     print("serial wrong")
+    logger.warning("UNO Client connect maybe fail.")
    
 
 def ReceiveDataThread(socket_tcp,address): 
@@ -105,16 +106,15 @@ def ReceiveDataThread(socket_tcp,address):
                        print("Take picture 1min !")
                        logger.info("Take picture")
                     elif data=='M':
-                       #subprocess.popen('mplayer /home/pi/Music/Soundtrack - Define Dancing.mp3')
-                       subprocess.Popen(["mplayer", "-slave", "-quiet", "/home/pi/Music/Soundtrack - Define Dancing.mp3"], stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = False)
+                       #subprocess.Popen(["mplayer", "-slave", "-quiet", "/home/pi/Music/Soundtrack - Define Dancing.mp3"], stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = False)
+                       subprocess.Popen('~/playMusic.sh', stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = True)                      
                        print("Play music") 
                        time.sleep(1)
         # "Z" 20200307ADD    send Email        
                     elif data=='Z':
                        subprocess.Popen('~/sendDiffNews.sh', shell = True, stdout = subprocess.PIPE)
                        print("SEND Email------ !")
-                       logger.info("SEND Email------ !")
-                    
+                       logger.info("SEND Email------ !")            
 
                     
                     elif data=='F':
@@ -139,6 +139,7 @@ def ReceiveDataThread(socket_tcp,address):
                        ser.write(str.encode('P'))
                        print("car Pause")
                     elif data=='S':    #slow down  add 202003
+                       ser.flushInput()  #add test FLUSH many old commands!
                        ser.write(str.encode('S'))
                        print("car SLOW DOWN!")   
 
@@ -154,6 +155,7 @@ def ReceiveDataThread(socket_tcp,address):
                          break
         except Exception as e:
                     print("出错了，错误类型是{}".format(type(e)))
+                    logger.error("出错了，错误类型是{}".format(type(e)))
                     socket_tcp.close()
                     print(address,'offline')
                     _index = conn_list.index(address)
