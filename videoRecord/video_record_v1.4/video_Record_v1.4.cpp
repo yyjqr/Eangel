@@ -17,7 +17,6 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。 2019--->202004
 #include <unistd.h>	 //getopt 202005
 
 #include "log.h"
-#include "debug.h"
 
 #include "log.h"
 
@@ -36,6 +35,8 @@ static int program_para(int argc, char **argv, int *fps);
 void printHelp(void);
 
 int bCapture = 1;
+int MSG_LEVEL_OFF     = 0;
+int MSG_LEVEL_MAX =5;
 int trace_level = MSG_LEVEL_OFF;
 int b_dump = 0;
 
@@ -108,7 +109,7 @@ int main(int argc, char **argv)
 		cout << " " STR_FAIL " Capture not OK";
 		return -1;
 	}
-	//Mat frame;
+
 	t = time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
 	//local=asctime(localtime(&timep));    //gmtime(WRONG)--->localtime(0903)
 	local = localtime(&t); //转为本地时间
@@ -130,9 +131,10 @@ int main(int argc, char **argv)
 	pthread_t card_monitor_thread;
 	pthread_create(&card_monitor_thread, NULL, monitor_mem_thread_proc, NULL);
 	//namedWindow("Capture", WINDOW_AUTOSIZE);
+    Mat frame;
 	while (videoCapturer.isOpened())
 	{
-		Mat frame;
+		
 		//frame=cvQueryFrame(capture); //首先取得摄像头中的一帧     add
 		if (bCapture == 1)
 		{
@@ -171,7 +173,6 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
-	//pthread_cancel(record_thread_t);
 	sprintf(stop_cmd, "pkill arecord");
 	system(stop_cmd);
 	writer.release();
@@ -219,22 +220,18 @@ static int program_para(int argc, char **argv, int *fps)
 	{
 		switch (c)
 		{
-			// case 'a':
-			//     log_set_level(LOG_ERROR);
-			//     log_set_quiet(1);
-			// 	strncpy(appkey, optarg, strlen(optarg));
-			// 	ac_traces(MSG_LEVEL_DEBUG, "appkey = %s\n", appkey);
 
-			// 	break;
-
-			// case 'c':
-			// 	strncpy(devicecode, optarg, strlen(optarg));
-			// 	ac_traces(MSG_LEVEL_DEBUG, "device code = %s\n", devicecode);
-
-			// 	break;
 
 		case 'd':
-			trace_level = MSG_LEVEL_OFF;
+			level = atoi(optarg);
+			trace_level = level;
+			b_dump = 1;
+			if (level < MSG_LEVEL_OFF)
+				trace_level = MSG_LEVEL_OFF;
+			else if (level > MSG_LEVEL_MAX)
+				trace_level = MSG_LEVEL_MAX;
+			log_set_level(level); //revise 根据参数来设置日志级别
+			log_set_quiet(0);
 			break;
 
 		case 'D':
@@ -247,7 +244,7 @@ static int program_para(int argc, char **argv, int *fps)
 				trace_level = MSG_LEVEL_MAX;
 			log_set_level(level); //revise 根据参数来设置日志级别
 			log_set_quiet(0);
-			ac_traces(MSG_LEVEL_DEBUG, "trace_level = %d level = %d\n", trace_level, level);
+			
 
 			break;
 		case 'f':
@@ -261,9 +258,6 @@ void printHelp(void)
 {
 	printf("Usage:video_noshow  [options]\n");
 	printf("options:\n");
-	//printf("  -a Str appkey \t\t Connect remote server\n");
-	//printf("  -b Num baudrate \t\t Com baudrate\n");
-	//printf("  -c Str device code \t\t Connect remote server\n");
 	printf("  -d no debug-level \t\t Increase debug verbosity level\n");
 	printf("  -D Num set-debug-level \t Set the debug verbosity level\n");
 	printf("      0  minimum\n");

@@ -1,12 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-//#include "config.h"
-#include "log.h"
-#include "debug.h"
-
 #include <unistd.h>   //sleep
-
+#include "log.h"
 extern char sn[128];
 extern int bCapture;
 
@@ -27,12 +23,7 @@ void* monitor_mem_thread_proc(void* arg) {
 	//static int bCapture=1;
     int ret;
 	int is_running=1;
-//add 对采集中途拔掉U盘做检测  0326
-        // if(commandDfResult()<0){
-        //         printf("SD card or usb disk is not mount,NOT RECORD IMU \n");
-        //         log_error("SD card or usb disk is not mount,NOT RECORD IMU  ###\n");
-      
-        // }
+
     while (is_running) {
         sleep(1);
         
