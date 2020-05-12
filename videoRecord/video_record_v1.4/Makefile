@@ -19,7 +19,7 @@ INCLUDES   := -I /usr/local/include/opencv4/opencv2/
 #INCLUDES   := -I /usr/include/opencv4/opencv2/   
  #所有用到的源文件，注意：非当前目录的要+上详细地址
 SRCS    =  video_Record_v1.4.cpp
-SRCS  += $(wildcard get_device_info.cpp )
+SRCS  += $(wildcard get_device_info.c )
 SRCS  += $(wildcard log.c )
 #把源文件SRCS字符串的后缀.c改为.o 
 #OBJS    = $(SRCS:.c=.o)  
