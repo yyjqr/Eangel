@@ -55,13 +55,13 @@ int main(int argc, char **argv)
 	FILE *log_file = NULL;
 	if (argc >= 2)
 	{
-		program_para(argc, argv, &fps);
+		printHelp();
+                program_para(argc, argv, &fps);
 	}
 	else
 	{
-		printHelp();
-		printf("\nerror :Need more arguments!!  main program exit...\n");
-		exit(1);
+		printf("\n YOU can debug with arguments ...\n");
+		//exit(1);
 	}
 
 	log_file = fopen(VIDEO_LOG_FILE, "a");
@@ -217,7 +217,7 @@ static int program_para(int argc, char **argv, int *fps)
 {
 	int c;
 	const char *opts;
-	int level = -1;
+	int level = 0;
 
 	opts = "dD:f";
 
