@@ -50,7 +50,7 @@ int commandDfResult()
 {
     char buf[100];
     FILE *fp = NULL;
-    fp = popen("df | grep /mnt", "r");
+    fp = popen("df | grep /dev/root|awk '{print$5}' ", "r");
     if(fp)
     {
         memset(buf, 0, sizeof(buf));

@@ -139,13 +139,18 @@ int main(int argc, char **argv)
 		if (bCapture == 1)
 		{
 			elapsedseconds = difftime(time(&NOW), t); //比较前后时间差 0912
+			
+			videoCapturer >> frame;
 			/*if ((frame.rows==0)||(frame.cols==0))
 					{
 					printf("frame capture failed\n");
 					exit(0);
 					}*/
+			if (frame.empty()){
+				printf("frame capture failed\n");
+					exit(-1);
+			}
 			//这里运行提示捕获失败！！
-			videoCapturer >> frame;
 
 			writer << frame;
 			//imshow("EangelUSBVideo", frame);
