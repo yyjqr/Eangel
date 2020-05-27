@@ -1,4 +1,4 @@
-/****定时拍摄10分钟的图片，并以当前时间+字符的形式命名***by YJ20170908----》201907  */
+/****定时拍摄10分钟的图片，并以当前时间+字符的形式命名***by YJ20170908----》201907 --->202005 */
 // 基于opencv3,4 c++的函数写法，重写摄像头拍摄图片的程序。硬件基于树莓派。
 
 #include <stdio.h>
@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
 
     string str[2000]={"cam0"}; //数组设置过小，导致只能拍摄100张图片，现已修改为2000
     string strTemp="/tmp/";//间隔一段时间缓存到tmp目录下一张图片 20190217 ！！
-    //stringstream ss;
     time_t timep,t;
     tm* local;
     char buf[2000]={0};
@@ -38,7 +37,7 @@ int main(int argc, char **argv) {
         cin.get();
         return -1;
     }
-    cout<<"Video capture time(minutes)拍摄时间（分钟）:10分钟";
+    cout<<"Video capture time(minutes)拍摄时间（分钟）:10分钟"<<endl;
     //cin >>timeDuration;
     //cvNamedWindow("Eangel cam",0);  //chuanjian  0 window can be changed!0312
     int count=0;//add 0807
@@ -46,6 +45,12 @@ int main(int argc, char **argv) {
     for(unsigned int i=0;i<timeDuration*42;i++)   //*60/5*4  (20180807yj)------------>*60/5.5*4 (1121)
     {
         pCapture >>frame;
+        if(frame.empty()){
+        printf("cam is NG,frame is empty\n");
+        exit(-1);
+
+         }
+
         //writer  <<frame;
         //imshow("Eangel cam",frame);
         waitKey(900); //延时5s
