@@ -28,8 +28,7 @@ import codecs # use for write a file 0708
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
 receiver='yyjqr789@sina.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
 #receiver=my_sender
-_pwd = "tfqlcytviyqdbcib"  #0603
-#_pwd  = "cppfdkkotkehbdjj"   #需在qq邮箱开启SMTP服务并获取授权码20180505
+_pwd = "tfqlcytviyqdbcib"  #0603   #需在qq邮箱开启SMTP服务并获取授权码20180505
 
 pin0=11
 pin1=13
@@ -125,7 +124,7 @@ class GrabNewsAI():
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
 
-#adopt from other article
+#adopt AI from other article
 def writeNews():
     grabNews = GrabNews()
     grabNews.getNews()
@@ -173,19 +172,15 @@ def mail():
     msg.attach(techHtml)
     fp.close
     
-
     path = '/tmp'         # 替换为你的路径
-    dir = os.listdir(path)                  # dir是目录下的全部文件
-        
-    #imgPath=get_file_list(imgPath) 
-    #pic=make_img_msg(imgPath)
-    pic=None
-    print (pic) 
-    if pic is None:
-        print ("no picture captured!")
-    else:
-        print ("no pic!")
-        #msg.attach(make_img_msg(imgPath))
+    listN=get_file_list(path)
+    #print (listN)
+    if listN:
+       imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
+       print('Send IMG is "%s" ' %imgPath)
+       msg.attach(make_img_msg(imgPath))
+    else: 
+        print("no pic capture!")     
     msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     msg['Subject']="EXAID 2020" #邮件的主题，也可以说是标题
