@@ -10,6 +10,7 @@ from email.header import Header
 import ssl
 import sys,os  #os.listdir 201902
 import time
+from datetime import datetime # date for file
 import glob  #查找通配文件 201902
 
 from email.utils import formataddr
@@ -22,6 +23,7 @@ import re
 import json
 #import pandas
 import codecs # use for write a file 0708
+
 
 #import RPi.GPIO as GPIO
 
@@ -124,12 +126,17 @@ class GrabNewsAI():
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
 
+# get the sys date and hour,minutes!!
+now_time = datetime.now()
+date=datetime.now().strftime('%Y-%m-%d_%H:%M')
+print (date)
+
 #adopt AI from other article
 def writeNews():
     grabNews = GrabNews()
     grabNews.getNews()
-    #print("test write 0711")
-    fp = codecs.open('news.html', 'a', 'utf-8')
+    # 加上获取新闻的日期
+    fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -139,8 +146,7 @@ def writeNews():
 def writeNews2():
     grabNews = GrabNews2()
     grabNews.getNews()
-    #print("test write 0711")
-    fp = codecs.open('news.html', 'a', 'utf-8')  #w---->a  改为追加内容的模式07
+    fp = codecs.open('news%s.html' % date , 'a', 'utf-8') #w---->a  改为追加内容的模式07
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -151,7 +157,7 @@ def writeNewsAI():
     grabNews = GrabNewsAI()
     grabNews.getNews()
     print("SEARCH AI news")
-    fp = codecs.open('news.html', 'w', 'utf-8')  #w---->a  改为追加内容的模式07
+    fp = codecs.open('news%s.html' % date, 'w', 'utf-8')  #w---->a  改为追加内容的模式07
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -165,9 +171,12 @@ def mail():
     msg = MIMEMultipart()  # test two html file 201907
     #add AI topic search 202006
     writeNewsAI()
-    writeNews()
+    try:
+        writeNews()
+    except Exception as e:
+        print (str(e))
     writeNews2()
-    fp = open('news.html','rb+')
+    fp = open('news%s.html' % date,'rb+')
     techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
     msg.attach(techHtml)
     fp.close
