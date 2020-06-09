@@ -22,13 +22,12 @@ from lxml.html import etree
 from lxml.html.clean import Cleaner #html cleaner 0415
 import RPi.GPIO as GPIO
 
-
-my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
-receiver='yyjqr789@sina.com'
 #receiver=my_sender
 #_pwd = "xxx"  #0603
 #_user = "你的qq邮箱"
-_pwd = "tfqlcytviyqdbcib"   #需在qq邮箱开启SMTP服务并获取授权码20180505
+my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
+receiver='yyjqr789@sina.com'
+_pwd = "xxx"   #需在qq邮箱开启SMTP服务并获取授权码20180505
 GPIO.setwarnings(False)
 pin0=11
 pin1=13
@@ -134,8 +133,6 @@ def mail():
     msg = MIMEMultipart('alternative')
     #txt=MIMEText('这是一封来自Eangel机器人的邮件，谢谢!2019012','plain','utf-8')
  #获取文件路径
- 
-    #txtFile=make_txt_msg('/home/pi/Documents/news网易新闻抓取/科技.txt')
     num=int(time.time())
     print (num%5) 
     if (num%5) == 0:
