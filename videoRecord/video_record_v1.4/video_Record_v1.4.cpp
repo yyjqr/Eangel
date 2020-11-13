@@ -39,6 +39,8 @@ int MSG_LEVEL_OFF     = 0;
 int MSG_LEVEL_MAX =5;
 int trace_level = MSG_LEVEL_OFF;
 int b_dump = 0;
+const string str_saveDir="/home/pi/Videos/";
+
 
 int main(int argc, char **argv)
 {
@@ -88,9 +90,9 @@ int main(int argc, char **argv)
 		* Get some information of the video and print them
 		*/
 	//videoCapturer.set(CAP_PROP_FOURCC,CV_FOURCC('M', 'P','4', '2'));
-	videoCapturer.set(CAP_PROP_FRAME_WIDTH, 960);
-	videoCapturer.set(CAP_PROP_FRAME_HEIGHT, 540);
-	videoCapturer.set(CAP_PROP_FPS, 20);
+	videoCapturer.set(CAP_PROP_FRAME_WIDTH, 1280);
+	videoCapturer.set(CAP_PROP_FRAME_HEIGHT, 720);
+	videoCapturer.set(CAP_PROP_FPS, 15);
 	if (videoCapturer.isOpened())
 	{
 		//double totalFrameCount = videoCapturer.get(CAP_PROP_FRAME_COUNT);  //这个参数获取会报错！！ VIDEOIO ERROR: V4L2: getting property #7 is not supported
@@ -111,10 +113,10 @@ int main(int argc, char **argv)
 	}
 
 	t = time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
-	//local=asctime(localtime(&timep));    //gmtime(WRONG)--->localtime(0903)
 	local = localtime(&t); //转为本地时间
 	strftime(buf, 64, "%Y-%m-%d_%H:%M:%S", local);
-	str[0] = buf;
+        str[0]=str_saveDir;
+        str[0]+=buf;
 	str[0] += ".avi"; //gmtime
 
 	pthread_t record_thread_t;
@@ -200,7 +202,8 @@ void *record_thread(void *args)
 	-D, --device=NAME
 	指定PCM设备名称.
 	*/
-	sprintf(play_cmd, "arecord  -f cd -t wav -r 10000 -D plughw:1,0 %s.wav", buf); //buf 为时间名称
+        log_info("audio save path is %s\n",str_saveDir.c_str());
+	sprintf(play_cmd, "arecord  -f cd -t wav -r 10000 -D plughw:1,0 %s%s.wav",str_saveDir.c_str(), buf); //buf 为时间名称
 	if (recordFlag)
 	{
 		system(play_cmd); //增加录音 20190601
@@ -219,7 +222,7 @@ static int program_para(int argc, char **argv, int *fps)
 	const char *opts;
 	int level = 0;
 
-	opts = "dD:f";
+	opts = "d:D:f"; //：后面接调试级别的数字！
 
 	while ((c = getopt(argc, argv, opts)) != -1)
 	{
@@ -248,8 +251,7 @@ static int program_para(int argc, char **argv, int *fps)
 			else if (level > MSG_LEVEL_MAX)
 				trace_level = MSG_LEVEL_MAX;
 			log_set_level(level); //revise 根据参数来设置日志级别
-			log_set_quiet(0);
-			
+			log_set_quiet(0);			
 
 			break;
 		case 'f':
@@ -261,7 +263,7 @@ static int program_para(int argc, char **argv, int *fps)
 
 void printHelp(void)
 {
-	printf("Usage:video_noshow  [options]\n");
+	printf("Usage:video_NOShow  [options]\n");
 	printf("options:\n");
 	printf("  -d no debug-level \t\t Increase debug verbosity level\n");
 	printf("  -D Num set-debug-level \t Set the debug verbosity level\n");
