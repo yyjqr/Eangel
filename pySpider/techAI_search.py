@@ -30,7 +30,7 @@ import codecs # use for write a file 0708
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
 receiver='yyjqr789@sina.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
 #receiver=my_sender
-_pwd = "xxx"  #0603   #需在qq邮箱开启SMTP服务并获取授权码
+_pwd = "tfqlcytviyqdbcib"  #0603   #需在qq邮箱开启SMTP服务并获取授权码
 
 pin0=11
 pin1=13
@@ -59,6 +59,19 @@ def get_file_list(file_path):
         dir_list = sorted(dir_list,  key=lambda x: os.path.getmtime(os.path.join(file_path, x)))
         # print(dir_list)
         return dir_list
+
+array=['机器人','新冠','量子','物联网','硬科技','数字','5G','Robot','robot','COVID','Digital','AI','IOT','ML']
+def findKeyWordInNews(str):
+   #print(str)
+   for i in range(14):
+       
+       if array[i] in str:
+           #print("test")
+           return True
+   return False
+
+
+
 
 class GrabNews():
     def __init__(self):
@@ -126,10 +139,51 @@ class GrabNewsAI():
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
 
+
+class GrabNewsTechnet():
+    def __init__(self):
+        self.NewsList = []
+    def getNews(self):
+        url = 'http://stdaily.com/'
+        r2 = requests.get(url)
+        r2.encoding = 'utf-8'
+
+        soup = BeautifulSoup(r2.text, "html.parser")
+        for news in soup.select('div.fp_subtitle   a'):  ##ti_news---->fp_title
+        #for news in soup.select('div.ti_news   a'):
+            if findKeyWordInNews(news.text):
+               tittle=news.text
+               print(news.text)
+               for string in news.stripped_strings:
+                    #article.append(tittle.strip())   #strip去处多余空格
+                    if news.attrs['href'].startswith('http'):
+                        newsUrl=news.attrs['href']
+                    else:
+                        newsUrl=url+news.attrs['href']
+                    #article.append(url.strip())
+                    print(newsUrl)
+                    self.NewsList.append({string:newsUrl})
+
+
 # get the sys date and hour,minutes!!
 now_time = datetime.now()
 date=datetime.now().strftime('%Y-%m-%d_%H:%M')
 print (date)
+
+
+
+def writeNewsTechNet():
+    grabNews = GrabNewsTechnet()
+    grabNews.getNews()
+  
+    fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
+    for news in grabNews.NewsList:
+        for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
+            fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
+            fp.write('<hr />')
+    fp.close()
+
+
 
 #adopt AI from other article
 def writeNews():
@@ -175,7 +229,9 @@ def mail():
         writeNews()
     except Exception as e:
         print (str(e))
-    writeNews2()
+
+    writeNewsTechNet()
+    #writeNews2()
     fp = open('news%s.html' % date,'rb+')
     techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
     msg.attach(techHtml)
