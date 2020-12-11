@@ -4,8 +4,21 @@
 #include  <QTcpSocket>
 #include <QTimer>
 #include <QMainWindow>
+#include <vector>
+ #include<queue>
 //1280*720=921600
 #define IMAGESIZE 921600
+using namespace  std;
+
+struct camInfo
+{
+    uint8_t *imageBuf=NULL;
+    int imageWidth;
+    int imageHeight;
+    int type;
+};
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -37,7 +50,7 @@ public:
 private slots:
     void on_pushButtonConnect_clicked();
     void sendcmd();
-    void connectError();
+
 private:
     Ui::MainWindow *ui;
 
@@ -45,8 +58,13 @@ private:
     QTcpSocket* controlSocket;
      QString addr,port;
      uchar imagebuffer[IMAGESIZE];
+//     QVector2D
+     vector<uchar> one_camData;
+     vector<vector<uchar>> camData;
+     queue<camInfo> camSaveQueue;
      int imageCount=0;
      int imageWidth,imageHeight;
+     camInfo oneCamInfo;
 private slots:
     void startTime();
     void getpic();

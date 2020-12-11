@@ -1,7 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QMessageBox>
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,9 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     controlSocket = new QTcpSocket(this);
     imageWidth=640;
     imageHeight=480;
-    ui->lineEdit_IP->setText("192.168.0.105");
-
-
+    ui->lineEdit_IP->setText("192.168.1.100");
 }
 
 MainWindow::~MainWindow()
@@ -24,7 +20,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::startTime(){
-//    qDebug() << "fun: " <<__func__;
+    qDebug() << "fun: " <<__func__;
     ui->textBrowser_log->append("相机连接成功");
     myTimer->start(200);
 }
@@ -33,9 +29,6 @@ void MainWindow::sendcmd(){
     pictureSocket->write("PIC");
     pictureSocket->flush();
 }
-
-/*-----------------------------图像传输-----------------------------------------------*/
-
 
 void MainWindow::getpic(){
 
@@ -53,19 +46,32 @@ void MainWindow::getpic(){
     }
     imageCount++;
     //    ReceiveCount->setText(QString::number(imagecount,10));
+
     memcpy(imagebuffer, bytes, IMAGESIZE);
+//    camData.push_back(one_camData);
+    oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE); //分配内存
+    if(bytes!=nullptr){
+        memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE);
+    }
+        camSaveQueue.push(oneCamInfo);
     //    image_receive=new QImage(imagebuffer, imagewidth,imageheight,QImage::Format_RGB888);
-    ShowImage(imagebuffer, imageWidth,imageHeight,QImage::Format_RGB888);
+     qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size();
+        if(camSaveQueue.size()!=0){
+            camInfo oneFrameInfo;
+            oneFrameInfo=camSaveQueue.front();
+            ShowImage(oneFrameInfo.imageBuf, imageWidth,imageHeight,QImage::Format_RGB888);
+        }
+//    ShowImage(imagebuffer, imageWidth,imageHeight,QImage::Format_RGB888);
 }
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
 
-    pictureSocket->connectToHost(addr,6800);
+//    pictureSocket->connectToHost("192.168.0.101",6800);
+        pictureSocket->connectToHost(addr,6800);
+    ui->textBrowser_log->append("连接ip:"+addr);
     qDebug()<<"connected Cam test";
     connect(pictureSocket,SIGNAL(connected()),this,SLOT(tips()));  //test
-    connect(pictureSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(connectError()));
-//    connect(pictureSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(connectError()));
     connect(pictureSocket,SIGNAL(connected()),this,SLOT(startTime()));
 
     connect(pictureSocket,SIGNAL(readyRead()),this,SLOT(getpic()));
@@ -76,12 +82,6 @@ void MainWindow::on_pushButtonConnect_clicked()
 void MainWindow::tips(){
 
     qDebug()<<"car connected OK";
-
-}
-
-void MainWindow::connectError()
-{
-    QMessageBox::warning(this,QString::fromLocal8Bit("错误"),QString::fromLocal8Bit("连接失败。可能IP地址错误，请重新输入!"));
 
 }
 void MainWindow::on_pushButtonCAR_clicked()
@@ -104,7 +104,7 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
         printf("%s image is invalid.\n", __FUNCTION__);
         return false;
     }
-    //    if (gvspPixelMono8 == nPixelFormat)
+    //    if (Dahua::GenICam::gvspPixelMono8 == nPixelFormat)
     //    {
     //        image = QImage(pRgbFrameBuf, nWidth, nHeight, QImage::Format_Grayscale8);
     //    }
@@ -120,11 +120,11 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
     ui->label_Pixmap->setPixmap(pixmap);
 
     //    m_mxDisplay.unlock();
-    //    if(pRgbFrameBuf != NULL)
-    //    {
-    //        free(pRgbFrameBuf);
-    //        pRgbFrameBuf = NULL;
-    //    }
+        if(pRgbFrameBuf != NULL)
+        {
+            free(pRgbFrameBuf);
+            pRgbFrameBuf = NULL;
+        }
 
     return true;
 
@@ -212,8 +212,22 @@ void MainWindow::on_pushButton_RIGHT_released()
 
 }
 
+/*-----------------------------图像传输-----------------------------------------------*/
 
-
+//void MainWindow::onSocketReadyRead()
+//{
+//    QByteArray bytes=NULL;
+//    while(Client->waitForReadyRead(100))
+//    {
+//        bytes.append((QByteArray)Client->readAll());
+//    }
+//    imagecount++;
+//    ReceiveCount->setText(QString::number(imagecount,10));
+//    memcpy(imagebuffer, bytes, IMAGESIZE);
+//    image_receive=new QImage(imagebuffer, imagewidth,imageheight,QImage::Format_RGB888);
+//    DrawPainter->PassImage(*image_receive);
+//    DrawPainter->update();
+//}
 
 /*-----------------------------小车方向-----------------------------------------------*/
 
