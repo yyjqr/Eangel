@@ -167,13 +167,13 @@
        <property name="minimumSize">
         <size>
          <width>70</width>
-         <height>80</height>
+         <height>60</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>70</width>
-         <height>80</height>
+         <height>60</height>
         </size>
        </property>
        <property name="text">
@@ -202,13 +202,32 @@
        </property>
       </widget>
      </item>
+     <item row="2" column="2">
+      <widget class="QPushButton" name="pushButton_grab">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>截图</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QTextBrowser" name="textBrowser_log">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>430</y>
+      <x>30</x>
+      <y>450</y>
       <width>591</width>
       <height>192</height>
      </rect>
@@ -229,7 +248,7 @@
      <rect>
       <x>890</x>
       <y>240</y>
-      <width>113</width>
+      <width>71</width>
       <height>20</height>
      </rect>
     </property>
@@ -271,6 +290,32 @@
     </property>
     <property name="text">
      <string>IP地址</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>390</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>接收的图片数：</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_RecvPictureNums">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>390</y>
+      <width>54</width>
+      <height>12</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0</string>
     </property>
    </widget>
   </widget>

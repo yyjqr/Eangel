@@ -50,7 +50,7 @@ public:
 private slots:
     void on_pushButtonConnect_clicked();
     void sendcmd();
-
+    void systemInfoUpdate();
 private:
     Ui::MainWindow *ui;
 
@@ -59,9 +59,10 @@ private:
      QString addr,port;
      uchar imagebuffer[IMAGESIZE];
 //     QVector2D
-     vector<uchar> one_camData;
+     QTimer systemTimer;
      vector<vector<uchar>> camData;
      queue<camInfo> camSaveQueue;
+
      int imageCount=0;
      int imageWidth,imageHeight;
      camInfo oneCamInfo;
@@ -96,6 +97,7 @@ private slots:
     void on_lineEdit_port_editingFinished();
     void on_pushButtonCARRF_clicked();
 //    void onSocketReadyRead(); //读取socket传入的数据
+    void on_pushButton_grab_clicked();
 };
 
 #endif // MAINWINDOW_H
