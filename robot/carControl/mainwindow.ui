@@ -190,15 +190,33 @@
      </item>
      <item row="2" column="1">
       <widget class="QPushButton" name="pushButton_DOWN">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>40</height>
+        </size>
+       </property>
        <property name="text">
         <string>向下</string>
        </property>
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QPushButton" name="pushButton_test">
+      <widget class="QPushButton" name="pushButton_disconnect">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>40</height>
+        </size>
+       </property>
        <property name="text">
-        <string>PushButton</string>
+        <string>断开连接</string>
        </property>
       </widget>
      </item>

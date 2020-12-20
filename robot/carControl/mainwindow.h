@@ -51,6 +51,7 @@ private slots:
     void on_pushButtonConnect_clicked();
     void sendcmd();
     void systemInfoUpdate();
+    void socket_disconnect();
 private:
     Ui::MainWindow *ui;
 
@@ -66,6 +67,8 @@ private:
      int imageCount=0;
      int imageWidth,imageHeight;
      camInfo oneCamInfo;
+     bool b_grabPic;
+     int m_saveIndex;
 private slots:
     void startTime();
     void getpic();
@@ -96,8 +99,9 @@ private slots:
     void on_lineEdit_IP_editingFinished();
     void on_lineEdit_port_editingFinished();
     void on_pushButtonCARRF_clicked();
-//    void onSocketReadyRead(); //读取socket传入的数据
+
     void on_pushButton_grab_clicked();
+    void on_pushButton_disconnect_clicked();
 };
 
 #endif // MAINWINDOW_H

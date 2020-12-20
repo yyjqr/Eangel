@@ -1,16 +1,19 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDateTime>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
+  ,b_grabPic(false)
+  ,m_saveIndex(0)
 {
     ui->setupUi(this);
     myTimer = new QTimer(this);
     pictureSocket = new QTcpSocket(this);
     controlSocket = new QTcpSocket(this);
-    imageWidth=640;
-    imageHeight=480;
+    imageWidth=960;
+    imageHeight=720;
     ui->lineEdit_IP->setText("192.168.0.100");
     connect(&systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
     addr="192.168.0.100";
@@ -25,7 +28,7 @@ void MainWindow::startTime()
 {
     qDebug() << "fun: " <<__func__;
     ui->textBrowser_log->append("相机连接成功");
-    myTimer->start(200);
+    myTimer->start(300);
     systemTimer.start(500);
 }
 
@@ -47,18 +50,32 @@ void MainWindow::getpic(){
     QByteArray bytes=NULL;
     while(pictureSocket->waitForReadyRead(100))
     {
-        bytes.append((QByteArray)pictureSocket->readAll());
+//        bytes.append((QByteArray)pictureSocket->read(IMAGESIZE));//readAll--->read
+        bytes.append((QByteArray)pictureSocket->readAll());//readAll--->read
     }
 
     qDebug() <<"QByteArray size:" <<bytes.size();
-    memcpy(imagebuffer, bytes, IMAGESIZE);
-    //   memcpy(imagebuffer, bytes, bytes.size());
     oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE); //分配内存
-    if(bytes!=nullptr)
+    if(oneCamInfo.imageBuf!=nullptr)
     {
+        qDebug()  <<"malloc pic mem OK\n";
+    }
+    if(bytes.size()<IMAGESIZE)
+    {
+//        memcpy(imagebuffer, bytes, bytes.size());
+        memcpy(oneCamInfo.imageBuf,bytes,bytes.size());
+        imageCount++;
+    }
+    else
+    {
+//        memcpy(imagebuffer, bytes, IMAGESIZE);
         memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE);
         imageCount++;
     }
+
+    //   memcpy(imagebuffer, bytes, bytes.size());
+
+
     camSaveQueue.push(oneCamInfo);
     qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size();
     if(camSaveQueue.size()!=0)
@@ -84,13 +101,21 @@ void MainWindow::on_pushButtonConnect_clicked()
     connect(pictureSocket,SIGNAL(readyRead()),this,SLOT(getpic()));
 
     connect(myTimer,SIGNAL(timeout()),this,SLOT(sendcmd()));
-
+    connect(pictureSocket,SIGNAL(disconnected()),this,SLOT(socket_disconnect()));
 }
 
 void MainWindow::tips()
 {
-
+    ui->pushButtonConnect->setEnabled(false);
     qDebug()<<"car connected OK";
+
+}
+
+void MainWindow::socket_disconnect()
+{
+    ui->textBrowser_log->append("服务器断开连接\n");
+    myTimer->stop();
+    ui->pushButtonConnect->setEnabled(true);
 
 }
 
@@ -127,6 +152,17 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
     //        image = QImage(pRgbFrameBuf,nWidth, nHeight, QImage::Format_RGB888);
     //    }
     image = QImage(pRgbFrameBuf,nWidth, nHeight, QImage::Format_BGR888);
+    if(b_grabPic==true)
+    {
+        QDateTime datetime;
+        QString timestr=datetime.currentDateTime().toString("yyyyMMdd_HHmmss");
+        QString SAVE_NAME=timestr+"_IMG_"+ QString::number(m_saveIndex)+"_"+".jpg";
+        //qTempString +=SAVE_NAME;
+        qDebug() <<"SAVE_NAME "<<SAVE_NAME;
+        image.save(SAVE_NAME,"JPG",80);
+        m_saveIndex++;
+        b_grabPic=false;
+    }
     // 将QImage的大小收缩或拉伸，与label的大小保持一致。这样label中能显示完整的图片
     // Shrink or stretch the size of Qimage to match the size of the label. In this way, the complete image can be displayed in the label
     QImage imageScale = image.scaled(QSize(ui->label_Pixmap->width(), ui->label_Pixmap->height()));
@@ -325,8 +361,16 @@ void MainWindow::on_pushButtonCARRF_clicked()
 {
 
 }
-
+ //抓图判断
 void MainWindow::on_pushButton_grab_clicked()
 {
+  b_grabPic=true;
+}
 
+void MainWindow::on_pushButton_disconnect_clicked()
+{
+    ui->textBrowser_log->append("服务器断开连接\n");
+    pictureSocket->disconnectFromHost();
+    myTimer->stop();
+    ui->pushButtonConnect->setEnabled(true);
 }
