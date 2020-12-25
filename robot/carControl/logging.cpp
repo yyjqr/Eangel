@@ -21,7 +21,9 @@
  */
  
 #include "logging.h"
-#include <string>
+#include <stdio.h>
+#include <string.h>
+
 #include <iostream>
 #include <QDateTime>
 
@@ -91,14 +93,14 @@ void Log::SetFile( const char* filename )
 	if( !filename )
         return ;
 
-    if( strcasecmp(filename, "stdout") == 0 )
+    if( stricmp(filename, "stdout") == 0 )
 		SetFile(stdout);
 
-    else if( strcasecmp(filename, "stderr") == 0 )
+    else if( stricmp(filename, "stderr") == 0 )
 		SetFile(stderr);
 	else
 	{
-		if( strcasecmp(filename, mFilename.c_str()) == 0 )
+        if( stricmp(filename, mFilename.c_str()) == 0 )
             return ;
 
        FILE* file = fopen(filename, "w+");
@@ -151,11 +153,11 @@ Log::Level Log::LevelFromStr( const char* str )
 	{
 		const Level level = (Level)n;
 
-		if( strcasecmp(str, LevelToStr(level)) == 0 )
+        if( stricmp(str, LevelToStr(level)) == 0 )
 			return level;
 	}
 
-	if( strcasecmp(str, "disable") == 0 || strcasecmp(str, "disabled") == 0 || strcasecmp(str, "none") == 0 )
+    if( stricmp(str, "disable") == 0 || stricmp(str, "disabled") == 0 || stricmp(str, "none") == 0 )
 		return SILENT;
 
 	return DEFAULT;

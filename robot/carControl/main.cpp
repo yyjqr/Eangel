@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     Log camlog;
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8")); //中文字符支持
     QString timestr=datetime.currentDateTime().toString("yyyyMMdd_HHmmss");  //yyyyMMdd_HHmmss-->MMdd_HHmmss
-    std::string log_file="./log/camDetect/cam";   //日志在打开cam之前创建。
+    std::string log_file="./log/";   //日志在打开cam之前创建。
     log_file+=timestr.toStdString();
     log_file+=".log";
     camlog.SetFile(log_file.c_str());

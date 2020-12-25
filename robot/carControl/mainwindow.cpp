@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDateTime>
-
+#include "logging.h"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -78,6 +78,7 @@ void MainWindow::getpic(){
 
     camSaveQueue.push(oneCamInfo);
     qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size();
+    LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
     if(camSaveQueue.size()!=0)
     {
         camInfo oneFrameInfo;
