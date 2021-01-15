@@ -18,7 +18,7 @@ FRAMELENGTH = 1024
 capture = cv2.VideoCapture(-1)
 #ret, frame = capture.read()
 # 创建服务器
-server = socket.socket()
+server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 # 获取到本机IP
 def get_ip_address():
         s =socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
@@ -33,7 +33,7 @@ HOST_IP=get_ip_address()
 #IP = socket.gethostbyname(PCname)
 print(HOST_IP)
 # 设置IP和端口号
-server.bind((HOST_IP, 8082))
+server.bind((HOST_IP, 6800))
 server.listen(1)
 
 print('connecting...')
@@ -86,7 +86,7 @@ while True:
             conn.send(data_to_send)
             has_sent += FRAMELENGTH
         cv2.waitKey(100)
-        cv2.imshow('jj', framed)
+        cv2.imshow('RobotCam', framed)
     break
 
 cap.release()
