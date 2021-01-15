@@ -30,7 +30,7 @@ import codecs # use for write a file 0708
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
 receiver='yyjqr789@sina.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
 #receiver=my_sender
-_pwd = "tfqlcytviyqdbcib"  #0603   #需在qq邮箱开启SMTP服务并获取授权码
+_pwd = "XXX"  #0603   #需在qq邮箱开启SMTP服务并获取授权码
 
 pin0=11
 pin1=13
@@ -169,7 +169,7 @@ class GrabNewsTechnet():
 now_time = datetime.now()
 date=datetime.now().strftime('%Y-%m-%d_%H:%M')
 print (date)
-
+year_month=datetime.now().strftime('%Y-%m')
 
 
 def writeNewsTechNet():
@@ -248,7 +248,7 @@ def mail():
         print("no pic capture!")     
     msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
-    msg['Subject']="EXAID 2020" #邮件的主题，也可以说是标题
+    msg['Subject']="EXAID %s" %year_month  #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
