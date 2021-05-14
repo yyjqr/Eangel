@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ai/Documents/Eangel/videoRecord/videoRecord/include/log.h
+stdio.h
+-
+stdarg.h
+-
+
+/home/ai/Documents/Eangel/videoRecord/videoRecord/src/video_RecordAndCam.cpp
+stdio.h
+-
+opencv2/core.hpp
+-
+opencv2/opencv.hpp
+-
+opencv2/videoio.hpp
+-
+time.h
+-
+string
+-
+stdlib.h
+-
+pthread.h
+-
+unistd.h
+-
+../include/log.h
+/home/ai/Documents/Eangel/videoRecord/videoRecord/include/log.h
+
