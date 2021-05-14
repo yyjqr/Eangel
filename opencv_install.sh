@@ -1,3 +1,5 @@
+## 安装在服务器的/home/opencv目录下，针对不能操作服务器的/usr/local/lib等设定的
+##无需配置pkgconfig目录及其下的opencv.pc文件 ？？（树莓派下需要）
 sudo mkdir /home/opencv
 sudo apt-get install -y wget build-essential cmake libgtk2.0-dev pkg-config \
 libavcodec-dev libavformat-dev libswscale-dev python-dev \

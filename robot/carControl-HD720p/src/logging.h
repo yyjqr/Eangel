@@ -63,17 +63,28 @@ public:
 	 * Defines the logging level of a message, and the threshold
 	 * used by the logger to either drop or output messages.
 	 */
-	enum Level
-	{
-		SILENT=0,		 /**< No messages are output. */
-		ERROR,		 /**< Major errors that may impact application execution. */
-		WARNING,		 /**< Warning conditions where the application may be able to proceed in some capacity. */
-		SUCCESS,		 /**< Successful events (e.g. the loading or creation of a resource) */
-		INFO,		 /**< Informational messages that are more important than VERBOSE messages */
-		VERBOSE,		 /**< Verbose details about program execution */
+//    enum Level
+//    {
+//        SILENT=0,
+//        ERROR,
+//        WARNING,
+//        SUCCESS,
+//        INFO,
+//        VERBOSE,
+//        DEBUGING,
+//        DEFAULT=VERBOSE
+//    };
+    enum Level
+    {
+        SILENT=0,		 /**< No messages are output. */
+        ERROR,		 /**< Major errors that may impact application execution. */
+        WARNING,		 /**< Warning conditions where the application may be able to proceed in some capacity. */
+        SUCCESS,		 /**< Successful events (e.g. the loading or creation of a resource) */
+        INFO,		 /**< Informational messages that are more important than VERBOSE messages */
+        VERBOSE,		 /**< Verbose details about program execution */
         DEBUGING,		 /**< Low-level debugging (disabled by default) */  //DEBUG--->DEBUGING
-		DEFAULT=VERBOSE /**< The default level is `VERBOSE` */
-	};
+        DEFAULT=VERBOSE /**< The default level is `VERBOSE` */
+    };
 
 	/**
 	 * Get the current logging level.

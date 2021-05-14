@@ -33,33 +33,8 @@ Log::Level Log::mLevel = Log::DEFAULT;
 FILE* Log::mFile = stdout;
 std::string Log::mFilename = "stdout";
 
-// ParseCmdLine
-//void Log::ParseCmdLine( const int argc, char** argv )
-//{
-//    ParseCmdLine(commandLine(argc, argv));
-//}
 
 
-//// ParseCmdLine
-//void Log::ParseCmdLine( const commandLine& cmdLine )
-//{
-//    const char* levelStr = cmdLine.GetString("log-level");
-
-//    if( levelStr != NULL )
-//    {
-//        SetLevel(LevelFromStr(levelStr));
-//    }
-//    else
-//    {
-//        if( cmdLine.GetFlag("verbose") )
-//            SetLevel(VERBOSE);
-
-//        if( cmdLine.GetFlag("debug") )
-//            SetLevel(DEBUGING);//DEBUG--->DEBUGING
-//    }
-
-//    SetFile(cmdLine.GetString("log-file"));
-//}
 
 Log::Log()
 {
@@ -131,7 +106,7 @@ const char* Log::LevelToStr( Log::Level level )
 	switch(level)
 	{
 		case SILENT:	return "silent";
-		case ERROR:    return "error";
+        case ERROR:    return "error";
 		case WARNING:  return "warning";
 		case SUCCESS:  return "success";
         case INFO:	   return "info";

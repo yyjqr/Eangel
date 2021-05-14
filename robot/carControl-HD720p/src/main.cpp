@@ -8,6 +8,7 @@
 #include "logging.h"
 #include <QDateTime>
 #include <QTextCodec>   //中文支持
+#include <QDir>
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +18,18 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8")); //中文字符支持
     QString timestr=datetime.currentDateTime().toString("yyyyMMdd_HHmmss");  //yyyyMMdd_HHmmss-->MMdd_HHmmss
     std::string log_file="./log/";   //日志在打开cam之前创建。
+    std::string log_path=".\\log";
+    string command;
+    QDir q_dir;
+    q_dir.setPath(QString::fromStdString(log_path));
+    if(!q_dir.exists())
+    {
+        command = "mkdir" + log_path;
+        system(command.c_str());
+    }
+    else{
+        cout<<"日志路径存在\n";
+    }
     log_file+=timestr.toStdString();
     log_file+=".log";
     camlog.SetFile(log_file.c_str());
