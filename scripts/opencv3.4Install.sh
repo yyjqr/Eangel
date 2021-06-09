@@ -23,7 +23,7 @@ echo "** Install requirement"
 sudo apt-get install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
 sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 sudo apt-get install -y python2.7-dev
-sudo apt-get install -y python3.5-dev
+sudo apt-get install -y python3.6-dev
 sudo apt-get install -y python-dev python-numpy 
 sudo apt-get install -y python3-dev python3-numpy
 sudo apt-get install -y libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
@@ -40,7 +40,9 @@ cd opencv-3.4.0/
 echo "** Building... CUDA9.0"
 mkdir release
 cd release/
-cmake -D WITH_CUDA=ON -D CUDA_ARCH_BIN="6.2" -D CUDA_ARCH_PTX="" -D WITH_GSTREAMER=ON -D WITH_LIBV4L=ON -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_EXAMPLES=OFF -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
+#自动获取CUDA版本，直接指定10.2有问题
+#cmake -D WITH_CUDA=ON -D CUDA_ARCH_BIN="6.2" -D CUDA_ARCH_PTX="" -D WITH_GSTREAMER=ON -D WITH_LIBV4L=ON -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_EXAMPLES=OFF -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
+cmake -D WITH_CUDA=ON -D -D CUDA_GENERATION=Auto  -D CUDA_ARCH_PTX="" -DOPENCV_GENERATE_PKGCONFIG=ON -D WITH_GSTREAMER=ON -D WITH_LIBV4L=ON -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_EXAMPLES=OFF -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
 
 make -j8
 sudo make install
