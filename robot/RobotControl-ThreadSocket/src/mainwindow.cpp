@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     showThread= new MyThread();
     imageWidth=1280;
     imageHeight=720;
-    addr="192.168.0.100";
+    addr="192.168.2.100";
     ui->lineEdit_IP->setText(addr);
 
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));

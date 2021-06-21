@@ -14,7 +14,8 @@ MyThread::MyThread():
     stopped(false),
     oneCamInfo({nullptr,1280,720,0}),
     oneFrameInfo({nullptr,1280,720,0}),
-    m_countNOdata(0)
+    m_countNOdata(0),
+    imageExtraDataBuf(nullptr)
 {
     //    m_pictureSocket = new QTcpSocket(this); //add 0216
     myTimer = new QTimer(this);
@@ -301,13 +302,21 @@ void MyThread::receivePic(QByteArray bytes)
                 }
 
                 extraDataSize=0; //拷贝后，将其置零！！！！0323
-                free(imageExtraDataBuf);
+                //优化指针内存的释放 0621
+                if(imageExtraDataBuf!=nullptr){
+                    free(imageExtraDataBuf);
+                    imageExtraDataBuf=nullptr;
+                }
             }
             else
             {
                 qDebug() <<"\n **********extraDataSize >IMAGESIZE:" <<extraDataSize;
                 memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
-                free(imageExtraDataBuf);
+                if(imageExtraDataBuf!=nullptr){
+                    free(imageExtraDataBuf);
+                    imageExtraDataBuf=nullptr;
+                }
+
             }
 
 
@@ -319,7 +328,7 @@ void MyThread::receivePic(QByteArray bytes)
         {
         camSaveQueue.push(oneCamInfo);
         }
-        //将cam数据加入队列后，这部分内存是否需要释放？？  0620目前内存可占用600MB以上
+        //将cam数据加入队列后，这部分内存需要释放
 //        free(oneCamInfo.imageBuf);
         qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size()<<"End \n\n";
         LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
