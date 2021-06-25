@@ -23,7 +23,7 @@ MyThread::MyThread():
     //    extraDataSize=0;
     m_pictureSocket = new controlTCP(this); //add 0216
     connect(getFrameTimer,SIGNAL(timeout()),this,SLOT(getOneFrame()));
-  connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receivePic(QByteArray)));
+    connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receivePic(QByteArray)));
 
 }
 
@@ -46,7 +46,7 @@ void MyThread::run()
 {
     QTime t,time_debug;
 
-    qDebug()<< "thread.id"<<QThread::currentThreadId();
+    qDebug()<<__func__<< "currentThreadId"<<QThread::currentThreadId();
     int i=0;
 
     while(!stopped)
@@ -61,13 +61,10 @@ void MyThread::run()
         }
         QThread::msleep(50);
         i++;
-        //        if(i%10==0){
-        //            qDebug()<<"i:"<<i<<"time:"<<time_debug.elapsed();
-        //        }
 
 
     }
-    //    qDebug() <<"thread exit";
+
     //    quit();//stop==true后，退出线程循环！！！
 
 }
@@ -194,14 +191,14 @@ void MyThread::receivePic0(QByteArray bytes)
 
 void MyThread::receivePic(QByteArray bytes)
 {
-//    qDebug()  <<" read cam data......\n";
+    //    qDebug()  <<" read cam data......\n";
     if(bytes.size()>0)
     {
         oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*3); //分配内存 RGB 3倍
 
         if(oneCamInfo.imageBuf!=nullptr)
         {
-//            qDebug()  <<"malloc pic mem OK\n";
+            //            qDebug()  <<"malloc pic mem OK\n";
         }
         else
         {
@@ -215,10 +212,10 @@ void MyThread::receivePic(QByteArray bytes)
             qDebug()<<"imageExtraDataBuf:"<<imageExtraDataBuf<<"\n"; //<<" "<<*imageExtraDataBuf
             if(extraDataSize>0&&extraDataSize<IMAGESIZE)
             {
-                qDebug()<<__FUNCTION__<<__LINE__;
+                qDebug()<<__func__<<__LINE__;
                 //修改  判断imageExtraDataBuf指针  0320-----》  问题还是出在下面 0323
                 if(imageExtraDataBuf!=nullptr){
-                    qDebug()<<__FUNCTION__<<__LINE__;
+                    qDebug()<<__func__<<__LINE__;
                     qDebug()<<"imageExtraDataBuf: "<<imageExtraDataBuf;
                     try {
                         memcpy(oneCamInfo.imageBuf,imageExtraDataBuf,extraDataSize); //FIX ME 0317
@@ -231,14 +228,14 @@ void MyThread::receivePic(QByteArray bytes)
 
                 if(imageExtraDataBuf!=nullptr)
                 {
-                    qDebug()<<__FUNCTION__<<__LINE__;
+                    qDebug()<<__func__<<__LINE__;
                     free(imageExtraDataBuf);
                 }
 
                 if(extraDataSize+bytes.size()<IMAGESIZE*3)
                 {
                     //地址应在之前的基础上进行偏移！！！！！地址增加，按p+1进行计算，不用每次增加4个   0219
-                    qDebug()<<__FUNCTION__<<__LINE__;
+                    qDebug()<<__func__<<__LINE__;
                     //                    printf("oneCamInfo.imageBuf:%x\n",oneCamInfo.imageBuf);
                     memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,bytes.size());
 
@@ -280,7 +277,7 @@ void MyThread::receivePic(QByteArray bytes)
             }
             if(extraDataSize>0&&extraDataSize<IMAGESIZE)
             {
-                qDebug()<<__FUNCTION__<<__LINE__<< "extraDataSize"<<extraDataSize<<\
+                qDebug()<<__func__<<__LINE__<< "extraDataSize"<<extraDataSize<<\
                           "oneCamInfo.imageBuf+extraDataSize:%x"<<oneCamInfo.imageBuf+extraDataSize;
                 //FIX ME
                 qDebug()<<__LINE__<<"imageExtraDataBuf:"<<imageExtraDataBuf;
@@ -291,7 +288,7 @@ void MyThread::receivePic(QByteArray bytes)
 
                 if(IMAGESIZE*3-extraDataSize<bytes.size())
                 {
-                    qDebug()<<__FUNCTION__<<__LINE__<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<"<"<<bytes.size();
+                    qDebug()<<__func__<<__LINE__<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<"<"<<bytes.size();
                     memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,IMAGESIZE*3-extraDataSize);
                 }
                 else
@@ -326,10 +323,10 @@ void MyThread::receivePic(QByteArray bytes)
         //只把读取是完整字节及以上的数据存到队列  0620
         if(bytes.size()>=IMAGESIZE*3)
         {
-        camSaveQueue.push(oneCamInfo);
+            camSaveQueue.push(oneCamInfo);
         }
         //将cam数据加入队列后，这部分内存需要释放
-//        free(oneCamInfo.imageBuf);
+        //        free(oneCamInfo.imageBuf);
         qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size()<<"End \n\n";
         LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
     }

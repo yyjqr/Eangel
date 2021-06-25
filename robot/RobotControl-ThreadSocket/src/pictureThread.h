@@ -11,7 +11,6 @@ using namespace std;
 
 
 
-
 class MyThread : public QThread
 {
     Q_OBJECT

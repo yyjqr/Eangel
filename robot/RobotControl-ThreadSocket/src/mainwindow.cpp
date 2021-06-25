@@ -56,7 +56,7 @@ void MainWindow::getpic(){
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
-
+     qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     ui->textBrowser_log->append("连接ip:"+addr);
     if(showThread->connectTCPSocket(addr)){
         startTime();//开启系统定时
@@ -93,11 +93,10 @@ void MainWindow::socket_disconnect()
 //相机接收socket数据线程
 void MainWindow::getPicThread(camInfo frameToShow)
 {
-
+    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     m_getImageCount++;
     //     qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
-    qDebug() <<"frameToShow.imageHeight:"<<frameToShow.imageHeight;
-    //   frameToShow=camRecvThread->getOneFrame();
+//    qDebug() <<"frameToShow.imageHeight:"<<frameToShow.imageHeight;
     if(frameToShow.imageBuf!=nullptr){
 
         if(m_getImageCount%3==0){
