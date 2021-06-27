@@ -46,10 +46,8 @@ public:
 private slots:
     void on_pushButtonConnect_clicked();
     void systemInfoUpdate();
-    void socket_disconnect();
 
     void startTime();
-    void getpic();
     void getPicThread(camInfo frameToShow);  //add 0213
     void tips();
     void on_pushButton_LEFT_pressed();

@@ -1,7 +1,7 @@
 #include "controlTCP.h"
 #include "QDebug"
 #include "camSocketParam.h"
-
+#include "logging.h"
 controlTCP::controlTCP(QObject* parent):
     QTcpSocket(parent)
 {
@@ -40,7 +40,9 @@ bool controlTCP::connectSocket(QString ip)
     pictureSocket->connectToHost(ip,6800);
     qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
     connect(pictureSocket,SIGNAL(connected()),this,SLOT(startTime()));
-    if(pictureSocket->state()==QTcpSocket::ConnectingState||pictureSocket->state()==QTcpSocket::ConnectedState){
+    pictureSocket->waitForConnected();
+    //pictureSocket->state()==QTcpSocket::ConnectingState||
+    if(pictureSocket->state()==QTcpSocket::ConnectedState){
 //        emit signalSocketToRead();
         return true;
     }
@@ -53,13 +55,13 @@ bool controlTCP::connectSocket(QString ip)
 bool controlTCP::disconnectSocket()
 {
     qDebug()<< "this  :"<<this;
-    pictureSocket->disconnectFromHost();
     qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
     if(pictureSocket->state()==QTcpSocket::ClosingState||pictureSocket->state()==QTcpSocket::UnconnectedState){
         return true;
     }
     else
     {
+        pictureSocket->disconnectFromHost();
         return false;
     }
 }
@@ -68,14 +70,13 @@ void controlTCP::startTime()
 {
     qDebug() << "fun: " <<__func__;
     myTimer->start(500);
-    //    systemTimer.start(500);
 }
 
 void controlTCP::stopTimer()
 {
     qDebug() << "fun: " <<__func__;
     myTimer->stop();
-    //    systemTimer.start(500);
+    emit signalSocketDisconnect();
 }
 
 void controlTCP::sendCmdToServer()
@@ -101,6 +102,37 @@ void controlTCP::recvData(void)
          }
     }
 
-    qDebug()<<__func__<<__LINE__<<"Read data.size()"<<bytes.size()<< "\n";
+    qDebug()<<__func__<<__LINE__<<"\n ------------Read data.size():"<<bytes.size()<< "\n";
+    emit dataReady(bytes);
+}
+
+
+void controlTCP::recvDataOpt(void)
+{
+
+    QByteArray bytes=NULL;
+    int read_times=0;
+    while(pictureSocket->waitForReadyRead(400))
+    {
+      while(bytes.size()<=3*IMAGESIZE)
+      {
+           //每次只读1280*720的大小  0627
+          bytes.append((QByteArray)pictureSocket->read(IMAGESIZE));
+          qDebug()<<__func__<<__LINE__<<"\n One Read data.size():"<<bytes.size()<< "\n";
+          read_times++;
+           if(bytes.size()>=3*IMAGESIZE||read_times>=5)
+           {
+                qDebug()<<"\n Read finished,bytes.size(): "<<bytes.size()<< "\n";
+               break;
+           }
+      }
+      LogInfo("pictureSocket Read data.size() %d\n",bytes.size());
+
+      break;
+
+
+    }
+
+    qDebug()<<__func__<<__LINE__<<"\n ------------Read data.size():"<<bytes.size()<< "\n";
     emit dataReady(bytes);
 }

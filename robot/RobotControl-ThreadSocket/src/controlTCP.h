@@ -19,15 +19,17 @@ private slots:
     void startTime();
     void sendCmdToServer();
     void recvData(void);
+    void recvDataOpt(void);
     void stopTimer();
 signals:
     void dataReady(const QString &ip, const QByteArray &data);
     void dataReady(const QByteArray &data);
     void  signalSocketToRead();
+    void signalSocketDisconnect();
 private:
     QTcpSocket* pictureSocket;
     QTimer *myTimer;
-//    MyThread* camRecvThread;
+
 };
 
 #endif // CONTROLTCP_H
