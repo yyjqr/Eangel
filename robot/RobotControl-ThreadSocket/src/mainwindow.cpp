@@ -17,12 +17,14 @@ MainWindow::MainWindow(QWidget *parent) :
     showThread= new MyThread();
     imageWidth=1280;
     imageHeight=720;
-    addr="192.168.2.100";
+    addr="192.168.0.104";
     ui->lineEdit_IP->setText(addr);
 
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
     //
     connect(showThread,SIGNAL(SIGNAL_get_one_frame(camInfo)),this,SLOT(getPicThread(camInfo)));
+    //增加失去服务器连接的相关操作
+    connect(showThread,SIGNAL(SIGNAL_camSocketDisconnect()),this,SLOT(on_pushButton_disconnect_clicked()));
 
 
 }
@@ -43,21 +45,12 @@ void MainWindow::startTime()
 }
 
 
-
-void MainWindow::getpic(){
-
-    int ret;
-    char response[20];
-    char *len;
-    unsigned int piclen;
-
-
-}
-
 void MainWindow::on_pushButtonConnect_clicked()
 {
-     qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
-    ui->textBrowser_log->append("连接ip:"+addr);
+    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    QDateTime datetime;
+    QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
+    ui->textBrowser_log->append(timestr+":连接ip:"+addr);
     if(showThread->connectTCPSocket(addr)){
         startTime();//开启系统定时
         showThread->start();
@@ -81,22 +74,13 @@ void MainWindow::tips()
 
 }
 
-void MainWindow::socket_disconnect()
-{
-    ui->textBrowser_log->setStyleSheet("color:red;");
-    ui->textBrowser_log->append("服务器断开连接\n");
-    myTimer->stop();
-    ui->pushButtonConnect->setEnabled(true);
-
-}
-
 //相机接收socket数据线程
 void MainWindow::getPicThread(camInfo frameToShow)
 {
     qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     m_getImageCount++;
     //     qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
-//    qDebug() <<"frameToShow.imageHeight:"<<frameToShow.imageHeight;
+    //    qDebug() <<"frameToShow.imageHeight:"<<frameToShow.imageHeight;
     if(frameToShow.imageBuf!=nullptr){
 
         if(m_getImageCount%3==0){
@@ -161,6 +145,7 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
         //qTempString +=SAVE_NAME;
         qDebug() <<"SAVE_NAME "<<SAVE_NAME;
         image.save(SAVE_NAME,"JPG",80);
+        ui->textBrowser_log->append(QString::asprintf("截图成功%s",SAVE_NAME.toStdString().c_str()));
         m_saveIndex++;
         b_grabPic=false;
     }
@@ -370,7 +355,10 @@ void MainWindow::on_pushButton_grab_clicked()
 
 void MainWindow::on_pushButton_disconnect_clicked()
 {
-    ui->textBrowser_log->append("服务器断开连接\n");
+    QDateTime datetime;
+    QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
+    ui->textBrowser_log->setStyleSheet("color:red;");
+    ui->textBrowser_log->append(timestr+"服务器断开连接\n");
     myTimer->stop();
     showThread->setThreadStop();
     ui->pushButtonConnect->setEnabled(true);

@@ -27,7 +27,6 @@ protected:
     virtual void run();
 
 private slots:
-    void getPicThread();
     void receivePic(QByteArray bytes);
     void receivePic0(QByteArray bytes);
     void receivePic();
@@ -39,6 +38,7 @@ private slots:
     void  getOneFrame();
 signals:
     void SIGNAL_get_one_frame(camInfo);
+    void SIGNAL_camSocketDisconnect();
 private:
     //    volatile bool stopped;
     bool stopped;
@@ -52,7 +52,7 @@ private:
     QTimer *getFrameTimer;
     int imageCount=0;
     int imageWidth,imageHeight;
-    int m_countNOdata;
+    int m_countNOdata,m_tryGetDataTimes;
     camInfo oneCamInfo;
     camInfo oneFrameInfo; //队列中取一帧数据,此后面声明变量有报错
 

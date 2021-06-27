@@ -15,16 +15,17 @@ MyThread::MyThread():
     oneCamInfo({nullptr,1280,720,0}),
     oneFrameInfo({nullptr,1280,720,0}),
     m_countNOdata(0),
-    imageExtraDataBuf(nullptr)
+    imageExtraDataBuf(nullptr),
+    m_tryGetDataTimes(0)
 {
     //    m_pictureSocket = new QTcpSocket(this); //add 0216
     myTimer = new QTimer(this);
     getFrameTimer = new QTimer(this);
     //    extraDataSize=0;
     m_pictureSocket = new controlTCP(this); //add 0216
-    connect(getFrameTimer,SIGNAL(timeout()),this,SLOT(getOneFrame()));
+    //    connect(getFrameTimer,SIGNAL(timeout()),this,SLOT(getOneFrame()));
     connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receivePic(QByteArray)));
-
+    connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
 }
 
 MyThread::~MyThread()
@@ -55,12 +56,33 @@ void MyThread::run()
         time_debug.start();
         //        receivePic();//通过run函数来开启图像接收线程
 
-        //        qDebug()<<"ALG time"<<t.elapsed();
-        if(i%4==0){
+        if(camSaveQueue.size()!=0){
             getOneFrame();//每次取一帧
+            qDebug()<<"ALG time"<<time_debug.elapsed();
         }
-        QThread::msleep(50);
+        else{
+            QThread::msleep(200);
+            m_tryGetDataTimes++;
+            LogInfo("m_tryGetDataTimes: %d\n",m_tryGetDataTimes);
+            if(m_tryGetDataTimes%5==0){
+                QThread::sleep(2);
+            }
+            if(m_tryGetDataTimes%10==0){
+                QThread::sleep(3);
+
+            }
+            //超过50次未获取数据，退出线程
+            if(m_tryGetDataTimes>=50)
+            {
+               qDebug()<<"thread stop...m_tryGetDataTimes:"<<m_tryGetDataTimes;
+                stopped=true;
+                LogError("m_tryGetDataTimes: %d >50次，线程退出\n",m_tryGetDataTimes);
+            }
+            qDebug()<<"After sleep, ALG time"<<time_debug.elapsed();
+        }
         i++;
+
+
 
 
     }
@@ -78,7 +100,7 @@ bool MyThread::connectTCPSocket(QString addr)
     //    startTime();//add 发送命令的定时器 0619  22:15
     if(b_status)
     {
-        getFrameTimer->start(1000);
+        getFrameTimer->start(800);
         connect(myTimer,SIGNAL(timeout()),this,SLOT(sendCmdToServer()));
         return true;
     }
@@ -92,11 +114,7 @@ bool MyThread::connectTCPSocket(QString addr)
     //    connect(m_pictureSocket,SIGNAL(disconnected()),this,SLOT(socket_disconnect()));
 }
 
-//相机接收socket数据线程
-void MyThread::getPicThread()
-{
-    //    start();  //开启线程
-}
+
 
 void MyThread::sendCmdToServer()
 {
@@ -133,7 +151,6 @@ void MyThread::receivePic()
     }
     else if (oneCamInfo.imageBuf!=nullptr)
     {
-        //        memcpy(imagebuffer, bytes, IMAGESIZE);
         memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
         qDebug() <<"bytes.size()>IMAGESIZE*3:" <<bytes.size();
         LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
@@ -274,59 +291,75 @@ void MyThread::receivePic(QByteArray bytes)
                     memcpy(imageExtraDataBuf,bytes.right(extraDataSize),extraDataSize);  //数组多余字节拷贝！！！！！ 0218
                 }
 
-            }
-            if(extraDataSize>0&&extraDataSize<IMAGESIZE)
-            {
-                qDebug()<<__func__<<__LINE__<< "extraDataSize"<<extraDataSize<<\
-                          "oneCamInfo.imageBuf+extraDataSize:%x"<<oneCamInfo.imageBuf+extraDataSize;
-                //FIX ME
-                qDebug()<<__LINE__<<"imageExtraDataBuf:"<<imageExtraDataBuf;
-                // 增加指针判断 0320
-                if(imageExtraDataBuf!=nullptr){
-                    memcpy(oneCamInfo.imageBuf,imageExtraDataBuf,extraDataSize);
-                }
-
-                if(IMAGESIZE*3-extraDataSize<bytes.size())
+                if(extraDataSize>0&&extraDataSize<IMAGESIZE)
                 {
-                    qDebug()<<__func__<<__LINE__<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<"<"<<bytes.size();
-                    memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,IMAGESIZE*3-extraDataSize);
+                    qDebug()<<__func__<<__LINE__<< "extraDataSize"<<extraDataSize<<\
+                              "oneCamInfo.imageBuf+extraDataSize:%x"<<oneCamInfo.imageBuf+extraDataSize;
+                    //FIX ME
+                    qDebug()<<__LINE__<<"imageExtraDataBuf:"<<imageExtraDataBuf;
+                    // 增加指针判断 0320
+                    if(imageExtraDataBuf!=nullptr){
+                        memcpy(oneCamInfo.imageBuf,imageExtraDataBuf,extraDataSize);
+                    }
+
+                    if(IMAGESIZE*3-extraDataSize<bytes.size())
+                    {
+                        qDebug()<<__func__<<__LINE__<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<"<"<<bytes.size();
+                        memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,IMAGESIZE*3-extraDataSize);
+                    }
+                    else
+                    {
+                        //IMAGESIZE*3-extraDataSize大于bytes.size()时，只能拷贝bytes.size()，避免内存溢出！  0317
+                        qDebug()<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<">"<<bytes.size();
+                        memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,bytes.size());
+                    }
+
+                    extraDataSize=0; //拷贝后，将其置零！！！！0323
+                    //优化指针内存的释放 0621
+                    if(imageExtraDataBuf!=nullptr){
+                        free(imageExtraDataBuf);
+                        imageExtraDataBuf=nullptr;
+                    }
                 }
                 else
                 {
-                    //IMAGESIZE*3-extraDataSize大于bytes.size()时，只能拷贝bytes.size()，避免内存溢出！  0317
-                    qDebug()<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<">"<<bytes.size();
-                    memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,bytes.size());
+                    qDebug() <<"\n **********extraDataSize >IMAGESIZE:" <<extraDataSize;
+                    memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
+                    if(imageExtraDataBuf!=nullptr){
+                        free(imageExtraDataBuf);
+                        imageExtraDataBuf=nullptr;
+                    }
+
                 }
 
-                extraDataSize=0; //拷贝后，将其置零！！！！0323
-                //优化指针内存的释放 0621
-                if(imageExtraDataBuf!=nullptr){
-                    free(imageExtraDataBuf);
-                    imageExtraDataBuf=nullptr;
-                }
             }
             else
             {
-                qDebug() <<"\n **********extraDataSize >IMAGESIZE:" <<extraDataSize;
-                memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
-                if(imageExtraDataBuf!=nullptr){
-                    free(imageExtraDataBuf);
-                    imageExtraDataBuf=nullptr;
-                }
-
+                qDebug()<< "read just the right size~~~~~~~~\n";
+                memcpy(oneCamInfo.imageBuf,bytes,bytes.size());
             }
 
 
             imageCount++;
         }
         qDebug() <<" \n -----Total bytes.size() "<<bytes.size()<<"------------ \n";
-        //只把读取是完整字节及以上的数据存到队列  0620
-        if(bytes.size()>=IMAGESIZE*3)
+        //只把读取是完整字节及以上的数据存到队列  0620----->bytes.size()+extraDataSize  0626
+        //将cam数据加入队列后，这部分内存需要释放
+        if(bytes.size()+extraDataSize>=IMAGESIZE*3)
         {
             camSaveQueue.push(oneCamInfo);
         }
-        //将cam数据加入队列后，这部分内存需要释放
-        //        free(oneCamInfo.imageBuf);
+        else if(bytes.size()+extraDataSize>=IMAGESIZE)
+        {
+            camSaveQueue.push(oneCamInfo);
+        }
+        else
+        {
+            qDebug()<<__LINE__<<"read bytes.size()+extraSize<IMAGESIZE*3,free mem...\n";
+            free(oneCamInfo.imageBuf);
+            oneCamInfo.imageBuf=nullptr;
+        }
+
         qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size()<<"End \n\n";
         LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
     }
@@ -345,9 +378,9 @@ void MyThread::getOneFrame()
     {
 
         oneFrameInfo=camSaveQueue.front();
-        qDebug() <<"After get, camSaveQueue.size() "<<camSaveQueue.size();
+        qDebug() << "\n fun: " <<__func__<<__LINE__<<"After get, camSaveQueue.size() "<<camSaveQueue.size();
         camSaveQueue.pop();//   弹出队首元素
-        qDebug() << "\n fun: " <<__func__<<__LINE__<<"oneFrameInfo.imageBuf:"<<oneFrameInfo.imageBuf;
+        //qDebug() <<"oneFrameInfo.imageBuf:"<<oneFrameInfo.imageBuf;
         //        qDebug()<<"emit signal SIGNAL_get_one_frame";
         emit SIGNAL_get_one_frame(oneFrameInfo);
     }
@@ -359,7 +392,7 @@ void MyThread::getOneFrame()
         if(m_countNOdata>=5)
         {
             LogError("no data get,计数次数 %d",m_countNOdata);
-            sleep(5);
+            sleep(2);
             m_countNOdata=0;
         }
     }
@@ -377,6 +410,11 @@ void MyThread::socket_disconnect()
 {
 
     myTimer->stop();
+    getFrameTimer->stop();
+    emit SIGNAL_camSocketDisconnect();
+    if(camSaveQueue.size()==0){
+        stopped=true;
+    }
 
 }
 
