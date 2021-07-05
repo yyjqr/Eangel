@@ -40,6 +40,7 @@ bool controlTCP::connectSocket(QString ip)
     pictureSocket->connectToHost(ip,6800);
     qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
     connect(pictureSocket,SIGNAL(connected()),this,SLOT(startTime()));
+    qDebug()<< "pictureSocket->state:"<<pictureSocket->state();
     pictureSocket->waitForConnected();
     //pictureSocket->state()==QTcpSocket::ConnectingState||
     if(pictureSocket->state()==QTcpSocket::ConnectedState){
@@ -54,7 +55,7 @@ bool controlTCP::connectSocket(QString ip)
 
 bool controlTCP::disconnectSocket()
 {
-    qDebug()<< "this  :"<<this;
+//    qDebug()<< "this  :"<<this;
     qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
     if(pictureSocket->state()==QTcpSocket::ClosingState||pictureSocket->state()==QTcpSocket::UnconnectedState){
         return true;

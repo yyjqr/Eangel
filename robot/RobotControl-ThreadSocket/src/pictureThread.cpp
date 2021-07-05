@@ -59,31 +59,30 @@ void MyThread::run()
         if(camSaveQueue.size()!=0){
             getOneFrame();//每次取一帧
             qDebug()<<"ALG time"<<time_debug.elapsed();
+            QThread::msleep(150);//避免显示取不到 或卡住 0704
         }
         else{
             QThread::msleep(200);
             m_tryGetDataTimes++;
             LogInfo("m_tryGetDataTimes: %d\n",m_tryGetDataTimes);
             if(m_tryGetDataTimes%5==0){
-                QThread::sleep(2);
+                QThread::sleep(1);
             }
             if(m_tryGetDataTimes%10==0){
                 QThread::sleep(3);
 
             }
-            //超过50次未获取数据，退出线程
+            //超过50次未获取数据，睡眠5s，线程不能退出，否则数据一直累积！！ 0704
             if(m_tryGetDataTimes>=50)
             {
-               qDebug()<<"thread stop...m_tryGetDataTimes:"<<m_tryGetDataTimes;
-                stopped=true;
-                LogError("m_tryGetDataTimes: %d >50次，线程退出\n",m_tryGetDataTimes);
+                qDebug()<<"thread stop...m_tryGetDataTimes:"<<m_tryGetDataTimes;
+                QThread::sleep(5);
+                LogError("m_tryGetDataTimes: %d >50次\n",m_tryGetDataTimes);
+                m_tryGetDataTimes=0;
             }
             qDebug()<<"After sleep, ALG time"<<time_debug.elapsed();
         }
         i++;
-
-
-
 
     }
 
@@ -122,53 +121,6 @@ void MyThread::sendCmdToServer()
     m_pictureSocket->flush();
     qDebug()<<"fun"<<__func__<<"line"<<__LINE__<<"send CMD:PIC"<< "\n";
     //    ui->label_RecvPictureNums->setText(QString::number(imageCount));
-}
-void MyThread::receivePic()
-{
-
-    int ret;
-    char response[20];
-    char *len;
-    unsigned int piclen;
-
-    QByteArray bytes=NULL;
-    while(m_pictureSocket->waitForReadyRead(400))
-    {
-        bytes.append((QByteArray)m_pictureSocket->read(3*IMAGESIZE));//readAll--->read
-        if(bytes.size()>=3*IMAGESIZE) break;
-    }
-    LogInfo("bytes.size %d\n",bytes.size());
-    qDebug() <<"QByteArray size:" <<bytes.size();
-    oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*3); //分配内存 RGB 3倍
-
-    if(oneCamInfo.imageBuf!=nullptr && bytes.size()<IMAGESIZE*3)
-    {
-        memcpy(oneCamInfo.imageBuf,bytes,bytes.size());
-        qDebug() <<"bytes.size()<IMAGESIZE*3:" <<bytes.size();
-        LogInfo("bytes.size()<IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
-        LogInfo("imageCount: %d\n",imageCount);
-        imageCount++;
-    }
-    else if (oneCamInfo.imageBuf!=nullptr)
-    {
-        memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
-        qDebug() <<"bytes.size()>IMAGESIZE*3:" <<bytes.size();
-        LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
-        LogInfo("imageCount: %d\n",imageCount);
-        imageCount++;
-    }
-    else
-    {
-        qDebug()  <<"malloc pic mem failed\n";
-        LogError("%s\n","malloc pic mem failed");
-    }
-
-
-    camSaveQueue.push(oneCamInfo);
-    qDebug() <<"fun"<<__func__<<"line"<<__LINE__<<" camSaveQueue.size() "<<camSaveQueue.size();
-    LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
-
-
 }
 
 
@@ -360,7 +312,7 @@ void MyThread::receivePic(QByteArray bytes)
             oneCamInfo.imageBuf=nullptr;
         }
 
-        qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size()<<"End \n\n";
+        qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size()<<"End \n";
         LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
     }
     else

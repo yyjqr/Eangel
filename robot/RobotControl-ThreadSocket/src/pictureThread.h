@@ -29,7 +29,6 @@ protected:
 private slots:
     void receivePic(QByteArray bytes);
     void receivePic0(QByteArray bytes);
-    void receivePic();
     void startTime();
 
     void sendCmdToServer();
