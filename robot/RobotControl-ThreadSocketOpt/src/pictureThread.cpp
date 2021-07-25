@@ -11,33 +11,38 @@ unsigned int extraDataSize=0;
 
 
 MyThread::MyThread():
-    stopped(false),
+    b_run(true),
     oneCamInfo({nullptr,1280,720,0}),
     oneFrameInfo({nullptr,1280,720,0}),
+    b_dataValid(false),
     m_countNOdata(0),
     imageExtraDataBuf(nullptr),
     m_tryGetDataTimes(0)
 {
-    //    m_pictureSocket = new QTcpSocket(this); //add 0216
     myTimer = new QTimer(this);
     getFrameTimer = new QTimer(this);
     //    extraDataSize=0;
     m_pictureSocket = new controlTCP(this); //add 0216
-    //    connect(getFrameTimer,SIGNAL(timeout()),this,SLOT(getOneFrame()));
-    connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receivePic(QByteArray)));
-    connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
 }
 
 MyThread::~MyThread()
 {
-
+    if(myTimer!=nullptr){
+        delete  myTimer;
+    }
+    if(getFrameTimer!=nullptr){
+        delete  getFrameTimer;
+    }
+    if(m_pictureSocket!=nullptr){
+        delete m_pictureSocket;
+    }
 
 
 }
 
 void MyThread::startTime()
 {
-    qDebug() << "fun: " <<__func__;
+//    qDebug() << "fun: " <<__func__;
     qDebug() << "connet server OK-----";
     myTimer->start(300);
 
@@ -49,24 +54,27 @@ void MyThread::run()
 
     qDebug()<<__func__<< "currentThreadId"<<QThread::currentThreadId();
     int i=0;
-
-    while(!stopped)
+    connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receiveValidPicture(QByteArray)));
+    connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
+    while(b_run)
     {
 
         time_debug.start();
-        //        receivePic();//通过run函数来开启图像接收线程
-
-        if(camSaveQueue.size()!=0){
+        if(camSaveQueue.size()>=4){
             getOneFrame();//每次取一帧
-            qDebug()<<"ALG time"<<time_debug.elapsed();
+            //            qDebug()<<"getOneFrame time"<<time_debug.elapsed();
             QThread::msleep(150);//避免显示取不到 或卡住 0704
         }
         else{
-            QThread::msleep(200);
+            QThread::msleep(400);
             m_tryGetDataTimes++;
             LogInfo("m_tryGetDataTimes: %d\n",m_tryGetDataTimes);
             if(m_tryGetDataTimes%5==0){
                 QThread::sleep(1);
+                //睡眠1秒后，有数据，将之前的计数清零，避免取数据不及时
+                if(camSaveQueue.size()!=0){
+                    m_tryGetDataTimes=0;
+                }
             }
             if(m_tryGetDataTimes%10==0){
                 QThread::sleep(3);
@@ -82,6 +90,7 @@ void MyThread::run()
             }
             qDebug()<<"After sleep, ALG time"<<time_debug.elapsed();
         }
+        //        QThread::msleep(100);//避免显示取不到 或卡住 0704
         i++;
 
     }
@@ -100,7 +109,6 @@ bool MyThread::connectTCPSocket(QString addr)
     if(b_status)
     {
         getFrameTimer->start(800);
-        connect(myTimer,SIGNAL(timeout()),this,SLOT(sendCmdToServer()));
         return true;
     }
     else
@@ -108,54 +116,42 @@ bool MyThread::connectTCPSocket(QString addr)
         return false;
     }
 
-    //    connect(m_pictureSocket,SIGNAL(readyRead()),this,SLOT(getPicThread()));
-
-    //    connect(m_pictureSocket,SIGNAL(disconnected()),this,SLOT(socket_disconnect()));
 }
 
 
 
-void MyThread::sendCmdToServer()
+
+void MyThread::receiveValidPicture(QByteArray bytes)
 {
-    m_pictureSocket->write("PIC");
-    m_pictureSocket->flush();
-    qDebug()<<"fun"<<__func__<<"line"<<__LINE__<<"send CMD:PIC"<< "\n";
-    //    ui->label_RecvPictureNums->setText(QString::number(imageCount));
-}
-
-
-void MyThread::receivePic0(QByteArray bytes)
-{
-
-    oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*3); //分配内存 RGB 3倍
-
-    if(oneCamInfo.imageBuf!=nullptr && bytes.size()<IMAGESIZE*3)
+    if(bytes.size()>=IMAGESIZE*3)
     {
-        memcpy(oneCamInfo.imageBuf,bytes,bytes.size());
-        qDebug() <<"bytes.size()<IMAGESIZE*3:" <<bytes.size();
-        LogInfo("bytes.size()<IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
-        LogInfo("imageCount: %d\n",imageCount);
-        imageCount++;
-    }
-    else if (oneCamInfo.imageBuf!=nullptr)
-    {
-        //        memcpy(imagebuffer, bytes, IMAGESIZE);
-        memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
-        qDebug() <<"bytes.size()>IMAGESIZE*3:" <<bytes.size();
-        LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
-        LogInfo("imageCount: %d\n",imageCount);
-        imageCount++;
+        oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*3); //分配内存 RGB 3倍
+
+        if (oneCamInfo.imageBuf!=nullptr)
+        {
+            memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
+            qDebug() <<"bytes.size()>=IMAGESIZE*3:" <<bytes.size();
+            LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
+            LogInfo("imageCount: %d\n",imageCount);
+            imageCount++;
+            camSaveQueue.push(oneCamInfo);
+            qDebug() <<"fun"<<__func__<<"line"<<__LINE__<<" camSaveQueue.size() "<<camSaveQueue.size();
+            LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
+        }
+        else
+        {
+            qDebug()  <<"malloc pic mem failed\n";
+            LogError("%s\n","malloc pic mem failed");
+        }
     }
     else
     {
-        qDebug()  <<"malloc pic mem failed\n";
-        LogError("%s\n","malloc pic mem failed");
+        qDebug()<<__func__<<":"<<__LINE__<<"clear small size cam data\n";
+        bytes.clear();
     }
 
 
-    camSaveQueue.push(oneCamInfo);
-    qDebug() <<"fun"<<__func__<<"line"<<__LINE__<<" camSaveQueue.size() "<<camSaveQueue.size();
-    LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
+
 }
 
 void MyThread::receivePic(QByteArray bytes)
@@ -324,17 +320,19 @@ void MyThread::receivePic(QByteArray bytes)
 
 
 
-void MyThread::getOneFrame()
+bool MyThread::getOneFrame()
 {
+    QMutexLocker locker(&m_dataMutex);
     if(camSaveQueue.size()!=0)
     {
 
-        oneFrameInfo=camSaveQueue.front();
-        qDebug() << "\n fun: " <<__func__<<__LINE__<<"After get, camSaveQueue.size() "<<camSaveQueue.size();
+        OneTempFrame=camSaveQueue.front();
+        qDebug() <<"getOneFrame After get, camSaveQueue.size() "<<camSaveQueue.size();
         camSaveQueue.pop();//   弹出队首元素
-        //qDebug() <<"oneFrameInfo.imageBuf:"<<oneFrameInfo.imageBuf;
-        //        qDebug()<<"emit signal SIGNAL_get_one_frame";
-        emit SIGNAL_get_one_frame(oneFrameInfo);
+        //        emit SIGNAL_get_one_frame(oneFrameInfo);
+        b_dataValid=true;
+        free(OneTempFrame.imageBuf);//add
+        return true;
     }
     else
     {
@@ -347,16 +345,35 @@ void MyThread::getOneFrame()
             sleep(2);
             m_countNOdata=0;
         }
+        b_dataValid=false;
+        return false;
     }
+    return false;
 
 
 
 }
 
-//camInfo MyThread::getCamOneFrame()
-//{
-//    return oneCamInfo;
-//}
+camInfo MyThread::getCamOneFrame()
+{
+
+
+    if(camSaveQueue.size()!=0)
+    {
+
+        oneFrameInfo=camSaveQueue.front();
+        camSaveQueue.pop();
+        //          qDebug() << "\n fun: " <<__func__<<__LINE__<<"get one frame to show\n ";
+        return oneFrameInfo; //取队列中弹出的一帧数据 0717
+    }
+    else{
+        qDebug() << " fun: " <<__func__<<__LINE__<<"NO frame to show-----\n ";
+        return {nullptr,1280,720,0};
+    }
+
+
+
+}
 
 void MyThread::socket_disconnect()
 {
@@ -365,7 +382,7 @@ void MyThread::socket_disconnect()
     getFrameTimer->stop();
     emit SIGNAL_camSocketDisconnect();
     if(camSaveQueue.size()==0){
-        stopped=true;
+        b_run=true;
     }
 
 }
@@ -374,7 +391,12 @@ void MyThread::socket_disconnect()
 void MyThread::setThreadStop()
 {
     m_pictureSocket->disconnectSocket();
-    stopped=true;
+    b_run=false;
+}
+
+void MyThread::setThreadFlag(bool b_runFlag)
+{
+    b_run=b_runFlag;
 }
 
 

@@ -70,7 +70,7 @@ bool controlTCP::disconnectSocket()
 void controlTCP::startTime()
 {
     qDebug() << "fun: " <<__func__;
-    myTimer->start(500);
+    myTimer->start(400);
 }
 
 void controlTCP::stopTimer()
@@ -84,7 +84,7 @@ void controlTCP::sendCmdToServer()
 {
     pictureSocket->write("PIC");
     pictureSocket->flush();
-//    qDebug()<<"send CMD:PIC"<< "\n";
+//    qDebug()<<__func__<<":send CMD:PIC"<< "\n";
 }
 
 
@@ -92,18 +92,18 @@ void controlTCP::recvData(void)
 {
 
     QByteArray bytes=NULL;
-    while(pictureSocket->waitForReadyRead(200))
+    while(pictureSocket->waitForReadyRead(300))
     {
 //        bytes.append((QByteArray)pictureSocket->readAll());
         bytes.append((QByteArray)pictureSocket->read(3*IMAGESIZE));
          if(bytes.size()>=3*IMAGESIZE)
          {
-              qDebug()<<"\n Read 3*IMAGESIZE "<< "\n";
+//              qDebug()<<"\n Read 3*IMAGESIZE "<< "\n";
              break;
          }
     }
 
-    qDebug()<<__func__<<__LINE__<<"\n ------------Read data.size():"<<bytes.size()<< "\n";
+    qDebug()<<" ------------Read data.size():"<<bytes.size()<< "\n";
     emit dataReady(bytes);
 }
 
@@ -128,12 +128,10 @@ void controlTCP::recvDataOpt(void)
            }
       }
       LogInfo("pictureSocket Read data.size() %d\n",bytes.size());
-
       break;
-
 
     }
 
-    qDebug()<<__func__<<__LINE__<<"\n ------------Read data.size():"<<bytes.size()<< "\n";
+    qDebug()<<__func__<<__LINE__<<"\n --------Read data.size():"<<bytes.size()<< "\n";
     emit dataReady(bytes);
 }
