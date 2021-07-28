@@ -23,26 +23,22 @@ MyThread::MyThread():
     getFrameTimer = new QTimer(this);
     //    extraDataSize=0;
     m_pictureSocket = new controlTCP(this); //add 0216
+    //    connect(getFrameTimer,SIGNAL(timeout()),this,SLOT(getOneFrame()));
+    //    connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receivePic(QByteArray)));
+    connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receiveValidPicture(QByteArray)));
+    connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
 }
 
 MyThread::~MyThread()
 {
-    if(myTimer!=nullptr){
-        delete  myTimer;
-    }
-    if(getFrameTimer!=nullptr){
-        delete  getFrameTimer;
-    }
-    if(m_pictureSocket!=nullptr){
-        delete m_pictureSocket;
-    }
+
 
 
 }
 
 void MyThread::startTime()
 {
-//    qDebug() << "fun: " <<__func__;
+    qDebug() << "fun: " <<__func__;
     qDebug() << "connet server OK-----";
     myTimer->start(300);
 
@@ -54,16 +50,15 @@ void MyThread::run()
 
     qDebug()<<__func__<< "currentThreadId"<<QThread::currentThreadId();
     int i=0;
-    connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receiveValidPicture(QByteArray)));
-    connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
+
     while(b_run)
     {
 
         time_debug.start();
-        if(camSaveQueue.size()>=4){
+        if(camSaveQueue.size()>=2){
             getOneFrame();//每次取一帧
-            //            qDebug()<<"getOneFrame time"<<time_debug.elapsed();
-            QThread::msleep(150);//避免显示取不到 或卡住 0704
+            qDebug()<<"getOneFrame time"<<time_debug.elapsed();
+                        QThread::msleep(150);//避免显示取不到 或卡住 0704
         }
         else{
             QThread::msleep(200);
@@ -90,7 +85,7 @@ void MyThread::run()
             }
             qDebug()<<"After sleep, ALG time"<<time_debug.elapsed();
         }
-        //        QThread::msleep(100);//避免显示取不到 或卡住 0704
+//        QThread::msleep(100);//避免显示取不到 或卡住 0704
         i++;
 
     }
@@ -109,6 +104,7 @@ bool MyThread::connectTCPSocket(QString addr)
     if(b_status)
     {
         getFrameTimer->start(800);
+        connect(myTimer,SIGNAL(timeout()),this,SLOT(sendCmdToServer()));
         return true;
     }
     else
@@ -116,41 +112,38 @@ bool MyThread::connectTCPSocket(QString addr)
         return false;
     }
 
+    //    connect(m_pictureSocket,SIGNAL(readyRead()),this,SLOT(getPicThread()));
+
+    //    connect(m_pictureSocket,SIGNAL(disconnected()),this,SLOT(socket_disconnect()));
 }
 
 
 
+void MyThread::sendCmdToServer()
+{
+    m_pictureSocket->write("PIC");
+    m_pictureSocket->flush();
+    qDebug()<<"fun"<<__func__<<"line"<<__LINE__<<"send CMD:PIC"<< "\n";
+    //    ui->label_RecvPictureNums->setText(QString::number(imageCount));
+}
+
 
 void MyThread::receiveValidPicture(QByteArray bytes)
 {
-    if(bytes.size()>=IMAGESIZE*CAM_ResolutionRatio)
+    if(bytes.size()>=IMAGESIZE*3)
     {
-        oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*CAM_ResolutionRatio); //分配内存 RGB 3倍
+        oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*3); //分配内存 RGB 3倍
 
         if (oneCamInfo.imageBuf!=nullptr)
         {
-            memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*CAM_ResolutionRatio);
+            memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
             qDebug() <<"bytes.size()>=IMAGESIZE*3:" <<bytes.size();
             LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
             LogInfo("imageCount: %d\n",imageCount);
             imageCount++;
-            if(CAM_ResolutionRatio==1){
-                oneCamInfo.imageWidth=640;
-                oneCamInfo.imageHeight=480;
-            }
-            else if(CAM_ResolutionRatio==3){
-                oneCamInfo.imageWidth=1280;
-                oneCamInfo.imageHeight=720;
-            }
-            else
-            {
-                oneCamInfo.imageWidth=1920;
-                oneCamInfo.imageHeight=1080;
-            }
-
             camSaveQueue.push(oneCamInfo);
-            qDebug() <<"Push one frame,camSaveQueue.size() "<<camSaveQueue.size();
-            LogError("Push one frame,camSaveQueue.size() %d\n ",camSaveQueue.size());
+            qDebug() <<"fun"<<__func__<<"line"<<__LINE__<<" camSaveQueue.size() "<<camSaveQueue.size();
+            LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
         }
         else
         {
@@ -160,7 +153,7 @@ void MyThread::receiveValidPicture(QByteArray bytes)
     }
     else
     {
-        qDebug()<<__func__<<":"<<__LINE__<<"clear small size cam data\n";
+         qDebug()<<__func__<<":"<<__LINE__<<"clear small size cam data\n";
         bytes.clear();
     }
 
@@ -336,16 +329,15 @@ void MyThread::receivePic(QByteArray bytes)
 
 bool MyThread::getOneFrame()
 {
-    QMutexLocker locker(&m_dataMutex);
     if(camSaveQueue.size()!=0)
     {
-
-        OneTempFrame=camSaveQueue.front();
-        qDebug() <<"getOneFrame After get, camSaveQueue.size() "<<camSaveQueue.size();
+        oneFrameInfo=camSaveQueue.front();
+        qDebug() << "\n fun: " <<__func__<<__LINE__<<"After get, camSaveQueue.size() "<<camSaveQueue.size();
         camSaveQueue.pop();//   弹出队首元素
-        //        emit SIGNAL_get_one_frame(oneFrameInfo);
+        //qDebug() <<"oneFrameInfo.imageBuf:"<<oneFrameInfo.imageBuf;
+        //        qDebug()<<"emit signal SIGNAL_get_one_frame";
+//        emit SIGNAL_get_one_frame(oneFrameInfo);
         b_dataValid=true;
-        free(OneTempFrame.imageBuf);//add
         return true;
     }
     else
@@ -360,7 +352,7 @@ bool MyThread::getOneFrame()
             m_countNOdata=0;
         }
         b_dataValid=false;
-        return false;
+         return false;
     }
     return false;
 
@@ -371,19 +363,14 @@ bool MyThread::getOneFrame()
 camInfo MyThread::getCamOneFrame()
 {
 
-
-    if(camSaveQueue.size()!=0)
-    {
-
-        oneFrameInfo=camSaveQueue.front();
-        camSaveQueue.pop();
-        //          qDebug() << "\n fun: " <<__func__<<__LINE__<<"get one frame to show\n ";
-        return oneFrameInfo; //取队列中弹出的一帧数据 0717
-    }
-    else{
-        qDebug() << " fun: " <<__func__<<__LINE__<<"NO frame to show-----\n ";
-        return {nullptr,1280,720,0};
-    }
+      if(b_dataValid){
+          qDebug() << "\n fun: " <<__func__<<__LINE__<<"get one frame to show\n ";
+          return oneFrameInfo; //取队列中弹出的一帧数据 0717
+      }
+      else{
+          qDebug() << " fun: " <<__func__<<__LINE__<<"NO frame to show-----\n ";
+               return {nullptr,1280,720,0};
+      }
 
 
 

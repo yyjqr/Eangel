@@ -12,18 +12,29 @@ MainWindow::MainWindow(QWidget *parent) :
   ,m_picToshow({nullptr,1280,720,0})
 {
     ui->setupUi(this);
-    myTimer = new QTimer(this);
+    camTimer = new QTimer(this);
     systemTimer=new QTimer(this);
     controlSocket = new QTcpSocket(this);
     showThread= new MyThread();
-    imageWidth=1280;
-    imageHeight=720;
+    if(CAM_ResolutionRatio==3){
+        imageWidth=1280;
+        imageHeight=720;
+    }
+    else if(CAM_ResolutionRatio==1){
+        imageWidth=640;
+        imageHeight=480;
+    }
+    else{
+        imageWidth=1920;
+        imageHeight=1080;
+    }
+
     addr="192.168.0.104";
     ui->lineEdit_IP->setText(addr);
-
+    startTime();//开启系统定时
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
-    //
-//    connect(showThread,SIGNAL(SIGNAL_get_one_frame(camInfo)),this,SLOT(getPicThread(camInfo)));
+    connect(camTimer,SIGNAL(timeout()),this,SLOT(onTimeGetFrameToShow()));
+    //    connect(showThread,SIGNAL(SIGNAL_get_one_frame(camInfo)),this,SLOT(getPicThread(camInfo)));
     //增加失去服务器连接的相关操作
     connect(showThread,SIGNAL(SIGNAL_camSocketDisconnect()),this,SLOT(on_pushButton_disconnect_clicked()));
     connect(showThread, SIGNAL(finished()), showThread, SLOT(deleteLater()));
@@ -33,13 +44,13 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    if(myTimer!=nullptr){
-        delete  myTimer;
+    if(camTimer!=nullptr){
+        delete  camTimer;
     }
     if(systemTimer!=nullptr){
         delete  systemTimer;
     }
-   //线程结束
+    //线程结束
 
     delete controlSocket;
 }
@@ -48,19 +59,19 @@ void MainWindow::startTime()
 {
     qDebug() << "fun: " <<__func__;
     ui->textBrowser_log->append("相机连接成功");
-    systemTimer->start(400);
+    systemTimer->start(1000);
 }
 
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
     qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
-       QDateTime m_datetime;
+    QDateTime m_datetime;
     QString timestr=m_datetime.currentDateTime().toString("HH:mm:ss");
     ui->textBrowser_log->append(timestr+":连接ip:"+addr);
     if(showThread->connectTCPSocket(addr)){
         ui->pushButtonConnect->setStyleSheet("background-color:green;");
-        startTime();//开启系统定时
+        camTimer->start(400);
         //增加断开连接后，再次连接时，使能while循环标志，传输图片线程运行 0711
         showThread->setThreadFlag(true);
         showThread->start();
@@ -88,9 +99,9 @@ void MainWindow::getPicToShow(camInfo& frameToShow)
     qDebug() <<"frameToShow m_getImageCount:"<<m_getImageCount;
     if(frameToShow.imageBuf!=nullptr){
         //每3帧显示一帧图像
-       if(m_getImageCount%3==0)
-       {
-             qDebug() << "fun:" <<__func__<<__LINE__<<"frameToShow ------\n";
+        if(m_getImageCount%3==0)
+        {
+            qDebug() << "fun:" <<__func__<<__LINE__<<"frameToShow ------\n";
             ShowImage(frameToShow.imageBuf, imageWidth,imageHeight,QImage::Format_BGR888);//Format_RGB888---->Format_BGR888  (imread BGR格式）
         }
         else
@@ -105,14 +116,23 @@ void MainWindow::getPicToShow(camInfo& frameToShow)
 
 void MainWindow::systemInfoUpdate()
 {
-        m_picToshow=showThread->getCamOneFrame();
-        qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
-        if(m_picToshow.imageBuf!=nullptr)
-        {
+    QDateTime datetime;
+    QString timestr=datetime.currentDateTime().toString("yyyyMMdd HH:mm:ss");
+    ui->label_sysTime->setStyleSheet("color:green;");
+    ui->label_sysTime->setText(timestr);
+
+}
+//定时取数据显示
+void MainWindow::onTimeGetFrameToShow()
+{
+    m_picToshow=showThread->getCamOneFrame();
+    qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+    if(m_picToshow.imageBuf!=nullptr)
+    {
 
         getPicToShow(m_picToshow);
         m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717
-        }
+    }
     ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
 
 }
@@ -135,7 +155,7 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
         return false;
     }
 
-    image = QImage(pRgbFrameBuf,nWidth, nHeight, QImage::Format_BGR888);
+    image = QImage(pRgbFrameBuf,nWidth, nHeight, QImage::Format_RGB888);
     if(b_grabPic==true)
     {
         QDateTime datetime;
@@ -359,7 +379,7 @@ void MainWindow::on_pushButton_disconnect_clicked()
     QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
     ui->textBrowser_log->setStyleSheet("color:red;");
     ui->textBrowser_log->append(timestr+"服务器断开连接\n");
-    myTimer->stop();
+    camTimer->stop();
     showThread->setThreadStop();
     ui->pushButtonConnect->setEnabled(true);
 }

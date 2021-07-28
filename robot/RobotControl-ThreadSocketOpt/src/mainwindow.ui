@@ -472,6 +472,31 @@
      <string>0</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_sysTime">
+    <property name="geometry">
+     <rect>
+      <x>1300</x>
+      <y>61</y>
+      <width>241</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>150</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <family>Century</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>系统时间</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
