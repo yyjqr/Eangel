@@ -26,7 +26,7 @@ public:
 
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    QTimer *myTimer;
+
     void UP();
     void DOWN();
     void LEFT();
@@ -46,7 +46,7 @@ public:
 private slots:
     void on_pushButtonConnect_clicked();
     void systemInfoUpdate();
-
+    void onTimeGetFrameToShow();
     void startTime();
     void getPicToShow(camInfo& frameToShow);  //add 0213
     void tips();
@@ -87,6 +87,7 @@ private:
     uchar imagebuffer[IMAGESIZE];
     //     QVector2D
     QTimer* systemTimer;
+    QTimer *camTimer;
     queue<camInfo> camSaveQueue;
 
 

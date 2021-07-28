@@ -95,8 +95,8 @@ void controlTCP::recvData(void)
     while(pictureSocket->waitForReadyRead(300))
     {
 //        bytes.append((QByteArray)pictureSocket->readAll());
-        bytes.append((QByteArray)pictureSocket->read(3*IMAGESIZE));
-         if(bytes.size()>=3*IMAGESIZE)
+        bytes.append((QByteArray)pictureSocket->read(CAM_ResolutionRatio*IMAGESIZE));
+         if(bytes.size()>=CAM_ResolutionRatio*IMAGESIZE)
          {
 //              qDebug()<<"\n Read 3*IMAGESIZE "<< "\n";
              break;
