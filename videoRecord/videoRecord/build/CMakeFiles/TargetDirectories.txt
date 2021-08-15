@@ -1,3 +1,0 @@
-/home/ai/Documents/Eangel/videoRecord/videoRecord/build/CMakeFiles/rebuild_cache.dir
-/home/ai/Documents/Eangel/videoRecord/videoRecord/build/CMakeFiles/videoRecord.dir
-/home/ai/Documents/Eangel/videoRecord/videoRecord/build/CMakeFiles/edit_cache.dir

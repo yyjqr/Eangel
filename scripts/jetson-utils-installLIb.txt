@@ -1,0 +1,45 @@
+ 697  sudo apt-get install libgstreamer-plugins-base1.0-dev
+  698  sudo apt-get install libgstreamer1.0-0
+  721  cd lib/
+  776  sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev
+  779  cd lib/
+  781  sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev
+  825  find ./ -name "glib.h"
+  829  cd glib-2.0/
+  833  cd glib/
+  835  find ./ -name "glibconfig"
+  837  find ./ -name "glibconfig"
+  838  find ./ -name "glibconfig.h"
+  840  find ./ -name "glibconfig.h"
+  845  cd lib/
+  878  cd lib64
+  882  $$CUDA_DIR/lib64
+  883  cd $$CUDA_DIR/lib64
+  892  cd lib64
+  971  cd 1_Utilities/
+ 1098  sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev
+ 1104  nano aarch64/include/jetson-utils/glUtility.h
+ 1107  nano ../display/glUtility.h 
+ 1109  sudo apt install libglew1.8
+ 1110  sudo apt install libglew-dev
+ 1114  nano ../display/glUtility.h 
+ 1115  nano aarch64/include/jetson-utils/glUtility.h
+ 1120  nano aarch64/include/jetson-utils/glUtility.h
+ 1122  nano ../display/glUtility.h 
+ 1130  history |grep install lib*
+
+
+mkdir build;
+cd build;
+cmake ../
+
+ 1119  make -j8
+ 1120  nano aarch64/include/jetson-utils/glUtility.h
+ 1121  make -j8
+ 1122  nano ../display/glUtility.h 
+ 1123  make -j8
+ 1124  ls 
+ 1125  ls -alh
+ 1126  make install
+ 1127  sudo make install
+

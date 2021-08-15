@@ -1,0 +1,25 @@
+#安装ftp
+sudo apt install vsftpd
+ 1219  cd /etc/
+ 1221  cat vsftpd.chroot_list 
+ 1222  sudo nano vsftpd.chroot_list 
+ 1227  cat vsftpd.conf |grep "local_root"
+ 1234  sudo nano vsftpd.conf 
+ 1237  sudo systemctl  restart vsftpd.service 
+#增加用户，及所能访问的目录/var/ftp.
+
+ 1238  sudo useradd -d /var/ftp/ -s /sbin/nologin team
+#设置用户密码
+sudo passwd team
+
+#在此列表增加刚才的用户
+ 1240  sudo nano vsftpd.chroot_list 
+
+ 1241  sudo systemctl  restart vsftpd.service 
+
+
+
+ 1229  sudo useradd -d /var/ftp/ -s /sbin/nologin team1
+ 1230  chown -R team ftp
+ 1232  chown -R team1 /var/ftp
+ 1233  sudo chown -R team1 /var/ftp
