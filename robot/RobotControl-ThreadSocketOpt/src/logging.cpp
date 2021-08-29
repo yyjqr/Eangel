@@ -141,7 +141,7 @@ Log::Level Log::LevelFromStr( const char* str )
 void Log::writeLogHead(){
 //    string log_head=TimeUtil::getLogTime();
     QDateTime datetime;
-    QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
+    QString timestr=datetime.currentDateTime().toString("HH:mm:ss.zzz"); //fff为毫秒部分  202108
     std::string log_head=timestr.toStdString();
 //    std::string log_head;10
     fprintf(Log::GetFile(), "%s:", log_head.c_str());

@@ -35,7 +35,6 @@ private:
 private slots:
     void receivePic(QByteArray bytes);
     void receiveValidPicture(QByteArray bytes);
-    void startTime();
     void socket_disconnect();
 
 //    void  getOneFrame();
@@ -50,7 +49,6 @@ private:
     controlTCP* m_pictureSocket;
     QTcpSocket* m_tcpSocket;
     queue<camInfo> camSaveQueue;
-    QTimer *myTimer;
     QTimer *getFrameTimer;
     int imageCount=0;
     int imageWidth,imageHeight;

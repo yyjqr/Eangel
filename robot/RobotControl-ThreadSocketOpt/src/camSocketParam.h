@@ -5,7 +5,7 @@
 //640*480*3=1280*720
 //#define IMAGESIZE (921600*3)
 const int IMAGESIZE=921600;
-const int CAM_ResolutionRatio=1;
+const int CAM_ResolutionRatio=3;
 enum CAM_TYPE{ Small_480p=0,Common_Type720p,Common_Type1080p};
 struct camInfo
 {

@@ -2,6 +2,7 @@
 #include "QDebug"
 #include "camSocketParam.h"
 #include "logging.h"
+#include <QThread>
 controlTCP::controlTCP(QObject* parent):
     QTcpSocket(parent)
 {
@@ -90,9 +91,9 @@ void controlTCP::sendCmdToServer()
 
 void controlTCP::recvData(void)
 {
-
     QByteArray bytes=NULL;
-    while(pictureSocket->waitForReadyRead(300))
+//    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    while(pictureSocket->waitForReadyRead(200))
     {
 //        bytes.append((QByteArray)pictureSocket->readAll());
         bytes.append((QByteArray)pictureSocket->read(CAM_ResolutionRatio*IMAGESIZE));

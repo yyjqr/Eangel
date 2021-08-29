@@ -79,6 +79,7 @@ private slots:
 
     void on_pushButton_grab_clicked();
     void on_pushButton_disconnect_clicked();
+    void  disconnect_Deal(); //socket 断开连接后，触发主线程的信号
 private:
     Ui::MainWindow *ui;
 

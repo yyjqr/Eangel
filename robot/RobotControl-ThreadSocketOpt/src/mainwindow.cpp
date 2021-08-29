@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(camTimer,SIGNAL(timeout()),this,SLOT(onTimeGetFrameToShow()));
     //    connect(showThread,SIGNAL(SIGNAL_get_one_frame(camInfo)),this,SLOT(getPicThread(camInfo)));
     //增加失去服务器连接的相关操作
-    connect(showThread,SIGNAL(SIGNAL_camSocketDisconnect()),this,SLOT(on_pushButton_disconnect_clicked()));
+    connect(showThread,SIGNAL(SIGNAL_camSocketDisconnect()),this,SLOT(disconnect_Deal()));
     connect(showThread, SIGNAL(finished()), showThread, SLOT(deleteLater()));
 
 }
@@ -46,19 +46,24 @@ MainWindow::~MainWindow()
     delete ui;
     if(camTimer!=nullptr){
         delete  camTimer;
+        camTimer=nullptr;
     }
     if(systemTimer!=nullptr){
         delete  systemTimer;
+        systemTimer=nullptr;
     }
     //线程结束
-
+   if(controlSocket!=nullptr){
     delete controlSocket;
+    controlSocket=nullptr;
+   }
 }
 
 void MainWindow::startTime()
 {
     qDebug() << "fun: " <<__func__;
-    ui->textBrowser_log->append("相机连接成功");
+
+    systemTimer->setTimerType(Qt::PreciseTimer);
     systemTimer->start(1000);
 }
 
@@ -70,7 +75,10 @@ void MainWindow::on_pushButtonConnect_clicked()
     QString timestr=m_datetime.currentDateTime().toString("HH:mm:ss");
     ui->textBrowser_log->append(timestr+":连接ip:"+addr);
     if(showThread->connectTCPSocket(addr)){
+        ui->textBrowser_log->append("相机连接成功");
+        LogInfo("%s","相机连接成功");
         ui->pushButtonConnect->setStyleSheet("background-color:green;");
+        camTimer->setTimerType(Qt::PreciseTimer);
         camTimer->start(400);
         //增加断开连接后，再次连接时，使能while循环标志，传输图片线程运行 0711
         showThread->setThreadFlag(true);
@@ -79,6 +87,7 @@ void MainWindow::on_pushButtonConnect_clicked()
     else {
         ui->pushButtonConnect->setStyleSheet("background-color:blue;");
         ui->textBrowser_log->append(timestr+"连接ip:"+addr +"失败");
+        LogInfo("相机连接失败，ip %s",addr.toStdString().c_str());
     }
 
 }
@@ -102,7 +111,7 @@ void MainWindow::getPicToShow(camInfo& frameToShow)
         if(m_getImageCount%3==0)
         {
             qDebug() << "fun:" <<__func__<<__LINE__<<"frameToShow ------\n";
-            ShowImage(frameToShow.imageBuf, imageWidth,imageHeight,QImage::Format_BGR888);//Format_RGB888---->Format_BGR888  (imread BGR格式）
+            ShowImage(frameToShow.imageBuf, imageWidth,imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
         }
         else
         {
@@ -155,13 +164,13 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
         return false;
     }
 
-    image = QImage(pRgbFrameBuf,nWidth, nHeight, QImage::Format_RGB888);
+    image = QImage(pRgbFrameBuf,nWidth, nHeight, QImage::Format_RGB888);//Format_BGR888 --->Format_RGB888
     if(b_grabPic==true)
     {
         QDateTime datetime;
         QString timestr=datetime.currentDateTime().toString("yyyyMMdd_HHmmss");
         QString SAVE_NAME=timestr+"_IMG_"+ QString::number(m_saveIndex)+".jpg";
-        //qTempString +=SAVE_NAME;
+        qDebug()<<__LINE__<<" inside,test grab error";
         qDebug() <<"SAVE_NAME "<<SAVE_NAME;
         image.save(SAVE_NAME,"JPG",80);
         QString timestrLog=datetime.currentDateTime().toString("HH:mm:ss");
@@ -370,6 +379,9 @@ void MainWindow::on_pushButtonCARRF_clicked()
 //抓图判断
 void MainWindow::on_pushButton_grab_clicked()
 {
+    QDateTime datetime;
+    QString timestr=datetime.currentDateTime().toString("HH:mm:ss.zzz");
+    qDebug()<<timestr<<"analysis grab error"<<__LINE__<<endl;
     b_grabPic=true;
 }
 
@@ -379,7 +391,19 @@ void MainWindow::on_pushButton_disconnect_clicked()
     QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
     ui->textBrowser_log->setStyleSheet("color:red;");
     ui->textBrowser_log->append(timestr+"服务器断开连接\n");
+    LogInfo("%s","服务器断开");
     camTimer->stop();
     showThread->setThreadStop();
+//    qDebug()<<"test close error";
+    ui->pushButtonConnect->setEnabled(true);
+}
+
+
+void MainWindow::disconnect_Deal()
+{
+    QDateTime datetime;
+    QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
+    ui->textBrowser_log->setStyleSheet("color:red;");
+    ui->textBrowser_log->append(timestr+"服务器断开连接\n");
     ui->pushButtonConnect->setEnabled(true);
 }
