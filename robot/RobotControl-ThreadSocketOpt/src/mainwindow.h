@@ -80,6 +80,8 @@ private slots:
     void on_pushButton_grab_clicked();
     void on_pushButton_disconnect_clicked();
     void  disconnect_Deal(); //socket 断开连接后，触发主线程的信号
+    void on_comboBox_Res_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
 
@@ -101,7 +103,7 @@ private:
 
     MyThread *showThread;
     int m_getImageCount;
-
+    int m_CAM_ResolutionRatio;
 
 };
 

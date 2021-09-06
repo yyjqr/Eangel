@@ -16,17 +16,13 @@ MainWindow::MainWindow(QWidget *parent) :
     systemTimer=new QTimer(this);
     controlSocket = new QTcpSocket(this);
     showThread= new MyThread();
+    QStringList item_Resolution;
+    item_Resolution<<"720p"<<"480p"<<"1080p";
+    ui->comboBox_Res->addItems(item_Resolution);
+    ui->comboBox_Res->setCurrentIndex(0);
     if(CAM_ResolutionRatio==3){
         imageWidth=1280;
         imageHeight=720;
-    }
-    else if(CAM_ResolutionRatio==1){
-        imageWidth=640;
-        imageHeight=480;
-    }
-    else{
-        imageWidth=1920;
-        imageHeight=1080;
     }
 
     addr="192.168.0.104";
@@ -407,3 +403,34 @@ void MainWindow::disconnect_Deal()
     ui->textBrowser_log->append(timestr+"服务器断开连接\n");
     ui->pushButtonConnect->setEnabled(true);
 }
+
+void MainWindow::on_comboBox_Res_currentIndexChanged(int index)
+{
+   qDebug()<<"Resolution select index:"<<index;
+    switch (index) {
+      case 1:
+        m_CAM_ResolutionRatio=3;
+        break;
+    case 2:
+        m_CAM_ResolutionRatio=1;
+      break;
+    case 3:
+        m_CAM_ResolutionRatio=3;
+      break;
+    default:
+        m_CAM_ResolutionRatio=2;
+    }
+    if(m_CAM_ResolutionRatio==3){
+        imageWidth=1280;
+        imageHeight=720;
+    }
+    else if(m_CAM_ResolutionRatio==1){
+        imageWidth=640;
+        imageHeight=480;
+    }
+    else{
+        imageWidth=1920;
+        imageHeight=1080;
+    }
+}
+

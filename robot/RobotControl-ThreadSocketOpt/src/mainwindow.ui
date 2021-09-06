@@ -476,7 +476,7 @@
     <property name="geometry">
      <rect>
       <x>1300</x>
-      <y>61</y>
+      <y>30</y>
       <width>241</width>
       <height>40</height>
      </rect>
@@ -495,6 +495,41 @@
     </property>
     <property name="text">
      <string>系统时间</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_Res">
+    <property name="geometry">
+     <rect>
+      <x>1290</x>
+      <y>300</y>
+      <width>201</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>100</width>
+      <height>40</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>1310</x>
+      <y>260</y>
+      <width>120</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>120</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>摄像头分辨率</string>
     </property>
    </widget>
   </widget>
