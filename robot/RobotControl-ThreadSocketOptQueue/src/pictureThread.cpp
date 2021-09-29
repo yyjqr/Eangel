@@ -17,7 +17,8 @@ MyThread::MyThread():
     b_dataValid(false),
     m_countNOdata(0),
     imageExtraDataBuf(nullptr),
-    m_tryGetDataTimes(0)
+    m_tryGetDataTimes(0),
+    m_countGet(0)
 {
     getFrameTimer = new QTimer(this);
     //    extraDataSize=0;
@@ -42,7 +43,7 @@ MyThread::~MyThread()
 
 void MyThread::run()
 {
-    QTime t,time_debug;
+    QTime time_debug;
 
     qDebug()<<__func__<< "currentThreadId"<<QThread::currentThreadId();
     int i=0;
@@ -50,45 +51,23 @@ void MyThread::run()
     connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
     while(b_run)
     {
-        time_debug.start();
+//        time_debug.start();
         m_getFrame_byteArray=m_pictureSocket->getOneFrameDATA();
 
         if(m_getFrame_byteArray.length()>0){
             qDebug()<<"m_getFrame_byteArray length: "<<m_getFrame_byteArray.length();
-            receiveValidPicture(m_getFrame_byteArray);
+            //比正常数据多1.5倍,可尝试拷贝,如果多出10倍,拷贝报错  0927 m_getFrame_byteArray length:  1987737462
+            if(m_getFrame_byteArray.length()<=IMAGESIZE*CAM_ResolutionRatio*1.5){
+                receiveValidPicture(m_getFrame_byteArray);
+            }
+
         }
 
         if(camSaveQueue.size()>=10){
             getOneFrame();//每次取一帧
-            //            qDebug()<<"getOneFrame time"<<time_debug.elapsed();
-            QThread::msleep(200);//避免显示取不到 或卡住 0704
+//             qDebug()<<"getOneFrame time"<<time_debug.elapsed();
+//            QThread::msleep(200);//避免显示取不到 或卡住 0704
         }
-//        else{
-//            QThread::msleep(200);
-//            m_tryGetDataTimes++;
-
-//            if(m_tryGetDataTimes%5==0){
-//                LogInfo("m_tryGetDataTimes: %d\n",m_tryGetDataTimes);
-//                QThread::sleep(1);
-//                //睡眠1秒后，有数据，将之前的计数清零，避免取数据不及时
-//                if(camSaveQueue.size()!=0){
-//                    m_tryGetDataTimes=0;
-//                }
-//            }
-//            if(m_tryGetDataTimes%10==0){
-//                QThread::sleep(3);
-
-//            }
-//            //超过50次未获取数据，睡眠5s，线程不能退出，否则数据一直累积！！ 0704
-//            if(m_tryGetDataTimes>=50)
-//            {
-//                qDebug()<<"thread sleep 5s...m_tryGetDataTimes:"<<m_tryGetDataTimes;
-//                QThread::sleep(5);
-//                LogError("m_tryGetDataTimes: %d >50次\n",m_tryGetDataTimes);
-//                m_tryGetDataTimes=0;
-//            }
-//            qDebug()<<"After sleep, ALG time"<<time_debug.elapsed();
-//        }
 
         i++;
 
@@ -191,7 +170,7 @@ void MyThread::receivePic(QByteArray bytes)
             if(extraDataSize>0&&extraDataSize<IMAGESIZE)
             {
                 qDebug()<<__func__<<__LINE__;
-                //修改  判断imageExtraDataBuf指针  0320-----》  问题还是出在下面 0323
+                //修改  判断imageExtraDataBuf指针  0320----->  问题还是出在下面 0323
                 if(imageExtraDataBuf!=nullptr){
                     qDebug()<<__func__<<__LINE__;
                     qDebug()<<"imageExtraDataBuf: "<<imageExtraDataBuf;
@@ -338,11 +317,12 @@ bool MyThread::getOneFrame()
     QMutexLocker locker(&m_dataMutex);
     if(camSaveQueue.size()!=0)
     {
-
+//        QTime t_debug;
+//        t_debug.start();
         OneTempFrame=camSaveQueue.front();
-        qDebug() <<"getOneFrame After get, camSaveQueue.size() "<<camSaveQueue.size();
         camSaveQueue.pop();//   弹出队首元素
-        //        emit SIGNAL_get_one_frame(oneFrameInfo);
+        qDebug() <<"num:"<<m_countGet++<<" After get, camSaveQueue.size() "<<camSaveQueue.size()<<endl;
+
         b_dataValid=true;
         free(OneTempFrame.imageBuf);//add
         return true;
@@ -363,14 +343,11 @@ bool MyThread::getOneFrame()
     }
     return false;
 
-
-
 }
 
 camInfo MyThread::getCamOneFrame()
 {
-
-
+    QMutexLocker locker(&m_dataMutex);//主线程取数据,也得加锁,避免同时被取到!!!0929
     if(camSaveQueue.size()!=0)
     {
 

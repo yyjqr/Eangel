@@ -33,6 +33,6 @@ int main(int argc, char *argv[])
     qRegisterMetaType<camInfo>("camInfo");
     MainWindow w;
     w.show();
-    w.setWindowTitle(QString::fromLocal8Bit("移动机器人交互控制软件_v1.4.0"));
+    w.setWindowTitle(QString::fromLocal8Bit("移动机器人交互控制软件_v1.5.0"));
     return a.exec();
 }

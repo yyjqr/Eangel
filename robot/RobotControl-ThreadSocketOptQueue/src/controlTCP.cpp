@@ -126,7 +126,15 @@ QByteArray controlTCP::getOneFrameDATA()
         qDebug()<<" -------Get data.size():"<<m_byteArray_oneFrame.size()<< "\n";
         m_queue_camDataInCHAR.pop_back();
         qDebug()<<" After get, m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
-        return m_byteArray_oneFrame;
+         //Get data.size(): -1734502249
+        if(m_byteArray_oneFrame.size()>0)
+        {
+            return m_byteArray_oneFrame;
+        }
+        else
+        {
+            return "";
+        }
     }
     else
     {

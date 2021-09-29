@@ -42,7 +42,9 @@ public:
     void goLeftBack();
     void goRightHead();
     void goRightBack();
+    void getPicToShow();
     bool ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint64_t nPixelFormat);
+//    bool ShowImageOpt(int nWidth, int nHeight, uint64_t nPixelFormat);
 private slots:
     void on_pushButtonConnect_clicked();
     void systemInfoUpdate();
@@ -95,7 +97,7 @@ private:
 
 
     int imageCount=0;
-    int imageWidth,imageHeight;
+    int m_imageWidth,m_imageHeight;
     camInfo m_picToshow;
     camInfo oneCamInfo;
     bool b_grabPic;

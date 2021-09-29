@@ -21,11 +21,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBox_Res->addItems(item_Resolution);
     ui->comboBox_Res->setCurrentIndex(0);
     if(CAM_ResolutionRatio==3){
-        imageWidth=1280;
-        imageHeight=720;
+        m_imageWidth=1280;
+        m_imageHeight=720;
     }
 
-    addr="192.168.0.101";
+    addr="192.168.2.116";
     ui->lineEdit_IP->setText(addr);
     startTime();//开启系统定时
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
@@ -49,10 +49,10 @@ MainWindow::~MainWindow()
         systemTimer=nullptr;
     }
     //线程结束
-   if(controlSocket!=nullptr){
-    delete controlSocket;
-    controlSocket=nullptr;
-   }
+    if(controlSocket!=nullptr){
+        delete controlSocket;
+        controlSocket=nullptr;
+    }
 }
 
 void MainWindow::startTime()
@@ -102,21 +102,68 @@ void MainWindow::getPicToShow(camInfo& frameToShow)
     m_getImageCount++;
 
     qDebug() <<"frameToShow m_getImageCount:"<<m_getImageCount;
-    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
+    //    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
     if(frameToShow.imageBuf!=nullptr){
         //每3帧显示一帧图像
         if(m_getImageCount%3==0)
         {
-            qDebug() << "fun:" <<__func__<<__LINE__<<"frameToShow ------\n"<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
+            qDebug() <<"\n"<<__LINE__<<"frameToShow -----"<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
 
-            ShowImage(frameToShow.imageBuf, imageWidth,imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
+            ShowImage(frameToShow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
         }
         else
         {
             //add 未显示的数据，直接释放,避免内存增长 0620
-             qDebug() <<__LINE__<<"free buf\n";
-            free(frameToShow.imageBuf);
-            frameToShow.imageBuf=nullptr;
+            if(frameToShow.imageBuf!=nullptr){
+                qDebug() <<__LINE__<<"analysis double free";
+                try{
+                    free(frameToShow.imageBuf);
+                }
+                catch(std::exception &e ){
+                    std::cout << "Standard exception: " << e.what() << std::endl;
+                    LogError("Standard exception %s\n",e.what());
+                }
+
+                frameToShow.imageBuf=nullptr;
+            }
+
+        }
+
+    }
+}
+
+
+void MainWindow::getPicToShow()
+{
+    //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    m_getImageCount++;
+
+    qDebug() <<"frameToShow m_getImageCount:"<<m_getImageCount;
+    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+    if(m_picToshow.imageBuf!=nullptr){
+        //每3帧显示一帧图像
+        if(m_getImageCount%3==0)
+        {
+            qDebug() <<"\n"<<__LINE__<<"frameToShow -----"<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+
+            ShowImage(m_picToshow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
+            //              ShowImageOpt(m_imageWidth,m_imageHeight,QImage::Format_RGB888);
+        }
+        else
+        {
+            //add 未显示的数据，直接释放,避免内存增长 0620
+            if(m_picToshow.imageBuf!=nullptr){
+                qDebug() <<__LINE__<<"analysis double free";
+                try{
+                    free(m_picToshow.imageBuf);
+                    //        qDebug()  <<"test free-----------\n";
+                }
+                catch(std::exception &e ){
+                    std::cout << "Standard exception: " << e.what() << std::endl;
+                    LogError("Standard exception %s\n",e.what());
+                }
+
+            }
         }
 
     }
@@ -133,12 +180,28 @@ void MainWindow::systemInfoUpdate()
 //定时取数据显示
 void MainWindow::onTimeGetFrameToShow()
 {
+    QTime t_analysisMem;
+    t_analysisMem.start();
+    if(m_picToshow.imageBuf==nullptr) //开始为空,或者释放内存后再分配 0929test
+    {
+        m_picToshow.imageBuf=(uint8_t *)malloc(sizeof(uint8_t)*m_imageWidth*m_imageHeight);
+        if(m_picToshow.imageBuf!=nullptr){
+            //                 qDebug()<<"malloc OK";
+        }
+        else{
+            qDebug()<<"malloc failed-------!!!!!!!";
+            //            LogError("CAM DATA malloc failed, so not to show in GUI\n");
+            return;
+        }
+
+    }
+    qDebug()<<"malloc mem time:"<<t_analysisMem.elapsed();
     m_picToshow=showThread->getCamOneFrame();
     qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
     if(m_picToshow.imageBuf!=nullptr)
     {
 
-        getPicToShow(m_picToshow);
+        getPicToShow();
         m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717
     }
     ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
@@ -162,7 +225,7 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
         printf("%s image is invalid.\n", __FUNCTION__);
         return false;
     }
-
+    qDebug()<<"test free buf\n";
     image = QImage(pRgbFrameBuf,nWidth, nHeight, QImage::Format_RGB888);//Format_BGR888 --->Format_RGB888
     if(b_grabPic==true)
     {
@@ -186,6 +249,7 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
     //    m_mxDisplay.unlock();
     if(pRgbFrameBuf != NULL)
     {
+        qDebug()<<__LINE__<<"test free buf\n";
         free(pRgbFrameBuf);
         pRgbFrameBuf = NULL;
     }
@@ -194,6 +258,10 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
 
 
 }
+
+
+
+
 
 void MainWindow::STOP(){
     char buf[6] ="Pause";
@@ -393,7 +461,7 @@ void MainWindow::on_pushButton_disconnect_clicked()
     LogInfo("%s","服务器断开");
     camTimer->stop();
     showThread->setThreadStop();
-//    qDebug()<<"test close error";
+    //    qDebug()<<"test close error";
     ui->pushButtonConnect->setEnabled(true);
 }
 
@@ -409,31 +477,31 @@ void MainWindow::disconnect_Deal()
 
 void MainWindow::on_comboBox_Res_currentIndexChanged(int index)
 {
-   qDebug()<<"Resolution select index:"<<index;
+    qDebug()<<"Resolution select index:"<<index;
     switch (index) {
-      case 1:
+    case 1:
         m_CAM_ResolutionRatio=3;
         break;
     case 2:
         m_CAM_ResolutionRatio=1;
-      break;
+        break;
     case 3:
         m_CAM_ResolutionRatio=3;
-      break;
+        break;
     default:
         m_CAM_ResolutionRatio=3;
     }
     if(m_CAM_ResolutionRatio==3){
-        imageWidth=1280;
-        imageHeight=720;
+        m_imageWidth=1280;
+        m_imageHeight=720;
     }
     else if(m_CAM_ResolutionRatio==1){
-        imageWidth=640;
-        imageHeight=480;
+        m_imageWidth=640;
+        m_imageHeight=480;
     }
     else{
-        imageWidth=1920;
-        imageHeight=1080;
+        m_imageWidth=1920;
+        m_imageHeight=1080;
     }
 }
 
