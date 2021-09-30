@@ -102,7 +102,7 @@ void MainWindow::getPicToShow(camInfo& frameToShow)
     m_getImageCount++;
 
     qDebug() <<"frameToShow m_getImageCount:"<<m_getImageCount;
-    //    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
+    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
     if(frameToShow.imageBuf!=nullptr){
         //每3帧显示一帧图像
         if(m_getImageCount%3==0)
@@ -114,14 +114,17 @@ void MainWindow::getPicToShow(camInfo& frameToShow)
         else
         {
             //add 未显示的数据，直接释放,避免内存增长 0620
+            qDebug() <<__LINE__<<"free buf\n";
             if(frameToShow.imageBuf!=nullptr){
                 qDebug() <<__LINE__<<"analysis double free";
                 try{
                     free(frameToShow.imageBuf);
+                    //        qDebug()  <<"test free-----------\n";
                 }
                 catch(std::exception &e ){
                     std::cout << "Standard exception: " << e.what() << std::endl;
                     LogError("Standard exception %s\n",e.what());
+                    qDebug()  <<"test free error----------\n";
                 }
 
                 frameToShow.imageBuf=nullptr;
@@ -139,15 +142,15 @@ void MainWindow::getPicToShow()
     m_getImageCount++;
 
     qDebug() <<"frameToShow m_getImageCount:"<<m_getImageCount;
-    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+//    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
     if(m_picToshow.imageBuf!=nullptr){
         //每3帧显示一帧图像
-        if(m_getImageCount%3==0)
+        if(m_getImageCount%2==0)
         {
             qDebug() <<"\n"<<__LINE__<<"frameToShow -----"<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
 
             ShowImage(m_picToshow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
-            //              ShowImageOpt(m_imageWidth,m_imageHeight,QImage::Format_RGB888);
+
         }
         else
         {
@@ -156,7 +159,7 @@ void MainWindow::getPicToShow()
                 qDebug() <<__LINE__<<"analysis double free";
                 try{
                     free(m_picToshow.imageBuf);
-                    //        qDebug()  <<"test free-----------\n";
+
                 }
                 catch(std::exception &e ){
                     std::cout << "Standard exception: " << e.what() << std::endl;
@@ -190,17 +193,16 @@ void MainWindow::onTimeGetFrameToShow()
         }
         else{
             qDebug()<<"malloc failed-------!!!!!!!";
-            //            LogError("CAM DATA malloc failed, so not to show in GUI\n");
+            LogError("%s","CAM DATA malloc failed, so not to show in GUI\n");
             return;
         }
 
     }
-    qDebug()<<"malloc mem time:"<<t_analysisMem.elapsed();
+//    qDebug()<<"malloc mem time:"<<t_analysisMem.elapsed();
     m_picToshow=showThread->getCamOneFrame();
-    qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+//    qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
     if(m_picToshow.imageBuf!=nullptr)
     {
-
         getPicToShow();
         m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717
     }
@@ -225,7 +227,6 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
         printf("%s image is invalid.\n", __FUNCTION__);
         return false;
     }
-    qDebug()<<"test free buf\n";
     image = QImage(pRgbFrameBuf,nWidth, nHeight, QImage::Format_RGB888);//Format_BGR888 --->Format_RGB888
     if(b_grabPic==true)
     {
@@ -258,8 +259,6 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
 
 
 }
-
-
 
 
 

@@ -139,7 +139,7 @@ void MyThread::receiveValidPicture(QByteArray bytes)
     else
     {
         qDebug()<<"cam size small and clear, bytes.size():"<<bytes.size()<<"\n";
-        bytes.clear();
+//        bytes.clear();  //字节少的时候,是否需要释放?? cam size small and clear, bytes.size(): 2092360
     }
 
 
@@ -321,8 +321,9 @@ bool MyThread::getOneFrame()
 //        t_debug.start();
         OneTempFrame=camSaveQueue.front();
         camSaveQueue.pop();//   弹出队首元素
-        qDebug() <<"num:"<<m_countGet++<<" After get, camSaveQueue.size() "<<camSaveQueue.size()<<endl;
+        qDebug() <<"num:"<<m_countGet++<<" getOneFrame After get, camSaveQueue.size() "<<camSaveQueue.size()<<endl;
 
+        //        emit SIGNAL_get_one_frame(oneFrameInfo);
         b_dataValid=true;
         free(OneTempFrame.imageBuf);//add
         return true;
