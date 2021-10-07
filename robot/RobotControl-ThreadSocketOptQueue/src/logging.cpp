@@ -85,7 +85,7 @@ void Log::SetFile( const char* filename )
 			SetFile(file);
 			mFilename = filename;
             //return file;   //ADD  JACK
-            std::cout<<"filename"<<filename<<" save file* "<<file<<std::endl;
+            std::cout<<"filename:"<<filename<<std::endl;//<<" save file* "<<file
             LogInfo("filename is %s \n",filename);
 
             //fprintf(Log::GetFile(), "filename is %s \n",filename);

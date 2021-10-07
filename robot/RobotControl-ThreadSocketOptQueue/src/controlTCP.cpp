@@ -22,7 +22,7 @@ controlTCP::~controlTCP()
 
 bool controlTCP::connectSocket(QTcpSocket* m_tcpSocket,QString ip)
 {
-    qDebug()<< "this  :"<<this;
+//    qDebug()<< "this  :"<<this;
     m_tcpSocket->connectToHost(ip,6800);
     qDebug()<< "pictureSocket state  :"<<m_tcpSocket->state();
     connect(m_tcpSocket,SIGNAL(connected()),this,SLOT(startTime()));
@@ -37,7 +37,7 @@ bool controlTCP::connectSocket(QTcpSocket* m_tcpSocket,QString ip)
 
 bool controlTCP::connectSocket(QString ip)
 {
-    qDebug()<< "this  :"<<this;
+//    qDebug()<< "this  :"<<this;
     pictureSocket->connectToHost(ip,6800);
     qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
     connect(pictureSocket,SIGNAL(connected()),this,SLOT(startTime()));
@@ -45,7 +45,7 @@ bool controlTCP::connectSocket(QString ip)
     pictureSocket->waitForConnected();
     //pictureSocket->state()==QTcpSocket::ConnectingState||
     if(pictureSocket->state()==QTcpSocket::ConnectedState){
-        //        emit signalSocketToRead();
+
         return true;
     }
     else
@@ -56,7 +56,6 @@ bool controlTCP::connectSocket(QString ip)
 
 bool controlTCP::disconnectSocket()
 {
-    //    qDebug()<< "this  :"<<this;
     qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
     if(pictureSocket->state()==QTcpSocket::ClosingState||pictureSocket->state()==QTcpSocket::UnconnectedState){
         return true;
@@ -125,7 +124,7 @@ QByteArray controlTCP::getOneFrameDATA()
         m_byteArray_oneFrame=m_queue_camDataInCHAR.front();
         qDebug()<<" -------Get data.size():"<<m_byteArray_oneFrame.size()<< "\n";
         m_queue_camDataInCHAR.pop_back();
-        qDebug()<<" After get, m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
+//        qDebug()<<" After get, m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
         //Get data.size(): -1734502249
         if(m_byteArray_oneFrame.size()>0)
         {

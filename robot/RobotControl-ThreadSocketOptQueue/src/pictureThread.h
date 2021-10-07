@@ -49,7 +49,7 @@ private:
     controlTCP* m_pictureSocket;
     QTcpSocket* m_tcpSocket;
     queue<camInfo> camSaveQueue;
-    QTimer *getFrameTimer;
+//    QTimer *getFrameTimer;
     int imageCount=0;
     int imageWidth,imageHeight;
     //多线程读取与保护

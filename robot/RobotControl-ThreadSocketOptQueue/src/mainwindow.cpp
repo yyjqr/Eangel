@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
         m_imageHeight=720;
     }
 
-    addr="192.168.2.116";
+    addr="192.168.0.101";
     ui->lineEdit_IP->setText(addr);
     startTime();//开启系统定时
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
@@ -60,13 +60,13 @@ void MainWindow::startTime()
     qDebug() << "fun: " <<__func__;
 
     systemTimer->setTimerType(Qt::PreciseTimer);
-    systemTimer->start(1000);
+    systemTimer->start(500);
 }
 
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
-    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+//    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     QDateTime m_datetime;
     QString timestr=m_datetime.currentDateTime().toString("HH:mm:ss");
     ui->textBrowser_log->append(timestr+":连接ip:"+addr);
@@ -105,7 +105,7 @@ void MainWindow::getPicToShow(camInfo& frameToShow)
     qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
     if(frameToShow.imageBuf!=nullptr){
         //每3帧显示一帧图像
-        if(m_getImageCount%3==0)
+        if(m_getImageCount%2==0)
         {
             qDebug() <<"\n"<<__LINE__<<"frameToShow -----"<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
 
@@ -119,7 +119,6 @@ void MainWindow::getPicToShow(camInfo& frameToShow)
                 qDebug() <<__LINE__<<"analysis double free";
                 try{
                     free(frameToShow.imageBuf);
-                    //        qDebug()  <<"test free-----------\n";
                 }
                 catch(std::exception &e ){
                     std::cout << "Standard exception: " << e.what() << std::endl;
@@ -147,7 +146,7 @@ void MainWindow::getPicToShow()
         //每3帧显示一帧图像
         if(m_getImageCount%2==0)
         {
-            qDebug() <<"\n"<<__LINE__<<"frameToShow -----"<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+            qDebug() <<"\n"<<__LINE__<<"frameToShow -----";  // <<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
 
             ShowImage(m_picToshow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
 
@@ -175,7 +174,7 @@ void MainWindow::getPicToShow()
 void MainWindow::systemInfoUpdate()
 {
     QDateTime datetime;
-    QString timestr=datetime.currentDateTime().toString("yyyyMMdd HH:mm:ss");
+    QString timestr=datetime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
     ui->label_sysTime->setStyleSheet("color:green;");
     ui->label_sysTime->setText(timestr);
 
@@ -213,7 +212,7 @@ void MainWindow::on_pushButtonCAR_clicked()
 {
     controlSocket->connectToHost(addr,8200);
     ui->textBrowser_log->append("连接成功");
-    //    ui->textBrowser_log->append(controlSocket->peerAddress().toString());
+//    ui->textBrowser_log->append(controlSocket->peerAddress().toString());
     connect(controlSocket,SIGNAL(connected()),this,SLOT(tips()));
 }
 
@@ -250,7 +249,7 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
     //    m_mxDisplay.unlock();
     if(pRgbFrameBuf != NULL)
     {
-        qDebug()<<__LINE__<<"test free buf\n";
+//        qDebug()<<__LINE__<<"test free buf\n";
         free(pRgbFrameBuf);
         pRgbFrameBuf = NULL;
     }

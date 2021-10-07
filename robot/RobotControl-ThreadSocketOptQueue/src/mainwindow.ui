@@ -66,9 +66,9 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>1280</x>
+      <x>1260</x>
       <y>610</y>
-      <width>301</width>
+      <width>321</width>
       <height>211</height>
      </rect>
     </property>
@@ -82,7 +82,7 @@
         </size>
        </property>
        <property name="text">
-        <string>后</string>
+        <string/>
        </property>
        <property name="icon">
         <iconset resource="../buttonIcon.qrc">
@@ -98,6 +98,12 @@
      </item>
      <item row="0" column="0">
       <widget class="QPushButton" name="pushButtonCARLF">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>40</height>
+        </size>
+       </property>
        <property name="text">
         <string>左前</string>
        </property>
@@ -136,7 +142,7 @@
       <widget class="QPushButton" name="pushButtonCARLB">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>60</width>
          <height>40</height>
         </size>
        </property>
@@ -149,7 +155,7 @@
       <widget class="QPushButton" name="pushButtonCARRB">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>60</width>
          <height>40</height>
         </size>
        </property>
@@ -231,6 +237,12 @@
      </item>
      <item row="0" column="2">
       <widget class="QPushButton" name="pushButtonCARRF">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>40</height>
+        </size>
+       </property>
        <property name="text">
         <string>右前</string>
        </property>
@@ -241,9 +253,9 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>1290</x>
+      <x>1260</x>
       <y>380</y>
-      <width>281</width>
+      <width>311</width>
       <height>181</height>
      </rect>
     </property>
@@ -284,9 +296,14 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>80</width>
+         <width>100</width>
          <height>60</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>连接摄像头</string>
