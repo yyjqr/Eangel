@@ -7,9 +7,9 @@ controlTCP::controlTCP(QObject* parent):
     QTcpSocket(parent)
 {
 
-    myTimer = new QTimer(this);
+    cmdTimer = new QTimer(this);
     pictureSocket = new QTcpSocket(this);
-    connect(myTimer,SIGNAL(timeout()),this,SLOT(sendCmdToServer()));
+    connect(cmdTimer,SIGNAL(timeout()),this,SLOT(sendCmdToServer()));
     //先把连接成功的信号，来做读取，然后再在线程里做接收处理？？？
     connect(pictureSocket,SIGNAL(readyRead()),this,SLOT(recvData()));
     connect(pictureSocket,SIGNAL(disconnected()),this,SLOT(stopTimer()));
@@ -42,7 +42,7 @@ bool controlTCP::connectSocket(QString ip)
     qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
     connect(pictureSocket,SIGNAL(connected()),this,SLOT(startTime()));
     qDebug()<< "pictureSocket->state:"<<pictureSocket->state();
-    pictureSocket->waitForConnected();
+    pictureSocket->waitForConnected(5000);//5s超时
     //pictureSocket->state()==QTcpSocket::ConnectingState||
     if(pictureSocket->state()==QTcpSocket::ConnectedState){
 
@@ -70,13 +70,13 @@ bool controlTCP::disconnectSocket()
 void controlTCP::startTime()
 {
     qDebug() << "fun: " <<__func__;
-    myTimer->start(400);
+    cmdTimer->start(400);
 }
 
 void controlTCP::stopTimer()
 {
     qDebug() << "fun: " <<__func__;
-    myTimer->stop();
+    cmdTimer->stop();
     emit signalSocketDisconnect();
 }
 
@@ -93,20 +93,24 @@ void controlTCP::recvData(void)
     QByteArray bytes=nullptr;
     //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     mutex.lock();
-    while(pictureSocket->waitForReadyRead(200))
+    while(pictureSocket->waitForReadyRead(300)) //200--->300 尽量读取到1张图像的数据 20211023
     {
         //        bytes.append((QByteArray)pictureSocket->readAll());
         bytes.append((QByteArray)pictureSocket->read(CAM_ResolutionRatio*IMAGESIZE));
         if(bytes.size()>=CAM_ResolutionRatio*IMAGESIZE && bytes.size()<CAM_ResolutionRatio*IMAGESIZE*1.5)
         {
-            qDebug()<<" -------Socket Read data.size():"<<bytes.size()<< "\n";
+            qDebug()<<" ------Socket Read data.size():"<<bytes.size()<< "\n";
 
             m_queue_camDataInCHAR.push_back(bytes);
             break;
         }
+        else
+        {
+
+        }
     }
     mutex.unlock();
-
+//    qDebug()<<" \n Read  data.size():"<<bytes.size()<< "\n";
     qDebug()<<" m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
     if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
         if(bytes!=nullptr)

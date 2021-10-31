@@ -60,7 +60,8 @@ private:
     camInfo oneFrameInfo,OneTempFrame; //队列中取一帧数据,此后面声明变量有报错
     bool   b_dataValid;
     uint8_t *imageExtraDataBuf;
-    int    m_countGet;
+    int    m_countGet,m_malloc_times;
+
 };
 
 #endif // PICTURETHREAD_H

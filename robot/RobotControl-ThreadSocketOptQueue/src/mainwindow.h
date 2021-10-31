@@ -45,6 +45,7 @@ public:
     void getPicToShow();
     bool ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint64_t nPixelFormat);
 //    bool ShowImageOpt(int nWidth, int nHeight, uint64_t nPixelFormat);
+    void ParseFromJson();
 private slots:
     void on_pushButtonConnect_clicked();
     void systemInfoUpdate();
@@ -75,7 +76,7 @@ private slots:
     void on_pushButtonCARRB_pressed();
     void on_pushButtonCARRB_released();
     void on_pushButtonCAR_clicked();
-    void on_lineEdit_IP_editingFinished();
+
     void on_lineEdit_port_editingFinished();
     void on_pushButtonCARRF_clicked();
 
@@ -84,11 +85,16 @@ private slots:
     void  disconnect_Deal(); //socket 断开连接后，触发主线程的信号
     void on_comboBox_Res_currentIndexChanged(int index);
 
+
+    void on_comboBox_ipAddr_currentTextChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 
     QTcpSocket* controlSocket;
     QString addr,port;
+    QString m_ip_addr1,m_ip_addr2,m_ip_addr3,m_ip_addr4;
+    const std::string m_ip_config_path="./CONFIG/ipAddr.conf";
     uchar imagebuffer[IMAGESIZE];
     //     QVector2D
     QTimer* systemTimer;
@@ -106,6 +112,7 @@ private:
     MyThread *showThread;
     int m_getImageCount;
     int m_CAM_ResolutionRatio;
+    QString m_sysTimestr;
 
 };
 

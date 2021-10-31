@@ -20,6 +20,10 @@ else{
 
 
 }
+
+INCLUDEPATH +=./include
+
+
 SOURCES += src/logging.cpp \
         src/controlTCP.cpp \
         src/main.cpp \

@@ -1,7 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
 #include "logging.h"
+#include "jsonxx/json.hpp"
+#include <sstream>
+#include <iostream>
+#include <fstream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     systemTimer=new QTimer(this);
     controlSocket = new QTcpSocket(this);
     showThread= new MyThread();
-    QStringList item_Resolution;
+    QStringList item_Resolution,item_ipAddrs;
     item_Resolution<<"720p"<<"480p"<<"1080p";
     ui->comboBox_Res->addItems(item_Resolution);
     ui->comboBox_Res->setCurrentIndex(0);
@@ -24,9 +27,15 @@ MainWindow::MainWindow(QWidget *parent) :
         m_imageWidth=1280;
         m_imageHeight=720;
     }
+    ParseFromJson();
+    if(m_ip_addr1.isNull()!=true){
+        item_ipAddrs<<m_ip_addr1<<m_ip_addr2<<m_ip_addr3<<m_ip_addr4;
+    }
 
+    ui->comboBox_ipAddr->addItems(item_ipAddrs);
+    ui->comboBox_ipAddr->setCurrentIndex(0);
     addr="192.168.0.101";
-    ui->lineEdit_IP->setText(addr);
+
     startTime();//开启系统定时
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
     connect(camTimer,SIGNAL(timeout()),this,SLOT(onTimeGetFrameToShow()));
@@ -66,7 +75,7 @@ void MainWindow::startTime()
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
-//    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     QDateTime m_datetime;
     QString timestr=m_datetime.currentDateTime().toString("HH:mm:ss");
     ui->textBrowser_log->append(timestr+":连接ip:"+addr);
@@ -141,12 +150,12 @@ void MainWindow::getPicToShow()
     m_getImageCount++;
 
     qDebug() <<"frameToShow m_getImageCount:"<<m_getImageCount;
-//    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+    //    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
     if(m_picToshow.imageBuf!=nullptr){
         //每3帧显示一帧图像
         if(m_getImageCount%2==0)
         {
-            qDebug() <<"\n"<<__LINE__<<"frameToShow -----";  // <<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+//            qDebug() <<"\n"<<__LINE__<<"frameToShow -----";  // <<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
 
             ShowImage(m_picToshow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
 
@@ -155,8 +164,9 @@ void MainWindow::getPicToShow()
         {
             //add 未显示的数据，直接释放,避免内存增长 0620
             if(m_picToshow.imageBuf!=nullptr){
-                qDebug() <<__LINE__<<"analysis double free";
+//                qDebug() <<__LINE__<<"analysis double free";
                 try{
+                    qDebug()<<__LINE__<<"test free IMAGE buf\n";
                     free(m_picToshow.imageBuf);
 
                 }
@@ -174,9 +184,10 @@ void MainWindow::getPicToShow()
 void MainWindow::systemInfoUpdate()
 {
     QDateTime datetime;
-    QString timestr=datetime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+    //    qDebug() <<m_sysTimestr<<":系统时间更新测试\n";
+    m_sysTimestr=datetime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
     ui->label_sysTime->setStyleSheet("color:green;");
-    ui->label_sysTime->setText(timestr);
+    ui->label_sysTime->setText(m_sysTimestr);
 
 }
 //定时取数据显示
@@ -184,35 +195,34 @@ void MainWindow::onTimeGetFrameToShow()
 {
     QTime t_analysisMem;
     t_analysisMem.start();
-    if(m_picToshow.imageBuf==nullptr) //开始为空,或者释放内存后再分配 0929test
-    {
-        m_picToshow.imageBuf=(uint8_t *)malloc(sizeof(uint8_t)*m_imageWidth*m_imageHeight);
-        if(m_picToshow.imageBuf!=nullptr){
-            //                 qDebug()<<"malloc OK";
-        }
-        else{
-            qDebug()<<"malloc failed-------!!!!!!!";
-            LogError("%s","CAM DATA malloc failed, so not to show in GUI\n");
-            return;
-        }
 
-    }
-//    qDebug()<<"malloc mem time:"<<t_analysisMem.elapsed();
+    /*****数据获取****************/
+    /***************************/
     m_picToshow=showThread->getCamOneFrame();
-//    qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
-    if(m_picToshow.imageBuf!=nullptr)
-    {
-        getPicToShow();
-        m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717
+    if(m_picToshow.imageBuf!=nullptr){
+
+//        qDebug() << "Get the data,m_picToshow.imageBuf:"<<m_picToshow.imageBuf;
+         getPicToShow();
+         m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717--->未获取到图像数据，会一直在空指针下，再分配内存，导致内存过大！ 1023
+         ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
     }
-    ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
+    else
+    {
+//      qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+//        qDebug() <<"no data to show------\n";
+    }
+
+//    qDebug() <<m_sysTimestr<<":取一帧显示\n";
+//    qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+
+
 
 }
 void MainWindow::on_pushButtonCAR_clicked()
 {
     controlSocket->connectToHost(addr,8200);
     ui->textBrowser_log->append("连接成功");
-//    ui->textBrowser_log->append(controlSocket->peerAddress().toString());
+    //    ui->textBrowser_log->append(controlSocket->peerAddress().toString());
     connect(controlSocket,SIGNAL(connected()),this,SLOT(tips()));
 }
 
@@ -249,7 +259,7 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
     //    m_mxDisplay.unlock();
     if(pRgbFrameBuf != NULL)
     {
-//        qDebug()<<__LINE__<<"test free buf\n";
+        qDebug()<<__LINE__<<"test free buf\n";
         free(pRgbFrameBuf);
         pRgbFrameBuf = NULL;
     }
@@ -426,11 +436,6 @@ void MainWindow::on_pushButtonCARRB_released()
 }
 
 
-void MainWindow::on_lineEdit_IP_editingFinished()
-{
-    addr=ui->lineEdit_IP->text();
-
-}
 
 void MainWindow::on_lineEdit_port_editingFinished()
 {
@@ -501,5 +506,42 @@ void MainWindow::on_comboBox_Res_currentIndexChanged(int index)
         m_imageWidth=1920;
         m_imageHeight=1080;
     }
+}
+
+void MainWindow::ParseFromJson()
+{
+    std::ifstream ifs;
+    ifs.open(m_ip_config_path, std::ios::binary);
+    if(!ifs){
+        std::cout << "Open json file Error " << std::endl;
+        LogError("Open json file Error,%s \n",m_ip_config_path.c_str());
+        return ;
+    }
+    else
+    {
+        std::ifstream ifs(m_ip_config_path);
+        jsonxx::json json_flow;
+        ifs >> json_flow;
+        string  str_ip1,str_ip2,str_ip3,str_ip4;
+
+        str_ip1       = json_flow["ip_addr1"].as_string();
+        m_ip_addr1=QString::fromStdString(str_ip1);
+
+        str_ip2       = json_flow["ip_addr2"].as_string();
+        m_ip_addr2=QString::fromStdString(str_ip2);
+        str_ip3       = json_flow["ip_addr3"].as_string();
+        m_ip_addr3=QString::fromStdString(str_ip3);
+        str_ip4       = json_flow["ip_addr4"].as_string();
+        m_ip_addr4=QString::fromStdString(str_ip4);
+
+
+
+    }
+}
+
+void MainWindow::on_comboBox_ipAddr_currentTextChanged(const QString &arg1)
+{
+    addr=arg1;
+    qDebug()<<"current connect addr:"<<addr;
 }
 

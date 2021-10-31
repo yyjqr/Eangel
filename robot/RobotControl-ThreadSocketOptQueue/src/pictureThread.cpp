@@ -19,7 +19,8 @@ MyThread::MyThread():
     m_pictureSocket(nullptr),
     imageExtraDataBuf(nullptr),
     m_tryGetDataTimes(0),
-    m_countGet(0)
+    m_countGet(0),
+    m_malloc_times(0)
 {
 
     //    extraDataSize=0;
@@ -60,6 +61,7 @@ void MyThread::run()
 //            qDebug()<<"m_getFrame_byteArray length: "<<m_getFrame_byteArray.length();
             //比正常数据多1.5倍,可尝试拷贝,如果多出10倍,拷贝报错  0927 m_getFrame_byteArray length:  1987737462
             if(m_getFrame_byteArray.length()<=IMAGESIZE*CAM_ResolutionRatio*1.5){
+//                  qDebug()<<"analysis mem\n";
                 receiveValidPicture(m_getFrame_byteArray);
             }
 
@@ -109,9 +111,10 @@ void MyThread::receiveValidPicture(QByteArray bytes)
     if(bytes.size()>=IMAGESIZE*CAM_ResolutionRatio)
     {
         oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*CAM_ResolutionRatio); //分配内存 RGB 3倍
-
+//       qDebug() <<"malloc mem times:"<<m_malloc_times++<<endl;
         if (oneCamInfo.imageBuf!=nullptr)
         {
+//            memcpy(oneCamInfo.imageBuf,bytes,bytes.size()>IMAGESIZE*CAM_ResolutionRatio ? IMAGESIZE*CAM_ResolutionRatio:bytes.size());
             memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*CAM_ResolutionRatio);
             qDebug() <<"bytes.size()>=IMAGESIZE*3:" <<bytes.size();
             LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
@@ -358,6 +361,7 @@ camInfo MyThread::getCamOneFrame()
         oneFrameInfo=camSaveQueue.front();
         camSaveQueue.pop();
         //          qDebug() << "\n fun: " <<__func__<<__LINE__<<"get one frame to show\n ";
+//        qDebug() << "Return oneFrameInfo.imageBuf:"<<oneFrameInfo.imageBuf;
         return oneFrameInfo; //取队列中弹出的一帧数据 0717
     }
     else{
@@ -386,7 +390,7 @@ void MyThread::setThreadStop()
 {
     b_run=false;
     m_pictureSocket->disconnectSocket();
-    qDebug()<<__func__<<"test close error";
+//    qDebug()<<__func__<<"test close error";
 
 }
 
