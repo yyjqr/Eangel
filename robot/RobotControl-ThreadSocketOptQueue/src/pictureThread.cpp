@@ -48,7 +48,7 @@ void MyThread::run()
 
     qDebug()<<__func__<< "currentThreadId"<<QThread::currentThreadId();
     int i=0;
-    //add 0216--->20211007,线程退出后再次运行时，新建socket对象
+
 
 
     connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
@@ -86,6 +86,7 @@ bool MyThread::connectTCPSocket(QString addr)
     qDebug() <<"thread ,test connect"<<__func__;
     //调用controlTCP的方法！！
     bool b_status=false;
+    //add 0216--->20211007,线程退出后再次运行时，新建socket对象
     if(m_pictureSocket==nullptr){
         m_pictureSocket = new controlTCP(this);
     }

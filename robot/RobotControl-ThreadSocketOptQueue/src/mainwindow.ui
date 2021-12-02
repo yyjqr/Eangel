@@ -403,8 +403,14 @@
       <x>20</x>
       <y>720</y>
       <width>541</width>
-      <height>301</height>
+      <height>411</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>300</width>
+      <height>100</height>
+     </size>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_port">
@@ -532,7 +538,7 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>1280</x>
+      <x>1310</x>
       <y>270</y>
       <width>120</width>
       <height>30</height>

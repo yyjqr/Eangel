@@ -51,7 +51,7 @@ private slots:
     void systemInfoUpdate();
     void onTimeGetFrameToShow();
     void startTime();
-    void getPicToShow(camInfo& frameToShow);  //add 0213
+//    void getPicToShow(camInfo& frameToShow);  //add 0213
     void tips();
     void on_pushButton_LEFT_pressed();
     //    void on_pushButton_LEFT_released();
@@ -99,6 +99,8 @@ private:
     //     QVector2D
     QTimer* systemTimer;
     QTimer *camTimer;
+    QDateTime m_datetime;
+    QString m_timestr;
     queue<camInfo> camSaveQueue;
 
 
