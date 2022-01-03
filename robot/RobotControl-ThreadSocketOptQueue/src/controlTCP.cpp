@@ -41,7 +41,7 @@ bool controlTCP::connectSocket(QString ip)
 {
 //    qDebug()<< "this  :"<<this;
     pictureSocket->connectToHost(ip,6800);
-    qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
+    qDebug()<< "pictureSocket state  :"<<pictureSocket->state()<<endl;
     connect(pictureSocket,SIGNAL(connected()),this,SLOT(startTime()));
     qDebug()<< "pictureSocket->state:"<<pictureSocket->state();
     pictureSocket->waitForConnected(3000);//5s超时--->3s
@@ -71,7 +71,7 @@ bool controlTCP::disconnectSocket()
 
 void controlTCP::startTime()
 {
-    qDebug() << "fun: " <<__func__;
+    qDebug() << "fun: " <<__func__<<"start CMD timer\n";
     cmdTimer->start(400);
 }
 
@@ -79,9 +79,10 @@ void controlTCP::stopTimer()
 {
     qDebug() << "fun: " <<__func__;
     cmdTimer->stop();
+    //add 每次socket断开后，再访问，避免访问内存越界 202201
+    m_queue_camDataInCHAR.clear();
     emit signalSocketDisconnect();
 }
-
 void controlTCP::sendCmdToServer()
 {
     pictureSocket->write("PIC");
@@ -127,10 +128,12 @@ void controlTCP::recvData(void)
 
 QByteArray controlTCP::getOneFrameDATA()
 {
+
     if(m_queue_camDataInCHAR.size()!=0)
     {
+         qDebug()<<" ------Get m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
         m_byteArray_oneFrame=m_queue_camDataInCHAR.front();
-//        qDebug()<<" -------Get data.size():"<<m_byteArray_oneFrame.size()<< "\n";
+       //断开后，再次连接可能出错的地方 202201
         m_queue_camDataInCHAR.pop_back();
         //        qDebug()<<" After get, m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
         //Get data.size(): -1734502249

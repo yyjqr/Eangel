@@ -10,7 +10,7 @@ using namespace  std;
 unsigned int extraDataSize=0;
 
 
-MyThread::MyThread():
+CamThread::CamThread():
     b_run(true),
     oneCamInfo({nullptr,1280,720,0}),
     oneFrameInfo({nullptr,1280,720,0}),
@@ -28,7 +28,7 @@ MyThread::MyThread():
     //    connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receiveValidPicture(QByteArray)),Qt::QueuedConnection);//不同线程
 }
 
-MyThread::~MyThread()
+CamThread::~CamThread()
 {
 
 
@@ -42,7 +42,7 @@ MyThread::~MyThread()
 
 
 
-void MyThread::run()
+void CamThread::run()
 {
     QTime time_debug;
 
@@ -76,14 +76,14 @@ void MyThread::run()
         i++;
 
     }
-
-    //    quit();//stop==true后，退出线程循环！！！
+    qDebug()<<"Cam thread finished----\n";
+        quit();//stop==true后，退出线程循环！！！
 
 }
 
-bool MyThread::connectTCPSocket(QString addr)
+bool CamThread::connectTCPSocket(QString addr)
 {
-    qDebug() <<"thread ,test connect"<<__func__;
+    qDebug() <<"thread ,test connect fun:"<<__func__<<endl;
     //调用controlTCP的方法！！
     bool b_status=false;
     //add 0216--->20211007,线程退出后再次运行时，新建socket对象
@@ -92,22 +92,13 @@ bool MyThread::connectTCPSocket(QString addr)
     }
     b_status =m_pictureSocket->connectSocket(addr);
 
-    if(b_status)
-    {
-//        getFrameTimer->start(800);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-
+    return b_status;
 }
 
 
 
 
-void MyThread::receiveValidPicture(QByteArray bytes)
+void CamThread::receiveValidPicture(QByteArray bytes)
 {
     if(bytes.size()>=IMAGESIZE*CAM_ResolutionRatio)
     {
@@ -155,7 +146,7 @@ void MyThread::receiveValidPicture(QByteArray bytes)
 
 }
 
-void MyThread::receivePic(QByteArray bytes)
+void CamThread::receivePic(QByteArray bytes)
 {
     //    qDebug()  <<" read cam data......\n";
     if(bytes.size()>0)
@@ -321,7 +312,7 @@ void MyThread::receivePic(QByteArray bytes)
 
 
 
-bool MyThread::getOneFrame()
+bool CamThread::getOneFrame()
 {
     QMutexLocker locker(&m_dataMutex);
     if(camSaveQueue.size()!=0)
@@ -353,7 +344,7 @@ bool MyThread::getOneFrame()
 
 }
 
-camInfo MyThread::getCamOneFrame()
+camInfo CamThread::getCamOneFrame()
 {
     QMutexLocker locker(&m_dataMutex);//主线程取数据,也得加锁,避免同时被取到!!!0929
     if(camSaveQueue.size()!=0)
@@ -374,12 +365,12 @@ camInfo MyThread::getCamOneFrame()
 
 }
 
-void MyThread::socket_disconnect()
+void CamThread::socket_disconnect()
 {
 //    qDebug()<<"getFrameTimer addr:"<<getFrameTimer;
     LogError("%s","Cam socket disconnect\n");
 
-    emit SIGNAL_camSocketDisconnect();//主线程接收处理
+    emit SIGNAL_camSocketDisconnectToMainThread();//主线程接收处理
     //    if(camSaveQueue.size()==0){
     //        b_run=true;
     //    }
@@ -387,7 +378,7 @@ void MyThread::socket_disconnect()
 }
 
 
-void MyThread::setThreadStop()
+void CamThread::setThreadStop()
 {
     b_run=false;
     m_pictureSocket->disconnectSocket();
@@ -395,7 +386,7 @@ void MyThread::setThreadStop()
 
 }
 
-void MyThread::setThreadFlag(bool b_runFlag)
+void CamThread::setThreadFlag(bool b_runFlag)
 {
     b_run=b_runFlag;
 }

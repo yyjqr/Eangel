@@ -111,7 +111,7 @@ private:
     bool b_grabPic;
     int m_saveIndex;
 
-    MyThread *showThread;
+    CamThread *showThread;
     int m_getImageCount;
     int m_CAM_ResolutionRatio;
     QString m_sysTimestr;

@@ -12,12 +12,12 @@ using namespace std;
 
 
 
-class MyThread : public QThread
+class CamThread : public QThread
 {
     Q_OBJECT
 public:
-    MyThread();
-    ~MyThread();
+    CamThread();
+    ~CamThread();
     //    void receivePic();
        void setThreadStop();
     //    camInfo getOneFrame();
@@ -40,7 +40,7 @@ private slots:
 //    void  getOneFrame();
 signals:
     void SIGNAL_get_one_frame(camInfo);
-    void SIGNAL_camSocketDisconnect();
+    void SIGNAL_camSocketDisconnectToMainThread();
 private:
     bool b_run;
 
