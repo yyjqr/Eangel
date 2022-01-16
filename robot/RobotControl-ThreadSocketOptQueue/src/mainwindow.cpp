@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //    connect(showThread,SIGNAL(SIGNAL_get_one_frame(camInfo)),this,SLOT(getPicThread(camInfo)));
     //增加失去服务器连接的相关操作
     connect(showThread,SIGNAL(SIGNAL_camSocketDisconnectToMainThread()),this,SLOT(disconnect_Deal()));
-    connect(showThread, SIGNAL(finished()), showThread, SLOT(deleteLater()));
+//    connect(showThread, SIGNAL(finished()), showThread, SLOT(deleteLater()));//信号槽中已有删除，析构函数中使用的回收资源更清晰！！！
 
 }
 
@@ -80,7 +80,9 @@ MainWindow::~MainWindow()
     //删除线程资源202201
     qDebug()<<__LINE__<<"try to delete thread"<<endl;
     showThread->setThreadStop();
-    showThread->deleteLater();
+    //退出线程 0116
+    showThread->quit();
+    //回收资源
     showThread->wait();
     if(showThread!=nullptr){
         delete showThread;
@@ -113,6 +115,7 @@ void MainWindow::on_pushButtonConnect_clicked()
         LogInfo("%s","相机连接成功");
         ui->pushButtonConnect->setStyleSheet("background-color:green;");
         ui->pushButtonConnect->setEnabled(false);
+        ui->pushButtonConnect->setText("断开连接");
         camTimer->setTimerType(Qt::PreciseTimer);
         camTimer->start(400);
         //增加断开连接后，再次连接时，使能while循环标志，传输图片线程运行 0711
@@ -479,13 +482,13 @@ void MainWindow::on_pushButton_disconnect_clicked()
     ui->textBrowser_log->append(tmp_qstr);
     LogInfo("%s","服务器断开");
     camTimer->stop();
-    //线程循环结束，线程也结束--->删除之前的线程指针
+    //线程循环结束，线程也结束--->删除之前的线程指针--->是否需要删除？？？0116
     showThread->setThreadStop();
-    qDebug()<<__LINE__<<"test delete thread"<<endl;
-    if(showThread!=nullptr){
-        delete showThread;
-        showThread=nullptr;
-    }
+    qDebug()<<__LINE__<<"Socket disconnect,test delete thread"<<endl;
+//    if(showThread!=nullptr){
+//        delete showThread;
+//        showThread=nullptr;
+//    }
 
     ui->pushButtonConnect->setEnabled(true);
 }
