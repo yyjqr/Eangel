@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/image">
+        <file>images/20080604085145783.png</file>
+        <file>images/20080604085147919.png</file>
+        <file>images/20080604085149246.png</file>
+        <file>images/20080604085149385.png</file>
+        <file>images/20080604085150800.png</file>
+        <file>images/bg.jpg</file>
+        <file>images/button_off.png</file>
+        <file>images/button_on.png</file>
+        <file>images/light.png</file>
+        <file>images/sound.png</file>
+    </qresource>
+</RCC>
