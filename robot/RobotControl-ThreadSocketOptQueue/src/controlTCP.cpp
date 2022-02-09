@@ -3,6 +3,8 @@
 #include "camSocketParam.h"
 #include "logging.h"
 #include <QThread>
+#include <QDateTime>
+
 controlTCP::controlTCP(QObject* parent):
     QTcpSocket(parent)
 {
@@ -39,10 +41,10 @@ bool controlTCP::connectSocket(QString ip)
 {
 //    qDebug()<< "this  :"<<this;
     pictureSocket->connectToHost(ip,6800);
-    qDebug()<< "pictureSocket state  :"<<pictureSocket->state();
+    qDebug()<< "pictureSocket state  :"<<pictureSocket->state()<<endl;
     connect(pictureSocket,SIGNAL(connected()),this,SLOT(startTime()));
     qDebug()<< "pictureSocket->state:"<<pictureSocket->state();
-    pictureSocket->waitForConnected(5000);//5s超时
+    pictureSocket->waitForConnected(3000);//5s超时--->3s
     //pictureSocket->state()==QTcpSocket::ConnectingState||
     if(pictureSocket->state()==QTcpSocket::ConnectedState){
 
@@ -69,7 +71,7 @@ bool controlTCP::disconnectSocket()
 
 void controlTCP::startTime()
 {
-    qDebug() << "fun: " <<__func__;
+    qDebug() << "fun: " <<__func__<<"start CMD timer\n";
     cmdTimer->start(400);
 }
 
@@ -77,14 +79,17 @@ void controlTCP::stopTimer()
 {
     qDebug() << "fun: " <<__func__;
     cmdTimer->stop();
+    //add 每次socket断开后，再访问，避免访问内存越界 202201
+    m_queue_camDataInCHAR.clear();
     emit signalSocketDisconnect();
 }
-
 void controlTCP::sendCmdToServer()
 {
     pictureSocket->write("PIC");
     pictureSocket->flush();
-    //    qDebug()<<__func__<<":send CMD:PIC"<< "\n";
+    QDateTime datetime;
+    QString timestr=datetime.currentDateTime().toString("HH:mm:ss.zzz");
+        qDebug()<<__func__<<timestr<<":send CMD:PIC"<< "\n";
 }
 
 
@@ -110,7 +115,7 @@ void controlTCP::recvData(void)
         }
     }
     mutex.unlock();
-//    qDebug()<<" \n Read  data.size():"<<bytes.size()<< "\n";
+    qDebug()<<" \n Read  data.size():"<<bytes.size()<< "\n";
     qDebug()<<" m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
     if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
         if(bytes!=nullptr)
@@ -123,12 +128,14 @@ void controlTCP::recvData(void)
 
 QByteArray controlTCP::getOneFrameDATA()
 {
+
     if(m_queue_camDataInCHAR.size()!=0)
     {
+         qDebug()<<" ------Get m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
         m_byteArray_oneFrame=m_queue_camDataInCHAR.front();
-        qDebug()<<" -------Get data.size():"<<m_byteArray_oneFrame.size()<< "\n";
+       //断开后，再次连接可能出错的地方 202201
         m_queue_camDataInCHAR.pop_back();
-//        qDebug()<<" After get, m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
+        //        qDebug()<<" After get, m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
         //Get data.size(): -1734502249
         if(m_byteArray_oneFrame.size()>0)
         {

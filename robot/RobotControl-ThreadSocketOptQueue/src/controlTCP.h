@@ -35,7 +35,7 @@ signals:
     void signalSocketDisconnect();
 private:
     QTcpSocket* pictureSocket;
-    QTimer *myTimer;
+    QTimer *cmdTimer;
 //    queue<queue<char>> m_2vec_camDataInCHAR;
     QQueue<QByteArray> m_queue_camDataInCHAR;
     QMutex  mutex;

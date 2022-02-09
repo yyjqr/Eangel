@@ -1,3 +1,11 @@
+/**
+ *  @brief   Robot control GUI,based on USB cam and socket,tcp.
+ *  机器人交互控制界面，采用USB摄像头，基于tcp,socket进行传输，qt多线程开发
+ *  @author  Jack
+ *  @date  2020.12-2021.12
+
+*/
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "logging.h"
@@ -6,19 +14,26 @@
 #include <iostream>
 #include <fstream>
 
+#define TEXT_COLOR_RED(STRING)         "<font color=red>" STRING "</font>" "<font color=black> </font>"
+#define TEXT_COLOR_BLUE(STRING)        "<font color=blue>" STRING "</font>" "<font color=black> </font>"
+#define TEXT_COLOR_GREEN(STRING)        "<font color=green>" STRING "</font>" "<font color=black> </font>"
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
   ,b_grabPic(false)
   ,m_saveIndex(0)
   ,m_getImageCount(0)
+  ,showThread(nullptr)
   ,m_picToshow({nullptr,1280,720,0})
+
 {
     ui->setupUi(this);
     camTimer = new QTimer(this);
     systemTimer=new QTimer(this);
     controlSocket = new QTcpSocket(this);
-    showThread= new MyThread();
+    showThread= new CamThread();
     QStringList item_Resolution,item_ipAddrs;
     item_Resolution<<"720p"<<"480p"<<"1080p";
     ui->comboBox_Res->addItems(item_Resolution);
@@ -34,15 +49,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->comboBox_ipAddr->addItems(item_ipAddrs);
     ui->comboBox_ipAddr->setCurrentIndex(0);
-    addr="192.168.0.101";
-
+    //    addr="192.168.0.101";
+    //    ui->lineEdit_IP->setText(addr);
     startTime();//开启系统定时
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
     connect(camTimer,SIGNAL(timeout()),this,SLOT(onTimeGetFrameToShow()));
     //    connect(showThread,SIGNAL(SIGNAL_get_one_frame(camInfo)),this,SLOT(getPicThread(camInfo)));
     //增加失去服务器连接的相关操作
-    connect(showThread,SIGNAL(SIGNAL_camSocketDisconnect()),this,SLOT(disconnect_Deal()));
-    connect(showThread, SIGNAL(finished()), showThread, SLOT(deleteLater()));
+    connect(showThread,SIGNAL(SIGNAL_camSocketDisconnectToMainThread()),this,SLOT(disconnect_Deal()));
+//    connect(showThread, SIGNAL(finished()), showThread, SLOT(deleteLater()));//信号槽中已有删除，析构函数中使用的回收资源更清晰！！！
 
 }
 
@@ -62,27 +77,45 @@ MainWindow::~MainWindow()
         delete controlSocket;
         controlSocket=nullptr;
     }
+    //删除线程资源202201
+    qDebug()<<__LINE__<<"try to delete thread"<<endl;
+    showThread->setThreadStop();
+    //退出线程 0116
+    showThread->quit();
+    //回收资源
+    showThread->wait();
+    if(showThread!=nullptr){
+        delete showThread;
+        showThread=nullptr;
+    }
+
+
 }
 
 void MainWindow::startTime()
 {
     qDebug() << "fun: " <<__func__;
 
-    systemTimer->setTimerType(Qt::PreciseTimer);
     systemTimer->start(500);
 }
 
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
-    //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
-    QDateTime m_datetime;
-    QString timestr=m_datetime.currentDateTime().toString("HH:mm:ss");
-    ui->textBrowser_log->append(timestr+":连接ip:"+addr);
+    //        qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+
+    ui->textBrowser_log->append(m_timestr+":连接ip:"+addr);
+    if(showThread==nullptr){
+        qDebug()<<"\n fun:"<<__func__<<"showThread ptr:"<<showThread;
+        showThread= new CamThread();
+    }
     if(showThread->connectTCPSocket(addr)){
-        ui->textBrowser_log->append("相机连接成功");
+        qDebug()<<"\n Test fun:"<<__func__<<"showThread ptr:"<<showThread<<endl;
+        ui->textBrowser_log->append(TEXT_COLOR_GREEN("相机连接成功"));
         LogInfo("%s","相机连接成功");
         ui->pushButtonConnect->setStyleSheet("background-color:green;");
+        ui->pushButtonConnect->setEnabled(false);
+        ui->pushButtonConnect->setText("断开连接");
         camTimer->setTimerType(Qt::PreciseTimer);
         camTimer->start(400);
         //增加断开连接后，再次连接时，使能while循环标志，传输图片线程运行 0711
@@ -91,8 +124,10 @@ void MainWindow::on_pushButtonConnect_clicked()
     }
     else {
         ui->pushButtonConnect->setStyleSheet("background-color:blue;");
-        ui->textBrowser_log->append(timestr+"连接ip:"+addr +"失败");
+        QString tmp_qstr=m_timestr+"连接ip:"+addr +"失败";
+        ui->textBrowser_log->append(TEXT_COLOR_RED("连接失败"));
         LogInfo("相机连接失败，ip %s",addr.toStdString().c_str());
+        ui->pushButtonConnect->setEnabled(true);
     }
 
 }
@@ -105,66 +140,29 @@ void MainWindow::tips()
 }
 
 //获取相机数据，来显示
-void MainWindow::getPicToShow(camInfo& frameToShow)
-{
-    //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
-    m_getImageCount++;
-
-    qDebug() <<"frameToShow m_getImageCount:"<<m_getImageCount;
-    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
-    if(frameToShow.imageBuf!=nullptr){
-        //每3帧显示一帧图像
-        if(m_getImageCount%2==0)
-        {
-            qDebug() <<"\n"<<__LINE__<<"frameToShow -----"<<"frameToShow.imageBuf:"<<frameToShow.imageBuf;
-
-            ShowImage(frameToShow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
-        }
-        else
-        {
-            //add 未显示的数据，直接释放,避免内存增长 0620
-            qDebug() <<__LINE__<<"free buf\n";
-            if(frameToShow.imageBuf!=nullptr){
-                qDebug() <<__LINE__<<"analysis double free";
-                try{
-                    free(frameToShow.imageBuf);
-                }
-                catch(std::exception &e ){
-                    std::cout << "Standard exception: " << e.what() << std::endl;
-                    LogError("Standard exception %s\n",e.what());
-                    qDebug()  <<"test free error----------\n";
-                }
-
-                frameToShow.imageBuf=nullptr;
-            }
-
-        }
-
-    }
-}
-
-
 void MainWindow::getPicToShow()
 {
     //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     m_getImageCount++;
 
     qDebug() <<"frameToShow m_getImageCount:"<<m_getImageCount;
-    //    qDebug() << "fun: " <<__func__<<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+
     if(m_picToshow.imageBuf!=nullptr){
         //每3帧显示一帧图像
         if(m_getImageCount%2==0)
         {
-//            qDebug() <<"\n"<<__LINE__<<"frameToShow -----";  // <<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
-
+            qDebug() <<"\n"<<__LINE__<<"frameToShow -----";  // <<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+            assert(m_picToshow.imageBuf!=nullptr);
             ShowImage(m_picToshow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
-
+            qDebug() <<"\n"<<__LINE__<<"Show frame finish,test crash error -----";
         }
         else
         {
             //add 未显示的数据，直接释放,避免内存增长 0620
             if(m_picToshow.imageBuf!=nullptr){
-//                qDebug() <<__LINE__<<"analysis double free";
+                //                qDebug() <<__LINE__<<"analysis double free";
+                assert(m_picToshow.imageBuf!=nullptr);
+                //重点调试地方！！！！
                 try{
                     qDebug()<<__LINE__<<"test free IMAGE buf\n";
                     free(m_picToshow.imageBuf);
@@ -185,6 +183,8 @@ void MainWindow::systemInfoUpdate()
 {
     QDateTime datetime;
     //    qDebug() <<m_sysTimestr<<":系统时间更新测试\n";
+    m_timestr=datetime.currentDateTime().toString("HH:mm:ss");  //revise 11.21
+    systemTimer->setTimerType(Qt::PreciseTimer);
     m_sysTimestr=datetime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
     ui->label_sysTime->setStyleSheet("color:green;");
     ui->label_sysTime->setText(m_sysTimestr);
@@ -199,29 +199,41 @@ void MainWindow::onTimeGetFrameToShow()
     /*****数据获取****************/
     /***************************/
     m_picToshow=showThread->getCamOneFrame();
+    //未获取到图像数据，会一直在空指针下，再获取一帧，会分配内存，导致内存过大！ 1023
     if(m_picToshow.imageBuf!=nullptr){
 
-//        qDebug() << "Get the data,m_picToshow.imageBuf:"<<m_picToshow.imageBuf;
-         getPicToShow();
-         m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717--->未获取到图像数据，会一直在空指针下，再分配内存，导致内存过大！ 1023
-         ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
+        //        qDebug() << "Get the data,m_picToshow.imageBuf:"<<m_picToshow.imageBuf;
+        getPicToShow();
+        qDebug() << "After show:" <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+        m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717--->
+        ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
     }
     else
     {
-//      qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
-//        qDebug() <<"no data to show------\n";
+        //      qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+        qDebug() <<"no data to show------\n";
     }
 
-//    qDebug() <<m_sysTimestr<<":取一帧显示\n";
-//    qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+    //    qDebug() <<m_sysTimestr<<":取一帧显示\n";
+    //    qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
 
 
 
 }
 void MainWindow::on_pushButtonCAR_clicked()
 {
-    controlSocket->connectToHost(addr,8200);
-    ui->textBrowser_log->append("连接成功");
+    controlSocket->connectToHost(addr,6868); //车的控制端口，6868
+    if(controlSocket->state()==QTcpSocket::ConnectingState){
+        ui->textBrowser_log->append(m_timestr+"正在连接Robot---");
+    }
+    controlSocket->waitForConnected(3000);
+    if(controlSocket->state()==QTcpSocket::ConnectedState){
+        ui->textBrowser_log->append(m_timestr+"机器人连接OK++");
+    }
+    else{
+        ui->textBrowser_log->append(m_timestr+"机器人连接失败--");
+    }
+
     //    ui->textBrowser_log->append(controlSocket->peerAddress().toString());
     connect(controlSocket,SIGNAL(connected()),this,SLOT(tips()));
 }
@@ -242,10 +254,12 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
         QDateTime datetime;
         QString timestr=datetime.currentDateTime().toString("yyyyMMdd_HHmmss");
         QString SAVE_NAME=timestr+"_IMG_"+ QString::number(m_saveIndex)+".jpg";
+        assert(pRgbFrameBuf!=nullptr); //增加，来测试是否截图时，出现错误 1128
         qDebug()<<__LINE__<<" inside,test grab error";
         qDebug() <<"SAVE_NAME "<<SAVE_NAME;
         image.save(SAVE_NAME,"JPG",80);
         QString timestrLog=datetime.currentDateTime().toString("HH:mm:ss");
+
         ui->textBrowser_log->append(timestrLog+QString::asprintf("截图成功%s",SAVE_NAME.toStdString().c_str()));
         m_saveIndex++;
         b_grabPic=false;
@@ -259,8 +273,9 @@ bool MainWindow::ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint6
     //    m_mxDisplay.unlock();
     if(pRgbFrameBuf != NULL)
     {
-        qDebug()<<__LINE__<<"test free buf\n";
+        //      qDebug()<<__LINE__<<"test free buf\n";
         free(pRgbFrameBuf);
+        qDebug()<<__LINE__<<"add to analysis free buf\n";
         pRgbFrameBuf = NULL;
     }
 
@@ -303,7 +318,9 @@ void MainWindow::goBack(){
     controlSocket->write(&buf,sizeof(buf));
 }
 void MainWindow::goLeft(){
-    char buf ='L';
+
+    char buf ='M';
+    qDebug()<<__LINE__<<"test send CAR CMD:"<<buf<<endl;
     controlSocket->write(&buf,sizeof(buf));
 }
 void MainWindow::goRight(){
@@ -329,6 +346,7 @@ void MainWindow::goRightBack(){
 
 void MainWindow::on_pushButton_LEFT_pressed()
 {
+
     LEFT();
 }
 
@@ -387,12 +405,13 @@ void MainWindow::on_pushButtonCARRF_released()
 
 void MainWindow::on_pushButtonCARLEFT_pressed()
 {
+    qDebug()<<__LINE__<<"test send CAR CMD\n";
     goLeft();
 }
 
 void MainWindow::on_pushButtonCARLEFT_released()
 {
-    STOP();
+    //    STOP();
 }
 
 void MainWindow::on_pushButtonCARRIGHT_pressed()
@@ -459,12 +478,18 @@ void MainWindow::on_pushButton_disconnect_clicked()
 {
     QDateTime datetime;
     QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
-    ui->textBrowser_log->setStyleSheet("color:red;");
-    ui->textBrowser_log->append(timestr+"服务器断开连接\n");
+    QString tmp_qstr="<font color=\"#FF0000\">" + timestr + "服务器断开连接"+ "</font>";
+    ui->textBrowser_log->append(tmp_qstr);
     LogInfo("%s","服务器断开");
     camTimer->stop();
+    //线程循环结束，线程也结束--->删除之前的线程指针--->是否需要删除？？？0116
     showThread->setThreadStop();
-    //    qDebug()<<"test close error";
+    qDebug()<<__LINE__<<"Socket disconnect,test delete thread"<<endl;
+//    if(showThread!=nullptr){
+//        delete showThread;
+//        showThread=nullptr;
+//    }
+
     ui->pushButtonConnect->setEnabled(true);
 }
 
@@ -475,6 +500,9 @@ void MainWindow::disconnect_Deal()
     QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
     ui->textBrowser_log->setStyleSheet("color:red;");
     ui->textBrowser_log->append(timestr+"服务器断开连接\n");
+    camTimer->stop(); //服务器断开后，取数据定时器也停止  1113
+    //立即删除线程，会报Destroyed while thread is still running的错误！！！
+
     ui->pushButtonConnect->setEnabled(true);
 }
 
