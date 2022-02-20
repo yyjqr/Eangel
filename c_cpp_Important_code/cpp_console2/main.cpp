@@ -1,26 +1,27 @@
 #include <iostream>
+#include <unistd.h>
 
-using namespace std;
-#include <unistd.h>  
-//sleep func
 #include <string.h>
 #include <string>
+using namespace std;
+
+//sleep func
 void  fun(){
 
-cout << "递归" <<endl;
-static int i=0;
-i++;
-cout <<i<< endl;
-sleep(1);
-fun();
-//sleep(2000);
+    cout << "递归" <<endl;
+    static int i=0;
+    i++;
+    cout <<i<< endl;
+    sleep(1);
+    fun();
+    //sleep(2000);
 
 }
 typedef struct stRobotInfo
 {
-	int carID;
-	double veloctity;
-	double  driveDistance;
+    int carID;
+    double veloctity;
+    double  driveDistance;
 }st_robotInfo;
 
 int main(int argc,char** argv)
@@ -45,25 +46,29 @@ int main(int argc,char** argv)
     int num=std::stoi(str2);
     cout << "num "<<num<<endl;
     
-    #ifndef MAX
-    #define MAX 20
-    #endif 
+#ifndef MAX
+#define MAX 20
+#endif
     cout<<"MAX:"<<MAX;
     char *saveFormat=nullptr;
-     if(saveFormat==nullptr)
-        {
-            saveFormat=(char*)malloc(3);
-        }
-//saveFormat="jpg";
-saveFormat="jpg";  //栈内存和堆内存的区别，赋值
-//memcpy(saveFormat,"jpg",3);
-printf("saveFormat addr %x,saveFormat value %c\n",saveFormat,*saveFormat);
-   cout<<"saveFormat "<<saveFormat<<endl;
-if(saveFormat!=nullptr)
+    if(saveFormat==nullptr)
     {
-            free(saveFormat);
-            saveFormat=nullptr;
-        }
+        saveFormat=(char*)malloc(3);
+    }
+
+//错误用法：
+//    saveFormat="jpg";  //栈内存和堆内存的区别，赋值
+//正确用法：
+//    char format[5]="jpg";
+//    memcpy(saveFormat,format,3);
+    printf("saveFormat addr %x,saveFormat value %c\n",saveFormat,*saveFormat);
+    cout<<"saveFormat "<<saveFormat<<endl;
+    if(saveFormat!=nullptr)
+    {
+        cout<<"test free buffer "<<endl;
+        free(saveFormat);
+        saveFormat=nullptr;
+    }
     //fun();
     return 0;
 }
