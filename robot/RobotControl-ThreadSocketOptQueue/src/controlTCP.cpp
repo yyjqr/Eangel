@@ -134,7 +134,10 @@ QByteArray controlTCP::getOneFrameDATA()
          qDebug()<<" ------Get m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
         m_byteArray_oneFrame=m_queue_camDataInCHAR.front();
        //断开后，再次连接可能出错的地方 202201
-        m_queue_camDataInCHAR.pop_back();
+//        m_queue_camDataInCHAR.pop_back();
+
+        //是从队首弹出一帧数据吧！！！   20220222！！
+        m_queue_camDataInCHAR.pop_front();
         //        qDebug()<<" After get, m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
         //Get data.size(): -1734502249
         if(m_byteArray_oneFrame.size()>0)
