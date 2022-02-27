@@ -1,6 +1,7 @@
 /****定时拍摄1分钟的图片，并以当前时间+字符的形式命名***
 by YJ
-20170908----》201907 ---》202003 */
+20170908----》201907 ---》
+202003 -->202202 c服务器*/
 // 基于opencv3,4 c++的函数写法，重写摄像头拍摄图片的程序。硬件基于树莓派。
 
 #include <stdio.h>
@@ -32,7 +33,9 @@ int main(int argc, char **argv) {
     time_t timep,t;
     tm* local;
     char buf[1000]={0};
-    unsigned int timeDuration=1;
+    unsigned int timeDuration=2;
+    const int width=1280, height=720;
+    const int channel=3;
     Mat frame;
     unsigned int j;
 
@@ -52,7 +55,7 @@ int main(int argc, char **argv) {
     int count=0;//add 0807
     const char *pImageFileName;
     vector<uchar> array(1280*960);
-        uchar camData[1280*720]={'0'};
+        uchar camData[width*height*channel]={'0'};
     char recvCMD[3]={'\0'};
 
 
@@ -62,31 +65,32 @@ int main(int argc, char **argv) {
         if(frame.isContinuous())
          {
           //array=frame.data;
-           memcpy(camData,frame.data,frame.rows*frame.cols);
+           memcpy(camData,frame.data,frame.rows*frame.cols*channel);
          }
     
-      for(int i=0;i<frame.rows*frame.cols;i++)
+  /*    for(int i=0;i<frame.rows*frame.cols*channel;i++)
         {
         // cout<<camData[i];
           if(i%500000==0){
             printf("camData %d Value:%d\n",i,camData[i]);
           
              }
-          }
+          } */
 
     bool  recvStatus=false;
     memset(camData,'\0',sizeof(recvCMD));
     recvStatus =   camSocket.recvData(recvCMD,sizeof(recvCMD));
     //printf("recvStatus %d,recv  CMD :%s\n",recvStatus,recvCMD);
-    cout<<"recvStatus:"<<recvStatus<<" CMD:"<<recvCMD<<endl;
+    cout<<"\n recvStatus:"<<recvStatus<<" CMD:"<<recvCMD<<endl;
     if(recvStatus)
     {
     // cout<<"recvCMD==\"PIC\" " <<(recvCMD=="PIC")<<endl;
      if(strcasecmp(recvCMD,"PIC")==0)
     	{ 
-      	printf("\n recv CMD :%s\n",recvCMD);
-      	camSocket.sendData((char*)camData,frame.rows*frame.cols); 
-
+//        cout<<"recv CMD"<<recvCMD<<;
+ //       cout<<"Start to send Data"<<endl;
+      	int ret=camSocket.sendData((char*)camData,frame.rows*frame.cols*channel); 
+        cout<<"send Status:"<<ret<<"pics:"<<i<<endl;
      	}
    };
 
