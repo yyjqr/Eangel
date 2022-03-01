@@ -34,7 +34,7 @@ signals:
     void  signalSocketToRead();
     void signalSocketDisconnect();
 private:
-    QTcpSocket* pictureSocket;
+    QTcpSocket* m_camSocket;
     QTimer *cmdTimer;
 //    queue<queue<char>> m_2vec_camDataInCHAR;
     QQueue<QByteArray> m_queue_camDataInCHAR;
