@@ -34,12 +34,14 @@ signals:
     void  signalSocketToRead();
     void signalSocketDisconnect();
 private:
-    QTcpSocket* pictureSocket;
+    QTcpSocket* m_camSocket;
     QTimer *cmdTimer;
 //    queue<queue<char>> m_2vec_camDataInCHAR;
     QQueue<QByteArray> m_queue_camDataInCHAR;
     QMutex  mutex;
     QByteArray   m_byteArray_oneFrame;
+    int  m_NoDataTimes;
+    bool b_realStopTimer;
 };
 
 #endif // CONTROLTCP_H
