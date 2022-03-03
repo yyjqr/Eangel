@@ -17,7 +17,8 @@
 #define TEXT_COLOR_RED(STRING)         "<font color=red>" STRING "</font>" "<font color=black> </font>"
 #define TEXT_COLOR_BLUE(STRING)        "<font color=blue>" STRING "</font>" "<font color=black> </font>"
 #define TEXT_COLOR_GREEN(STRING)        "<font color=green>" STRING "</font>" "<font color=black> </font>"
-
+stCamResolution  stCamLowRes={ 640,480,Small_480p};
+stCamResolution  stCommon720pRes={ 1280,720,Common_Type720p};
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -35,9 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     controlSocket = new QTcpSocket(this);
     showThread= new CamThread();
     QStringList item_Resolution,item_ipAddrs;
-    item_Resolution<<"720p"<<"480p"<<"1080p";
+    item_Resolution<<"480p"<<"720p"<<"1080p";
     ui->comboBox_Res->addItems(item_Resolution);
-    ui->comboBox_Res->setCurrentIndex(0);
+    ui->comboBox_Res->setCurrentIndex(1);
     if(CAM_ResolutionRatio==3){
         m_imageWidth=1280;
         m_imageHeight=720;
@@ -115,7 +116,7 @@ void MainWindow::on_pushButtonConnect_clicked()
         LogInfo("%s","相机连接成功");
         ui->pushButtonConnect->setStyleSheet("background-color:green;");
         ui->pushButtonConnect->setEnabled(false);
-        ui->pushButtonConnect->setText("断开连接");
+//        ui->pushButtonConnect->setText("断开连接");
         camTimer->setTimerType(Qt::PreciseTimer);
         camTimer->start(400);
         //增加断开连接后，再次连接时，使能while循环标志，传输图片线程运行 0711
@@ -510,30 +511,25 @@ void MainWindow::on_comboBox_Res_currentIndexChanged(int index)
 {
     qDebug()<<"Resolution select index:"<<index;
     switch (index) {
-    case 1:
+    case Small_480p:
+        cout<<"test cam  Res type:"<<Small_480p<<endl;
         m_CAM_ResolutionRatio=3;
+        m_imageWidth=stCamLowRes.imageWidth;
+        m_imageHeight=stCamLowRes.imageHeight;
         break;
-    case 2:
-        m_CAM_ResolutionRatio=1;
+    case Common_Type720p:
+        cout<<"test cam default Res type:"<<Common_Type720p<<endl;
+        m_CAM_ResolutionRatio=3;
+        m_imageWidth=stCommon720pRes.imageWidth;
+        m_imageHeight=stCommon720pRes.imageHeight;
         break;
-    case 3:
+    case Common_Type1080p:
         m_CAM_ResolutionRatio=3;
         break;
     default:
         m_CAM_ResolutionRatio=3;
     }
-    if(m_CAM_ResolutionRatio==3){
-        m_imageWidth=1280;
-        m_imageHeight=720;
-    }
-    else if(m_CAM_ResolutionRatio==1){
-        m_imageWidth=640;
-        m_imageHeight=480;
-    }
-    else{
-        m_imageWidth=1920;
-        m_imageHeight=1080;
-    }
+
 }
 
 void MainWindow::ParseFromJson()

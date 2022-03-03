@@ -15,4 +15,16 @@ struct camInfo
     int type;
 };
 
+typedef struct ST_CamResolution {
+    int imageWidth=1280;
+    int imageHeight=720;
+    int type=Common_Type720p;
+}stCamResolution;
+
+
+
+//stCamResolution  stHDRes;
+
+
+
 #endif // CAMSOCKETPARAM_H
