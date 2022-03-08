@@ -69,10 +69,12 @@ bool tcpSocket::connectSocket()
 }
 
 
-bool tcpSocket::sendData(char* buf,size_t len)
+int tcpSocket::sendData(char* buf,size_t len)
 {
     int ret=0;
+//发送正常的话，返回的是发送长度，2764800
     ret= send(m_connfd,buf,len,0);
+    //cout<<"test send:"<<ret<<endl;
     return ret;
 }
 
