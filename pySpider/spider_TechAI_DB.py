@@ -1,9 +1,11 @@
 #拼接字符串并换行## -*- coding: UTF-8 -*-
 #@author: JACK YANG
 #@date:201902-->10-->202008->202011 
-#       ->202104-->202201
+#       ->202104-->202201--->0307
 #Email:  yyjqr789@sina.com
 #!/usr/bin/python3
+
+
 import smtplib
 #from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -24,13 +26,13 @@ from datetime import datetime
 import re
 import json
 import codecs # use for write a file 0708
-import mysqlWriteNewsV1
+import mysqlWriteNewsV2
 import random
 
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
 receiver='yyjqr789@sina.com' #收件人邮箱账号
 #receiver=my_sender
-_pwd = "nufuxycoehyobbji"  #需在qq邮箱开启SMTP服务并获取授权码
+_pwd = "nufuXXcoehyobbji"  #需在qq邮箱开启SMTP服务并获取授权码
 
 
 def make_img_msg(fn):
@@ -70,7 +72,7 @@ arrayKEYWORDS_EN=['5G','Robot','robot','COVID','Digital','AI','IOT','ML','APPLE'
 arrayKEYWORDS_MIL_ADVANCED_TECH=['war','fighter','electricity','Electricity','power','JET','flighter','unmanned','NUCLEAR','nuclear','electric','weapon',
                                  'cruiser','carrier','laser','autonomous','drone','drones','Navy','Russia','South China','China','Taiwan','bomb']
 
-sql = """ INSERT INTO techNewsTB(Id,Rate,title,author,publish_time,content,url,key_word) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) """
+sql = """ INSERT INTO techTB(Id,Rate,title,author,publish_time,content,url,key_word) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) """
 
 def findKeyWordInNews(str):
    #print(str)
@@ -189,8 +191,9 @@ class GrabNewsAI():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        print("sql index:%d" %mysqlWriteNewsV1.getLastInsertId() )
-        newsIndex=random.randint(20,100000)
+        #print("sql index:%d" %mysqlWriteNewsV1.getLastInsertId() )
+        #newsIndex=random.randint(20,100000)
+        newsIndex=0
         for news in soup.select('.searchtitle   a'):
             if findKeyWordInNews(news.text):
                tittle=news.text
@@ -201,11 +204,11 @@ class GrabNewsAI():
                     #article.append(url.strip())
                     print(newsUrl)
                     self.NewsList.append({string:newsUrl})
-                    newsIndex=newsIndex+1
+                    #newsIndex=newsIndex+1
                     print(newsIndex)
                     newsOne=(newsIndex, '1',news.text,'Jack',date, 'content',
                       newsUrl, '人工智能')
-                    result = mysqlWriteNewsV1.writeDb(sql, newsOne)
+                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
                     print("write DB state: %d" %result)
 
 class GrabNewsProduct():
@@ -248,8 +251,8 @@ class GrabDriveWEB():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        newsIndex= random.randint(20,100000)
-
+        #newsIndex= random.randint(20,100000)
+        newsIndex=0
         for news in soup.select('.linkable'):
             RateRank=findValuedInfoOPT(news.text,arrayKEYWORDS_MIL_ADVANCED_TECH)
             if findValuedInfoOPT(news.text,arrayKEYWORDS_MIL_ADVANCED_TECH):
@@ -266,11 +269,11 @@ class GrabDriveWEB():
                         newsUrl=URL+news.attrs['href']
                     
                     self.NewsList.append({string:newsUrl})
-                    newsIndex=newsIndex+1
+                    #newsIndex=newsIndex+1
                     print(newsIndex)
                     newsOne=(newsIndex,'2', news.text,'Jack',date, 'Barbare',
                       newsUrl, '军事')
-                    result = mysqlWriteNewsV1.writeDb(sql, newsOne)
+                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
                     print("write DB state: %d" %result)
 
 
@@ -352,7 +355,7 @@ def mail():
     writeNewsAI()
     #writeNewsProduct()
     #writeNews()
-    #writeNewsDrive()
+    writeNewsDrive()
     #writeNewsTechNet()
     fp = open('news%s.html' % date,'rb+')
     techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711--->fp.read().decode('utf-8')
@@ -370,12 +373,12 @@ def mail():
         print("no pic capture!")  
     msg['From']=formataddr(["smart Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
-    msg['Subject']="科技mil %s" %year_month  #邮件的主题，也可以说是标题
+    msg['Subject']="科技milDB %s" %year_month  #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
     server.sendmail(my_sender,[receiver,],msg.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
-    print ('SEND AI NEWS  OK')
+    print ('SEND AI NEWS and write to DB OK')
     server.quit()  #这句是关闭连接的意思
   except Exception as e:  #如果try中的语句没有执行，则会执行下面的ret=False
     print (str(e))
