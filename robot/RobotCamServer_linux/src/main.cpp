@@ -24,6 +24,7 @@ using namespace std;
 
 using namespace cv;
 string Absolute_exec_path=""; //定义执行程序绝对路径的变量
+const int total_len=2764800;//1280*720*3的字节数
 
 void camReadFunc();
 void threadFunc();
@@ -31,10 +32,9 @@ void threadFunc();
 
 int main(int argc, char **argv) {
 
-    time_t timep,t;
-    tm* local;
+  //  time_t timep,t;
+//    tm* local;
     char buf[100]={0};
-
 
 
     Log camlog;
@@ -61,7 +61,6 @@ int main(int argc, char **argv) {
     camlog.SetFile(log_file.c_str());
 
     int count=0;//add 0807
-    uchar camData[width*height*channel]={'0'};
 
 
 
@@ -81,6 +80,8 @@ int main(int argc, char **argv) {
 void camReadFunc()
 {
     Mat frame;
+    char buf[100]={0};
+    string cur_time_str="";
     /* init camera */
     VideoCapture pCapture;
     pCapture.open(-1); //从摄像头读入视频 0表示从摄像头读入  -1表示任意摄像头 202003
@@ -101,13 +102,12 @@ void camReadFunc()
     cout<<"Video capture 拍摄交互"<<endl; // for(unsigned int i=0;i<timeDuration*42;i++)   //
     while(1)
     {
-        //         t=time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
-        //         local = localtime(&t); //转为本地时间
-        //         strftime(buf, 64, "%H:%M:%S", local);//%Y-%m-%d_
-        //         string cur_time_str="";
-        //         cur_time_str=buf;
+                 /*t=time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
+                 local = localtime(&t); //转为本地时间
+                 strftime(buf, 64, "%H:%M:%S", local);//%Y-%m-%d_
+                 cur_time_str=buf;*/
         pCapture >>frame;
-        imshow("RobotCam",frame);
+        //imshow("RobotCam",frame);
 
         Mat rgbFrame;
 
@@ -120,13 +120,14 @@ void camReadFunc()
             //            memcpy(camData,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
             memcpy(st_oneFrame.camPtr,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
             cam_deque.push_back(st_oneFrame);
-            cout<<"cam deque size:"<<cam_deque.size()<<endl;
+            cout<<cur_time_str<<"cam deque size:"<<cam_deque.size()<<endl;
         }
-        if(cam_deque.size()>100){
-            sleep(5);
-            if(cam_deque.size()>200){
+        if(cam_deque.size()>10){
+            cam_deque.pop_front();
+            sleep(2);
+            if(cam_deque.size()>100){
                 cam_deque.pop_front();
-                sleep(10);
+                sleep(5);
 
             }
         }
@@ -156,10 +157,16 @@ void threadFunc()
     char recvCMD[3]={'\0'};
     int send_num=0;
     int notGetCmd_times=0;
-
+    char buf[100]={'0'};
 
     while (1)
     {
+        t=time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
+                 local = localtime(&t); //转为本地时间
+                 strftime(buf, 64, "%H:%M:%S", local);//%Y-%m-%d_
+                 string cur_time_str="";
+                 cur_time_str=buf;
+
         memset(recvCMD,'\0',sizeof(recvCMD));
         b_recvStatus =   camSocket.recvData(recvCMD,sizeof(recvCMD));
         //        cout<<"cur_time:"<<cur_time_str<<endl;
@@ -173,11 +180,16 @@ void threadFunc()
                 int ret=camSocket.sendData((char*)st_sendFrame.camPtr,width*height*channel);
                 cam_deque.pop_front();
                 cout<<"\n After get,cam deque size:"<<cam_deque.size()<<endl;
-                //        cout<<"send Status:"<<ret<<"pics:"<<i<<endl;
-                if(ret==0){
-                    cout<<"send pics:"<<send_num<<endl;
+                    // cout<<"send Status:"<<ret<<endl;
+                if(ret==total_len){
+                    send_num++;
+                    cout<<cur_time_str<<" send pics:"<<send_num<<endl;
                     LogInfo("Send pics:%d\n",send_num);
                 }
+               else{
+               cout<<cur_time_str<<"部分发送"<<send_num<<endl;
+                    LogError("Send len:%d\n",ret); 
+               }
 
 
             }

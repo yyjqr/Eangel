@@ -14,7 +14,7 @@ public:
     bool connectSocket();
     //bool recvData(char* buf,size_t len);
     int  recvData(char* buf,size_t len);
-    bool sendData(char* buf,size_t len);
+    int sendData(char* buf,size_t len);
 private:
 
 private:
