@@ -12,6 +12,7 @@ controlTCP::controlTCP(QObject* parent):
 {
     cmdTimer = new QTimer(this);
     m_camSocket = new QTcpSocket(this);
+    m_byteArray_oneFrame.resize(MAX_LEN);
     connect(cmdTimer,SIGNAL(timeout()),this,SLOT(sendCmdToServer()));
     //先把连接成功的信号，来做读取，然后再在线程里做接收处理？？？
     connect(m_camSocket,SIGNAL(readyRead()),this,SLOT(recvData()));
@@ -20,6 +21,7 @@ controlTCP::controlTCP(QObject* parent):
 
 controlTCP::~controlTCP()
 {
+    m_byteArray_oneFrame.clear(); //add 0309
     if(cmdTimer!=nullptr){
         delete  cmdTimer;
     }
@@ -30,7 +32,7 @@ controlTCP::~controlTCP()
 
 bool controlTCP::connectSocket(QTcpSocket* m_tcpSocket,QString ip)
 {
-//    qDebug()<< "this  :"<<this;
+    //    qDebug()<< "this  :"<<this;
     m_tcpSocket->connectToHost(ip,6800);
     qDebug()<< "m_camSocket state  :"<<m_tcpSocket->state();
     connect(m_tcpSocket,SIGNAL(connected()),this,SLOT(startTime()));
@@ -45,7 +47,7 @@ bool controlTCP::connectSocket(QTcpSocket* m_tcpSocket,QString ip)
 
 bool controlTCP::connectSocket(QString ip)
 {
-//    qDebug()<< "this  :"<<this;
+    //    qDebug()<< "this  :"<<this;
     m_camSocket->connectToHost(ip,6800);
     qDebug()<< "m_camSocket state  :"<<m_camSocket->state()<<endl;
     connect(m_camSocket,SIGNAL(connected()),this,SLOT(startTime()));
@@ -97,35 +99,54 @@ void controlTCP::sendCmdToServer()
     m_camSocket->flush();
     QDateTime datetime;
     QString timestr=datetime.currentDateTime().toString("HH:mm:ss.zzz");
-        qDebug()<<__func__<<timestr<<":send CMD:PIC"<< "\n";
+    qDebug()<<__func__<<timestr<<":send CMD:PIC"<< "\n";
 }
 
 
 void controlTCP::recvData(void)
 {
     QByteArray bytes=nullptr;
+    long long int bytesNum=0;
     //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    //    bytes.resize(MAX_LEN);//ADD 0309
     mutex.lock();
+    cout<<"test socket bytes:"<<m_camSocket->bytesAvailable()<<endl;
     while(m_camSocket->waitForReadyRead(300)) //200--->300 尽量读取到1张图像的数据 20211023
     {
         //        bytes.append((QByteArray)m_camSocket->readAll());
+
         bytes.append((QByteArray)m_camSocket->read(CAM_ResolutionRatio*IMAGESIZE));
+        bytesNum=m_camSocket->bytesAvailable();
+        if(bytesNum>1E7){
+            cout<<"After read,socket bytes:"<<bytesNum<<endl;
+        }
         if(bytes.size()>=CAM_ResolutionRatio*IMAGESIZE && bytes.size()<CAM_ResolutionRatio*IMAGESIZE*1.5)
         {
             qDebug()<<" ------Socket Read data.size():"<<bytes.size()<< "\n";
+            //            static int testNum=0;
+            //            bytes.insert()
+            //            if(testNum<3){
+            //                cout<<"bytes.length():"<<bytes.length()<<endl;
+            //                for(auto i=4000;i<bytes.length()/1000;i++){
+            //                    cout<<bytes[i]<<" "<<endl;
+            //                }
+
+            //                testNum++;
+            //            }
 
             m_queue_camDataInCHAR.push_back(bytes);
             break;
         }
         else
         {
-
+            cerr<<"\n not have enough bytes to read"<<endl; //add
         }
     }
     mutex.unlock();
     qDebug()<<" \n Read  data.size():"<<bytes.size()<< "\n";
     qDebug()<<" queue size():"<<m_queue_camDataInCHAR.size()<< "\n";
-    if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
+    bytes.clear();
+    /* if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
         m_NoDataTimes++;
         if(bytes!=nullptr)
         {
@@ -141,18 +162,23 @@ void controlTCP::recvData(void)
             }
         }
 
-    }
+    }*/
 
 }
 
 QByteArray controlTCP::getOneFrameDATA()
 {
-
+    QMutexLocker locker(&m_queueQByteMutex);
+    m_byteArray_oneFrame.clear(); //每次清除，能否避免double-linked list?? 0309
     if(m_queue_camDataInCHAR.size()!=0)
     {
-         qDebug()<<" ------Get m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
-        m_byteArray_oneFrame=m_queue_camDataInCHAR.front();
-       //断开后，再次连接可能出错的地方 202201
+        qDebug()<<" ------Get m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
+        //容易出错的地方 corrupted double-linked list  20220309！！
+        if(m_queue_camDataInCHAR.isEmpty()!=true){
+            m_byteArray_oneFrame=m_queue_camDataInCHAR.front();//this line!!!
+        }
+
+        //断开后，再次连接可能出错的地方 202201
         m_queue_camDataInCHAR.pop_front();
         //        qDebug()<<" After get, m_queue_camDataInCHAR.size():"<<m_queue_camDataInCHAR.size()<< "\n";
         //Get data.size(): -1734502249
