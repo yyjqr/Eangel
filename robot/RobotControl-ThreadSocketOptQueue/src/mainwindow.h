@@ -43,6 +43,7 @@ public:
     void goRightHead();
     void goRightBack();
     void getPicToShow();
+    void getPicToShow(const camInfo& oneFrameInfo);  //add 0213
     bool ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint64_t nPixelFormat);
 //    bool ShowImageOpt(int nWidth, int nHeight, uint64_t nPixelFormat);
     void ParseFromJson();
@@ -51,7 +52,7 @@ private slots:
     void systemInfoUpdate();
     void onTimeGetFrameToShow();
     void startTime();
-//    void getPicToShow(camInfo& frameToShow);  //add 0213
+//
     void tips();
     void on_pushButton_LEFT_pressed();
     //    void on_pushButton_LEFT_released();
@@ -112,7 +113,7 @@ private:
     int m_saveIndex;
 
     CamThread *showThread;
-    int m_getImageCount;
+    int m_getImageCount,m_getOneTimeImageNums;
     int m_CAM_ResolutionRatio;
     QString m_sysTimestr;
 
