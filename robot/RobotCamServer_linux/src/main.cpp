@@ -36,7 +36,6 @@ void threadFunc();
 
 
 int main(int argc, char **argv) {
-
     char buf[100]={0};
     Log camlog;
     FILESAVE file_get_exec_absolute_path;
@@ -79,7 +78,7 @@ int main(int argc, char **argv) {
 
 void camReadFunc()
 {
-    Mat frame;
+    Mat frame,rgbFrame;
     char buf[100]={0};
     string cur_time_str="";
     /* init camera */
@@ -104,32 +103,36 @@ void camReadFunc()
     {
         tOne=time(&timep); //放在循环里面才行
         local = localtime(&tOne); //转为本地时间
-        strftime(buf, 64, "%M:%S", local);//
+        strftime(buf, 64, "%H-%M-%S", local);//
+        cur_time_str=buf;
         pCapture >>frame;
         imshow("RobotCam",frame);
 
-        Mat rgbFrame;
-
-        waitKey(100); //延时0.1s
+//        waitKey(100); //延时0.1s
         if(frame.isContinuous())
         {
+            std::lock_guard<std::mutex> locker(camMutex);
             cvtColor(frame,rgbFrame,COLOR_BGR2RGB);//CV_BGR2RGB
             //            imshow("RobotCamRGB",rgbFrame);
             st_oneFrame.camPtr=(uint8_t*)malloc(height*width*channel*sizeof(uint8_t));
             //            memcpy(camData,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
             memcpy(st_oneFrame.camPtr,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
             cam_deque.push_back(st_oneFrame);
-            cout<<cur_time_str<<"cam deque size:"<<cam_deque.size()<<endl;
-        }
-        if(cam_deque.size()>10){
+            cout<<cur_time_str<<":cam deque size:"<<cam_deque.size()<<endl;
+            if(cam_deque.size()>8){
 
-            usleep(500);
-            if(cam_deque.size()>20){
-                cam_deque.pop_front();
-                sleep(3);
+                usleep(500);
+                if(cam_deque.size()>15){
+                    st_tmpFrame=cam_deque.front();
+                    //尝试把相关相机数据内存释放出去！！！0314
+                    cam_deque.pop_front();
+                    free(st_tmpFrame.camPtr);
+                    sleep(1);
 
+                }
             }
         }
+
         //客户端网络连接断开，跳出循环
         if(b_socketRecvError){
             break;
@@ -176,6 +179,7 @@ void threadFunc()
             if(strcasecmp(recvCMD,"PIC")==0)
             {
                 //判断size的大小，避免为0时，还在取数据0310
+                std::unique_lock<std::mutex> camDataUseLocker(camMutex);
                 if(cam_deque.size()>0){
                     st_sendFrame=cam_deque.front();
                     int ret=camSocket.sendData((char*)st_sendFrame.camPtr,total_len);
@@ -190,12 +194,9 @@ void threadFunc()
                     }
 
                     cam_deque.pop_front();
-                    cout<<"\n After get,cam deque size:"<<cam_deque.size()<<endl;
+                    free(st_sendFrame.camPtr);//add 分析内存增长未释放的问题 0314
+                    cout<<"\n After free mem,cam deque size:"<<cam_deque.size()<<endl;
                 }
-
-                // cout<<"send Status:"<<ret<<endl;
-
-
 
             }
         }
