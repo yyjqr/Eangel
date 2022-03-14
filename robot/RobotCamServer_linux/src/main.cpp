@@ -1,8 +1,15 @@
-/****定时拍摄1分钟的图片，并以当前时间+字符的形式命名***
-by YJ
-20170908----》201907 ---》
-202003 -->202202 c服务器*/
-// 基于opencv3,4 c++的函数写法，重写摄像头拍摄图片的程序。硬件基于树莓派。
+
+/** @brief
+ * c服务器,获取USB相机图像，另外一个线程通过socket发送出去***
+ * 基于opencv4 c++，摄像头拍摄图片。硬件基于树莓派/Jetson。
+ * @author Jack
+ * @date 20170908--->201907 -->
+   202003 -->202203
+ *
+
+*/
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,10 +39,7 @@ void threadFunc();
 
 int main(int argc, char **argv) {
 
-  //  time_t timep,t;
-//    tm* local;
     char buf[100]={0};
-
 
     Log camlog;
     FILESAVE file_get_exec_absolute_path;
@@ -52,6 +56,7 @@ int main(int argc, char **argv) {
     string logDir="mkdir -p "+ log_Path;
     system(logDir.c_str());
     std::string log_file=log_Path+"/robot";   //日志在打开cam之前创建。
+
     t=time(&timep);
     local = localtime(&t); //转为本地时间
     strftime(buf, 64, "%Y-%m-%d_%H:%M:%S", local);
@@ -61,7 +66,6 @@ int main(int argc, char **argv) {
     camlog.SetFile(log_file.c_str());
 
     int count=0;//add 0807
-
 
 
 
@@ -79,7 +83,9 @@ int main(int argc, char **argv) {
 
 void camReadFunc()
 {
-    Mat frame;
+
+    Mat frame,rgbFrame;
+
     char buf[100]={0};
     string cur_time_str="";
     /* init camera */
@@ -102,35 +108,42 @@ void camReadFunc()
     cout<<"Video capture 拍摄交互"<<endl; // for(unsigned int i=0;i<timeDuration*42;i++)   //
     while(1)
     {
-                 /*t=time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
-                 local = localtime(&t); //转为本地时间
-                 strftime(buf, 64, "%H:%M:%S", local);//%Y-%m-%d_
-                 cur_time_str=buf;*/
+
+        tOne=time(&timep); //放在循环里面才行
+        local = localtime(&tOne); //转为本地时间
+        strftime(buf, 64, "%H-%M-%S", local);//
+        cur_time_str=buf;
         pCapture >>frame;
-        //imshow("RobotCam",frame);
+        imshow("RobotCam",frame);
 
-        Mat rgbFrame;
-
-        waitKey(100); //延时0.1s
+//        waitKey(100); //延时0.1s
         if(frame.isContinuous())
         {
+            std::lock_guard<std::mutex> locker(camMutex);
+
             cvtColor(frame,rgbFrame,COLOR_BGR2RGB);//CV_BGR2RGB
             //            imshow("RobotCamRGB",rgbFrame);
             st_oneFrame.camPtr=(uint8_t*)malloc(height*width*channel*sizeof(uint8_t));
             //            memcpy(camData,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
             memcpy(st_oneFrame.camPtr,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
             cam_deque.push_back(st_oneFrame);
-            cout<<cur_time_str<<"cam deque size:"<<cam_deque.size()<<endl;
-        }
-        if(cam_deque.size()>10){
-            cam_deque.pop_front();
-            sleep(2);
-            if(cam_deque.size()>100){
-                cam_deque.pop_front();
-                sleep(5);
 
+            cout<<cur_time_str<<":cam deque size:"<<cam_deque.size()<<endl;
+            if(cam_deque.size()>8){
+
+                usleep(500);
+                if(cam_deque.size()>15){
+                    st_tmpFrame=cam_deque.front();
+                    //尝试把相关相机数据内存释放出去！！！0314
+                    cam_deque.pop_front();
+                    free(st_tmpFrame.camPtr);
+                    sleep(1);
+
+                }
             }
         }
+
+
         //客户端网络连接断开，跳出循环
         if(b_socketRecvError){
             break;
@@ -162,34 +175,44 @@ void threadFunc()
     while (1)
     {
         t=time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
-                 local = localtime(&t); //转为本地时间
-                 strftime(buf, 64, "%H:%M:%S", local);//%Y-%m-%d_
-                 string cur_time_str="";
-                 cur_time_str=buf;
+
+        local = localtime(&t); //转为本地时间
+        strftime(buf, 64, "%H:%M:%S", local);//%Y-%m-%d_
+        string cur_time_str="";
+        cur_time_str=buf;
+
 
         memset(recvCMD,'\0',sizeof(recvCMD));
         b_recvStatus =   camSocket.recvData(recvCMD,sizeof(recvCMD));
         //        cout<<"cur_time:"<<cur_time_str<<endl;
-        cout<<"\n In thread ,b_recvStatus:"<<b_recvStatus<<" CMD:"<<recvCMD<<endl;
+
+        cout<<"In thread,recv:"<<b_recvStatus<<" CMD:"<<recvCMD<<endl;
+
         if(b_recvStatus)
         {
 
             if(strcasecmp(recvCMD,"PIC")==0)
             {
-                st_sendFrame=cam_deque.front();
-                int ret=camSocket.sendData((char*)st_sendFrame.camPtr,width*height*channel);
-                cam_deque.pop_front();
-                cout<<"\n After get,cam deque size:"<<cam_deque.size()<<endl;
-                    // cout<<"send Status:"<<ret<<endl;
-                if(ret==total_len){
-                    send_num++;
-                    cout<<cur_time_str<<" send pics:"<<send_num<<endl;
-                    LogInfo("Send pics:%d\n",send_num);
+
+                //判断size的大小，避免为0时，还在取数据0310
+                std::unique_lock<std::mutex> camDataUseLocker(camMutex);
+                if(cam_deque.size()>0){
+                    st_sendFrame=cam_deque.front();
+                    int ret=camSocket.sendData((char*)st_sendFrame.camPtr,total_len);
+                    if(ret==total_len){
+                        send_num++;
+                        cout<<cur_time_str<<" send pics:"<<send_num<<endl;
+                        LogInfo("Send pics:%d\n",send_num);
+                    }
+                    else{
+                        cout<<cur_time_str<<"部分发送,长度"<<ret<<"图片数:"<<send_num<<endl;
+                        LogError("Send len:%d\n",ret);
+                    }
+
+                    cam_deque.pop_front();
+                    free(st_sendFrame.camPtr);//add 分析内存增长未释放的问题 0314
+                    cout<<"\n After free mem,cam deque size:"<<cam_deque.size()<<endl;
                 }
-               else{
-               cout<<cur_time_str<<"部分发送"<<send_num<<endl;
-                    LogError("Send len:%d\n",ret); 
-               }
 
 
             }
