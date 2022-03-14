@@ -1,3 +1,4 @@
+
 /** @brief
  * c服务器,获取USB相机图像，另外一个线程通过socket发送出去***
  * 基于opencv4 c++，摄像头拍摄图片。硬件基于树莓派/Jetson。
@@ -7,6 +8,7 @@
  *
 
 */
+
 
 
 #include <stdio.h>
@@ -36,7 +38,9 @@ void threadFunc();
 
 
 int main(int argc, char **argv) {
+
     char buf[100]={0};
+
     Log camlog;
     FILESAVE file_get_exec_absolute_path;
     Absolute_exec_path=file_get_exec_absolute_path.get_cur_executeProgram_path();
@@ -64,6 +68,7 @@ int main(int argc, char **argv) {
     int count=0;//add 0807
 
 
+
     //cin >>timeDuration;
     std::thread camReadThread(camReadFunc);
     std::thread camSendThread(threadFunc);
@@ -78,7 +83,9 @@ int main(int argc, char **argv) {
 
 void camReadFunc()
 {
+
     Mat frame,rgbFrame;
+
     char buf[100]={0};
     string cur_time_str="";
     /* init camera */
@@ -101,6 +108,7 @@ void camReadFunc()
     cout<<"Video capture 拍摄交互"<<endl; // for(unsigned int i=0;i<timeDuration*42;i++)   //
     while(1)
     {
+
         tOne=time(&timep); //放在循环里面才行
         local = localtime(&tOne); //转为本地时间
         strftime(buf, 64, "%H-%M-%S", local);//
@@ -112,12 +120,14 @@ void camReadFunc()
         if(frame.isContinuous())
         {
             std::lock_guard<std::mutex> locker(camMutex);
+
             cvtColor(frame,rgbFrame,COLOR_BGR2RGB);//CV_BGR2RGB
             //            imshow("RobotCamRGB",rgbFrame);
             st_oneFrame.camPtr=(uint8_t*)malloc(height*width*channel*sizeof(uint8_t));
             //            memcpy(camData,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
             memcpy(st_oneFrame.camPtr,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
             cam_deque.push_back(st_oneFrame);
+
             cout<<cur_time_str<<":cam deque size:"<<cam_deque.size()<<endl;
             if(cam_deque.size()>8){
 
@@ -132,6 +142,7 @@ void camReadFunc()
                 }
             }
         }
+
 
         //客户端网络连接断开，跳出循环
         if(b_socketRecvError){
@@ -164,20 +175,25 @@ void threadFunc()
     while (1)
     {
         t=time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
+
         local = localtime(&t); //转为本地时间
         strftime(buf, 64, "%H:%M:%S", local);//%Y-%m-%d_
         string cur_time_str="";
         cur_time_str=buf;
 
+
         memset(recvCMD,'\0',sizeof(recvCMD));
         b_recvStatus =   camSocket.recvData(recvCMD,sizeof(recvCMD));
         //        cout<<"cur_time:"<<cur_time_str<<endl;
+
         cout<<"In thread,recv:"<<b_recvStatus<<" CMD:"<<recvCMD<<endl;
+
         if(b_recvStatus)
         {
 
             if(strcasecmp(recvCMD,"PIC")==0)
             {
+
                 //判断size的大小，避免为0时，还在取数据0310
                 std::unique_lock<std::mutex> camDataUseLocker(camMutex);
                 if(cam_deque.size()>0){
@@ -197,6 +213,7 @@ void threadFunc()
                     free(st_sendFrame.camPtr);//add 分析内存增长未释放的问题 0314
                     cout<<"\n After free mem,cam deque size:"<<cam_deque.size()<<endl;
                 }
+
 
             }
         }

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python3
-# 2019-202005 爬取科技新闻，去掉大部分tag标签
+# 2019-202005 爬取科技新闻，去掉大部分tag标签--->改为utf编解码  202108
 import os
 import re
 import requests
 from lxml import etree
 from lxml.html.clean import Cleaner  #CLEANER 0415
+import chardet 
+import urllib
 
 def Page_Info(myPage):
     '''Regex'''
@@ -54,8 +56,8 @@ def filterHtml(new_page):
     html=new_page
 #清除不必要的标签
     cleaner = Cleaner(style = True,scripts=True,comments=True,javascript=True,page_structure=True,safe_attrs_only=False)
-
-    #content = cleaner.clean_html(html).encode('gbk')
+    ##测试编码成utf-8 2021
+    #content = cleaner.clean_html(html).encode('utf-8')
     content = cleaner.clean_html(html)
 #这里打印出来的结果会将上面过滤的标签去掉，但是未过滤的标签任然存在。
     #print (content)
@@ -89,15 +91,24 @@ def filterHtml(new_page):
 def Spider(url):
     i = 0
     print ("downloading ", url)
-    myPage = requests.get(url).content.decode("gbk")
+    #myPage = requests.get(url).content.decode("gbk")
+    myPage = requests.get(url).content.decode("utf-8")
     myPageResults = Page_Info(myPage)
+    ##开始滤除部分特殊字符 202108，避免解析异常
+    #myPageResults=filterHtml(myPageResults)
+
     save_path = "news网易新闻抓取"
     filename = str(i)+"_网易新闻排行榜"
     StringListSave(save_path, filename, myPageResults)
     i += 1
     for item, url in myPageResults:
         print ("downloading", url)
-        new_page = requests.get(url).content.decode("gbk")
+        #new_page = requests.get(url).content.decode("gbk")
+        new_page = requests.get(url).content.decode("utf-8")
+        #print(requests.get(url).content)
+      ##获取的结果是bytes,而bytes没有readline函数！！！ 20210829
+        #f=requests.get(url).content
+        #line = f.readline()
         new_page=filterHtml(new_page)
         testNewPage(save_path, item, new_page)
         newPageResults = New_Page_Info(new_page)
@@ -105,9 +116,16 @@ def Spider(url):
         StringListSave(save_path, filename, newPageResults)
         i += 1
 
+def testEncode(url):
+      #先获取网页内容
+    data1 = urllib.request.urlopen(url).read()
+  #用chardet进行内容分析
+    chardit1 = chardet.detect(data1)
+    print ("html codeing:"+chardit1['encoding']) # 
 
 if __name__ == '__main__':
     print ("start")
     start_url = "http://news.163.com/rank/"
+    testEncode(start_url)
     Spider(start_url)
     print ("end")

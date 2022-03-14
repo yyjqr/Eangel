@@ -3,6 +3,8 @@
 #include <QDateTime>
 #include "logging.h"
 #include <stdio.h>
+#include <exception>  //调试异常
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -33,7 +35,7 @@ void MainWindow::startTime()
     qDebug() << "fun: " <<__func__;
     ui->textBrowser_log->append("相机连接成功");
     myTimer->start(300);
-    systemTimer.start(500);
+    systemTimer.start(400);
 }
 
 void MainWindow::sendcmd()
@@ -43,13 +45,13 @@ void MainWindow::sendcmd()
     //    ui->label_RecvPictureNums->setText(QString::number(imageCount));
 }
 
-void MainWindow::getpic(){
-
-    //    qDebug() << "fun: " <<__func__;
+void MainWindow::getpic()
+{
 
     QByteArray bytes=NULL;
     while(pictureSocket->waitForReadyRead(100))
     {
+        //3*IMAGESIZE=2768400
         bytes.append((QByteArray)pictureSocket->read(3*IMAGESIZE));//readAll--->read
 
         //        bytes.append((QByteArray)pictureSocket->readAll());//readAll--->read
@@ -57,84 +59,135 @@ void MainWindow::getpic(){
     }
     LogInfo("bytes.size %d\n",bytes.size());
     qDebug() <<"QByteArray size:" <<bytes.size();
-    oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*3); //分配内存 RGB 3倍
-    //    oneCamInfo.imageBuf=(uint32_t*)malloc(sizeof(uint32_t)*IMAGESIZE); //分配内存
-    if(oneCamInfo.imageBuf!=nullptr)
+    if(bytes.size()>0)
     {
-        qDebug()  <<"malloc pic mem OK\n";
-    }
-    if(bytes.size()<IMAGESIZE*3)
-    {
-        //        memcpy(imagebuffer, bytes, bytes.size());
-        if(extraDataSize>0&&extraDataSize<IMAGESIZE)
+        oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*3); //分配内存 RGB 3倍
+
+        if(oneCamInfo.imageBuf!=nullptr)
         {
-            memcpy(oneCamInfo.imageBuf,imageExtraDataBuf,extraDataSize);
-            if(imageExtraDataBuf!=nullptr){
-                free(imageExtraDataBuf);
-            }
-
-            if(extraDataSize+bytes.size()<IMAGESIZE*3)
+            qDebug()  <<"malloc pic mem OK\n";
+        }
+        else
+        {
+            // 分配内存不成功，直接返回
+            return;
+        }
+        if(bytes.size()<IMAGESIZE*3)
+        {
+            qDebug() <<"\n Test bytes.size()<IMAGESIZE*3:" <<bytes.size()<<"extraDataSize:"<<extraDataSize;
+            qDebug()<<"imageExtraDataBuf:"<<imageExtraDataBuf<<"\n"; //<<" "<<*imageExtraDataBuf
+            if(extraDataSize>0&&extraDataSize<IMAGESIZE)
             {
-                //地址应在之前的基础上进行偏移！！！！！地址增加，按p+1进行计算，不用每次增加4个？？？ 0219
-                printf("oneCamInfo.imageBuf:%x\n",oneCamInfo.imageBuf);
-                memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,bytes.size());
+                qDebug()<<__FUNCTION__<<__LINE__;
+                //修改  判断imageExtraDataBuf指针  0320-----》  问题还是出在下面 0323
+                if(imageExtraDataBuf!=nullptr){
+                    qDebug()<<__FUNCTION__<<__LINE__;
+                    qDebug()<<"imageExtraDataBuf: "<<imageExtraDataBuf;
+                    try {
+                        memcpy(oneCamInfo.imageBuf,imageExtraDataBuf,extraDataSize); //FIX ME 0317
+                        throw "error";
+                    }  catch (exception& e) {
+                        cout << e.what() << endl;
+                    }
 
-                printf("Print oneCamInfo.imageBuf+extraDataSize*4:%x\n",oneCamInfo.imageBuf+extraDataSize);
+                }
+
+                if(imageExtraDataBuf!=nullptr)
+                {
+                    qDebug()<<__FUNCTION__<<__LINE__;
+                    free(imageExtraDataBuf);
+                }
+
+                if(extraDataSize+bytes.size()<IMAGESIZE*3)
+                {
+                    //地址应在之前的基础上进行偏移！！！！！地址增加，按p+1进行计算，不用每次增加4个   0219
+                    qDebug()<<__FUNCTION__<<__LINE__;
+                    //                    printf("oneCamInfo.imageBuf:%x\n",oneCamInfo.imageBuf);
+                    memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,bytes.size());
+
+                    //                    printf("Print oneCamInfo.imageBuf+extraDataSize:%x\n",oneCamInfo.imageBuf+extraDataSize);
+                }
+                else
+                {
+                    memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3-extraDataSize);
+                }
+
             }
             else
             {
-                memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3-extraDataSize);
+                memcpy(oneCamInfo.imageBuf,bytes,bytes.size());
             }
 
+            qDebug() <<"bytes.size()<IMAGESIZE*3:" <<bytes.size();
+            LogInfo("bytes.size()<IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
+            LogInfo("imageCount: %d\n",imageCount);
+            imageCount++;
         }
         else
         {
-            memcpy(oneCamInfo.imageBuf,bytes,bytes.size());
+            qDebug() <<"bytes.size()>=IMAGESIZE*3:" <<bytes.size();
+            LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
+            LogInfo("imageCount: %d\n",imageCount);
+            //对读取多余IMAGESIZE*3字节数据的存储，放到后面存储
+            //第一次如果读取过多，就进行多余存储处理 0323！！
+            extraDataSize=bytes.size()-IMAGESIZE*3;
+            qDebug() <<"extraDataSize:" <<extraDataSize;
+            if(extraDataSize>0)
+            {
+                //             qDebug() <<"bytes.right(extraDataSize):" <<bytes.right(extraDataSize);
+                imageExtraDataBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE); //分配内存 RGB 3倍
+                if(imageExtraDataBuf!=nullptr){   //对分配内存的判断
+                    memcpy(imageExtraDataBuf,bytes.right(extraDataSize),extraDataSize);  //数组多余字节拷贝！！！！！ 0218
+                }
+
+            }
+            if(extraDataSize>0&&extraDataSize<IMAGESIZE)
+            {
+
+                //           qDebug()<< "sizeof(uint8_t*)"<<sizeof(uint8_t*);
+                qDebug()<<__FUNCTION__<<__LINE__<< "extraDataSize"<<extraDataSize<<\
+                          "oneCamInfo.imageBuf+extraDataSize:%x"<<oneCamInfo.imageBuf+extraDataSize;
+                //FIX ME
+                qDebug()<<__LINE__<<"imageExtraDataBuf:"<<imageExtraDataBuf;
+                // 增加指针判断 0320
+                if(imageExtraDataBuf!=nullptr){
+                    memcpy(oneCamInfo.imageBuf,imageExtraDataBuf,extraDataSize);
+                }
+
+                if(IMAGESIZE*3-extraDataSize<bytes.size())
+                {
+                    qDebug()<<__FUNCTION__<<__LINE__<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<"<"<<bytes.size();
+                    memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,IMAGESIZE*3-extraDataSize);
+                }
+                else
+                {
+                    //IMAGESIZE*3-extraDataSize大于bytes.size()时，只能拷贝bytes.size()，避免内存溢出！  0317
+                    qDebug()<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<">"<<bytes.size();
+                    memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,bytes.size());
+                }
+
+                extraDataSize=0; //拷贝后，将其置零！！！！0323
+                free(imageExtraDataBuf);
+            }
+            else
+            {
+                memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
+            }
+
+
+            imageCount++;
         }
 
-        qDebug() <<"bytes.size()<IMAGESIZE*3:" <<bytes.size();
-        LogInfo("bytes.size()<IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
-        LogInfo("imageCount: %d\n",imageCount);
-        imageCount++;
+        camSaveQueue.push(oneCamInfo);
+        qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size()<<"End \n\n";
+        LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
     }
     else
     {
-        if(extraDataSize>0&&extraDataSize<IMAGESIZE)
-        {
-            printf("Has read more data....,oneCamInfo.imageBuf:%x\n",oneCamInfo.imageBuf);
-            //           qDebug()<< "sizeof(uint8_t*)"<<sizeof(uint8_t*);
-            qDebug()<< "oneCamInfo.imageBuf+extraDataSize*4:%x"<<oneCamInfo.imageBuf+extraDataSize;
-            printf("oneCamInfo.imageBuf+extraDataSize*4:%x;sizeof(uint8_t*):%d\n",oneCamInfo.imageBuf+extraDataSize*4,sizeof(uint8_t*));
-            memcpy(oneCamInfo.imageBuf,imageExtraDataBuf,extraDataSize);
-            memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,IMAGESIZE*3-extraDataSize);
-
-            free(imageExtraDataBuf);
-        }
-        else
-        {
-            memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
-        }
-
-
-        qDebug() <<"bytes.size()>IMAGESIZE*3:" <<bytes.size();
-        LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
-        LogInfo("imageCount: %d\n",imageCount);
-        //对读取多余IMAGESIZE*3字节数据的存储，放到后面存储
-        extraDataSize=bytes.size()-IMAGESIZE*3;
-        qDebug() <<"extraDataSize:" <<extraDataSize;
-        if(extraDataSize>0)
-        {
-            //             qDebug() <<"bytes.right(extraDataSize):" <<bytes.right(extraDataSize);
-            imageExtraDataBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE); //分配内存 RGB 3倍
-
-            memcpy(imageExtraDataBuf,bytes.right(extraDataSize),extraDataSize);  //数组多余字节拷贝！！！！！ 0218
-        }
-        imageCount++;
+        LogError("Read size failed,size %d",bytes.size());
+        return ;
     }
 
-    camSaveQueue.push(oneCamInfo);
-    qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size();
-    LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
 
 
 }
@@ -150,15 +203,19 @@ void MainWindow::showCamData()
         oneFrameInfo=camSaveQueue.front();
         qDebug() <<"After get, camSaveQueue.size() "<<camSaveQueue.size();
         LogInfo("After get,camSaveQueue.size() %d\n ",camSaveQueue.size());
-        //        if(imageCount%3==0)
+        if(imageCount%5==0)
         {
             ShowImage(oneFrameInfo.imageBuf, imageWidth,imageHeight,QImage::Format_BGR888);//Format_RGB888---->Format_BGR888  (imread BGR格式）
+        }
+        else
+        {
+            free(oneFrameInfo.imageBuf);
         }
         m_show_index++;
         qDebug()<<"m_show_index: "<<m_show_index;
         LogInfo("Show img index,m_show_index: %d\n ",m_show_index);
 
-        camSaveQueue.pop();//   弹出对首元素
+        camSaveQueue.pop();//   弹出队首元素
     }
 
 }

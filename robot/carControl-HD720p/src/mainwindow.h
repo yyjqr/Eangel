@@ -74,7 +74,7 @@ private:
      int m_saveIndex;
      int m_show_index;
      size_t extraDataSize;
-      uint8_t *imageExtraDataBuf;
+     uint8_t *imageExtraDataBuf;
 private slots:
     void startTime();
     void getpic();
