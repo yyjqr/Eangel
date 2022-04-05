@@ -113,7 +113,7 @@ private:
     int m_saveIndex;
 
     CamThread *showThread;
-    int m_getImageCount,m_getOneTimeImageNums;
+    int m_getImageCount,m_getOneTimeImageNums,m_NoDataToShow_Times;
     int m_CAM_ResolutionRatio;
     QString m_sysTimestr;
 

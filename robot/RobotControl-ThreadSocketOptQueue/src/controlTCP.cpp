@@ -110,8 +110,11 @@ void controlTCP::recvData(void)
     //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     //    bytes.resize(MAX_LEN);//ADD 0309
     mutex.lock();
-    cout<<"test socket bytes:"<<m_camSocket->bytesAvailable()<<endl;
-    while(m_camSocket->waitForReadyRead(300)) //200--->300 尽量读取到1张图像的数据 20211023
+
+    cout<<"socket Available bytes:"<<m_camSocket->bytesAvailable()<<endl;
+    //读到一张图的字节或超时，就退出循环！！  0404
+    while(m_camSocket->waitForReadyRead(200)) //200--->300 尽量读取到1张图像的数据 20211023
+
     {
         //        bytes.append((QByteArray)m_camSocket->readAll());
 
@@ -135,23 +138,30 @@ void controlTCP::recvData(void)
             //            }
 
             m_queue_camDataInCHAR.push_back(bytes);
+            qDebug()<<"Push,queue size():"<<m_queue_camDataInCHAR.size()<< "\n";
             break;
         }
-        else
-        {
-            cerr<<"\n not have enough bytes to read"<<endl; //add
-        }
+
     }
+
+    qDebug()<<" \n Total Read  data.size():"<<bytes.size()<< "\n";
+    if( bytes.size() < CAM_ResolutionRatio*IMAGESIZE/4 ){
+        cerr<<"\n not have enough bytes to read"<<endl; //add
+    }
+//    else{
+//        qDebug()<<"Socket don't read a picture size:"<<bytes.size()<<endl;
+//    }
     mutex.unlock();
-    qDebug()<<" \n Read  data.size():"<<bytes.size()<< "\n";
-    qDebug()<<" queue size():"<<m_queue_camDataInCHAR.size()<< "\n";
+
+
     bytes.clear();
-    /* if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
+    if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
+
         m_NoDataTimes++;
-        if(bytes!=nullptr)
-        {
-            bytes.clear();
-        }
+//        if(bytes!=nullptr)
+//        {
+//            bytes.clear();
+//        }
         //网络连接断开后，是不能再启动定时器的，因此增加标志位判断  0302
         if(!b_realStopTimer){
             if(m_NoDataTimes>5){
