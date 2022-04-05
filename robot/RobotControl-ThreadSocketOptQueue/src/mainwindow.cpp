@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
   ,m_getOneTimeImageNums(0)
   ,showThread(nullptr)
   ,m_picToshow({nullptr,1280,720,0})
-
+  ,m_NoDataToShow_Times(0)
 {
     ui->setupUi(this);
     ui->pushButton_disconnect->setEnabled(false);
@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    //socket结束
+    //释放socket的资源
     if(controlSocket!=nullptr){
         delete controlSocket;
         controlSocket=nullptr;
@@ -163,12 +163,11 @@ void MainWindow::getPicToShow()
             ShowImage(m_picToshow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
             qDebug() <<"\n"<<__LINE__<<"Show frame finish,test crash error -----";
         }
-        else
+       else
         {
             //add 未显示的数据，直接释放,避免内存增长 0620
             if(m_picToshow.imageBuf!=nullptr){
-                //                qDebug() <<__LINE__<<"analysis double free";
-                assert(m_picToshow.imageBuf!=nullptr);
+
                 //重点调试地方！！！！
                 try{
                     qDebug()<<__LINE__<<"test free IMAGE buf\n";
@@ -211,15 +210,26 @@ void MainWindow::onTimeGetFrameToShow()
         ui->label_RecvOneTimePictureNums->setText(QString::number(m_getOneTimeImageNums));
         //        qDebug() << "Get the data,m_picToshow.imageBuf:"<<m_picToshow.imageBuf;
         getPicToShow();
-        qDebug() << "After show:" <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+        //每次的地址是不一样的，目前不需要在测试这里。 0404
+//        qDebug() << "After show:" <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
         m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717--->
         ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
-        qDebug()<<"get and show ,take time:"<<t_analysisMem.elapsed()<<endl;
+        qDebug()<<"get and show ,take time(ms):"<<t_analysisMem.elapsed()<<endl;
+        //为了获取连续多次没有取到图像数据的情况，因此一次获取正常，一次不正常，则需做减法！！ 0404
+        if(m_NoDataToShow_Times>0){
+             m_NoDataToShow_Times--;
+        }
+
     }
     else
     {
-        //      qDebug() << "fun: " <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+//              qDebug() << "No get data ,test picToshow.imageBuf:"<<m_picToshow.imageBuf;
         qDebug() <<"no data to show------\n";
+        m_NoDataToShow_Times++;
+        if(m_NoDataToShow_Times>5){
+            ui->textBrowser_log->append(m_timestr+TEXT_COLOR_RED("已经有几次未获取到有效数据来显示"));
+            m_NoDataToShow_Times=0;
+        }
     }
 
 }
