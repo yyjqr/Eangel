@@ -110,9 +110,11 @@ void controlTCP::recvData(void)
     //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     //    bytes.resize(MAX_LEN);//ADD 0309
     mutex.lock();
+
     cout<<"socket Available bytes:"<<m_camSocket->bytesAvailable()<<endl;
     //读到一张图的字节或超时，就退出循环！！  0404
     while(m_camSocket->waitForReadyRead(200)) //200--->300 尽量读取到1张图像的数据 20211023
+
     {
         //        bytes.append((QByteArray)m_camSocket->readAll());
 
@@ -154,6 +156,7 @@ void controlTCP::recvData(void)
 
     bytes.clear();
     if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
+
         m_NoDataTimes++;
 //        if(bytes!=nullptr)
 //        {
@@ -169,7 +172,7 @@ void controlTCP::recvData(void)
             }
         }
 
-    }
+    }*/
 
 }
 

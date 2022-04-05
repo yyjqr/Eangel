@@ -56,7 +56,9 @@ bool tcpSocket::connectSocket()
         char szPeerAddress[16];
         //Sets buffers to a specified character.
         memset((void *)szPeerAddress,0,sizeof(szPeerAddress));
-        cout << szPeerAddress << "**************" <<endl;
+
+        cout <<"客户端地址："<< szPeerAddress << "**************" <<endl;
+
         //If no error occurs, inet_ntoa returns a character pointer to a static buffer
         //containing the text address in standard ".'' notation
         strcpy(szPeerAddress,inet_ntoa(client_address.sin_addr));//将ip地址从字符串转换为xxx.xxx.xxx.xxx 0301
