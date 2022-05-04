@@ -4,7 +4,7 @@
 #@date:201902-->10 --->
       #202006-->202101--->202110
 # Email: yyjqr789@sina.com
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 import smtplib
 #from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -26,6 +26,7 @@ from datetime import datetime
 import re
 import json
 #import pandas
+#一些数据写入文件时会有编码不统一的问题，so codecs to assign code type!!
 import codecs # use for write a file 0708
 
 
@@ -34,12 +35,20 @@ import codecs # use for write a file 0708
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
 receiver='yyjqr789@sina.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
 #receiver=my_sender
-#_pwd = "tfqlcytviyqdbcib"  #202010---202102   #需在qq邮箱开启SMTP服务并获取授权码
-_pwd ="rulnucenyqcpbbbf"  #202010---202102   #需在qq邮箱开启SMTP服务并获取授权码
+_pwd ="rulnucenyqcpXYZf"  #202010---202102   #需在qq邮箱开启SMTP服务并获取授权码
 
 pin0=11
 pin1=13
 #GPIO.setup(pin1,GPIO.OUT)
+save_news_path="./techNews/"
+# get the sys date and hour,minutes!!
+now_time = datetime.now()
+date=datetime.now().strftime('%Y-%m-%d_%H:%M')
+print (date)
+year_month=datetime.now().strftime('%Y-%m')
+
+newsFullPath=os.path.join(save_news_path,date+'.html')
+print(newsFullPath)
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
@@ -183,23 +192,20 @@ class GrabNewsTechnet():
                     self.NewsList.append({string:newsUrl})
 
 
-# get the sys date and hour,minutes!!
-now_time = datetime.now()
-date=datetime.now().strftime('%Y-%m-%d_%H:%M')
-print (date)
-year_month=datetime.now().strftime('%Y-%m')
+
 
 #科学网
 def writeNewsTechNet():
     grabNews = GrabNewsTechnet()
     grabNews.getNews()
   
-    fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
-    for news in grabNews.NewsList:
-        for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
-            fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
-            fp.write('<hr />')
-    fp.close()
+    #fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
+    with codecs.open(newsFullPath,'a', 'utf-8') as fp:
+        for news in grabNews.NewsList:
+            for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
+                fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
+                fp.write('<hr />')
+
 
 
 
@@ -208,7 +214,7 @@ def writeNews():
     grabNews = GrabNews()
     grabNews.getNews()
     # 加上获取新闻的日期
-    fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
+    fp = codecs.open(newsFullPath , 'a', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -229,7 +235,7 @@ def writeNewsAI():
     grabNews = GrabNewsAI()
     grabNews.getNews()
     print("SEARCH AI news")
-    fp = codecs.open('news%s.html' % date, 'w', 'utf-8')  #w---->a  改为追加内容的模式07
+    fp = codecs.open(newsFullPath, 'w', 'utf-8')  #w---->a  改为追加内容的模式07
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -245,16 +251,16 @@ def mail():
     writeNewsAI()
     try:
         writeNews()
-        #print("no send crunch news")
     except Exception as e:
         print (str(e))
 
     writeNewsTechNet()
-    writeNews2()
-    fp = open('news%s.html' % date,'rb+')
-    techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
-    msg.attach(techHtml)
-    fp.close
+    #writeNews2()
+    #fp = open('news%s.html' % date,'rb+')
+    with open(newsFullPath,'rb+') as fp:
+        techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
+        msg.attach(techHtml)
+    #fp.close
     
     path = '/tmp'         # 替换为你的路径
     listN=get_file_list(path)

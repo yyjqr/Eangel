@@ -67,7 +67,7 @@ void CamThread::run()
 
         }
 
-        if(camSaveQueue.size()>=5){
+        if(m_camSaveQueue.size()>=5){
             getOneFrame();//每次取一帧
             //             qDebug()<<"getOneFrame time"<<time_debug.elapsed();
             //            QThread::msleep(200);//避免显示取不到 或卡住 0704
@@ -126,9 +126,9 @@ void CamThread::receiveValidPicture(QByteArray bytes)
                 oneCamInfo.imageHeight=1080;
             }
 
-            camSaveQueue.push(oneCamInfo);
-            qDebug() <<"Push one frame,camSaveQueue.size() "<<camSaveQueue.size();
-            LogError("Push one frame,camSaveQueue.size() %d\n ",camSaveQueue.size());
+            m_camSaveQueue.push(oneCamInfo);
+            qDebug() <<"Push one frame,m_camSaveQueue.size() "<<m_camSaveQueue.size();
+            LogError("Push one frame,m_camSaveQueue.size() %d\n ",m_camSaveQueue.size());
         }
         else
         {
@@ -287,11 +287,11 @@ void CamThread::receivePic(QByteArray bytes)
         //将cam数据加入队列后，这部分内存需要释放
         if(bytes.size()+extraDataSize>=IMAGESIZE*3)
         {
-            camSaveQueue.push(oneCamInfo);
+            m_camSaveQueue.push(oneCamInfo);
         }
         else if(bytes.size()+extraDataSize>=IMAGESIZE)
         {
-            camSaveQueue.push(oneCamInfo);
+            m_camSaveQueue.push(oneCamInfo);
         }
         else
         {
@@ -300,8 +300,8 @@ void CamThread::receivePic(QByteArray bytes)
             oneCamInfo.imageBuf=nullptr;
         }
 
-        qDebug() <<" camSaveQueue.size() "<<camSaveQueue.size()<<"End \n";
-        LogError("camSaveQueue.size() %d\n ",camSaveQueue.size());
+        qDebug() <<" m_camSaveQueue.size() "<<m_camSaveQueue.size()<<"End \n";
+        LogError("m_camSaveQueue.size() %d\n ",m_camSaveQueue.size());
     }
     else
     {
@@ -315,11 +315,11 @@ void CamThread::receivePic(QByteArray bytes)
 bool CamThread::getOneFrame()
 {
     QMutexLocker locker(&m_dataMutex);
-    if(camSaveQueue.size()!=0)
+    if(m_camSaveQueue.size()!=0)
     {
-        OneTempFrame=camSaveQueue.front();
-        camSaveQueue.pop();//   弹出队首元素
-        qDebug() <<"num:"<<m_countGet++<<" getOneFrame After get, camSaveQueue.size() "<<camSaveQueue.size()<<endl;
+        OneTempFrame=m_camSaveQueue.front();
+        m_camSaveQueue.pop();//   弹出队首元素
+        qDebug() <<"num:"<<m_countGet++<<" getOneFrame After get, m_camSaveQueue.size() "<<m_camSaveQueue.size()<<endl;
 
         //        emit SIGNAL_get_one_frame(oneFrameInfo);
         b_dataValid=true;
@@ -328,7 +328,7 @@ bool CamThread::getOneFrame()
     }
     else
     {
-        qDebug() <<"camSaveQueue.size():"<<camSaveQueue.size()<<"IS Empty,sleep... \n";
+        qDebug() <<"m_camSaveQueue.size():"<<m_camSaveQueue.size()<<"IS Empty,sleep... \n";
         msleep(500);
         m_countNOdata++;
         if(m_countNOdata>=5)
@@ -347,12 +347,11 @@ bool CamThread::getOneFrame()
 camInfo CamThread::getCamOneFrame()
 {
     QMutexLocker locker(&m_dataMutex);//主线程取数据,也得加锁,避免同时被取到!!!0929
-    if(camSaveQueue.size()!=0)
+    if(m_camSaveQueue.size()!=0)
     {
+        oneFrameInfo=m_camSaveQueue.front();
+        m_camSaveQueue.pop();
 
-        oneFrameInfo=camSaveQueue.front();
-        camSaveQueue.pop();
-        //          qDebug() << "\n fun: " <<__func__<<__LINE__<<"get one frame to show\n ";
 //        qDebug() << "Return oneFrameInfo.imageBuf:"<<oneFrameInfo.imageBuf;
         return oneFrameInfo; //取队列中弹出的一帧数据 0717
     }
@@ -371,7 +370,7 @@ void CamThread::socket_disconnect()
     LogError("%s","Cam socket disconnect\n");
 
     emit SIGNAL_camSocketDisconnectToMainThread();//主线程接收处理
-    //    if(camSaveQueue.size()==0){
+    //    if(m_camSaveQueue.size()==0){
     //        b_run=true;
     //    }
 
@@ -381,7 +380,9 @@ void CamThread::socket_disconnect()
 void CamThread::setThreadStop()
 {
     b_run=false;
+    //析构时，也采用了停止线程，如果也加上socket相关操作，会导致后续操作，定时器停止操作，指针已为空！！ 0122--->还是需要断开连接20220308
     m_pictureSocket->disconnectSocket();
+
 //    qDebug()<<__func__<<"test close error";
 
 }

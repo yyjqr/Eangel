@@ -5,8 +5,7 @@ sudo apt-get install -y wget build-essential cmake libgtk2.0-dev pkg-config \
 libavcodec-dev libavformat-dev libswscale-dev python-dev \
 python-numpy  libtbb2 libtbb-dev libjpeg-dev
 
-sudo apt-get install -y libtiff-dev libjasper-dev libdc1394-22-dev
-libopenexr-dev
+sudo apt-get install -y libtiff-dev libjasper-dev libdc1394-22-dev libopenexr-dev
 
 cd /home/opencv
 wget -O opencv4.1.0.zip https://github.com/opencv/opencv/archive/4.1.0.zip
@@ -17,9 +16,9 @@ wget -O opencv_contrib-4.1.0.tar.gz https://github.com/opencv/opencv_contrib/arc
 tar -zxf opencv_contrib-4.1.0.tar.gz
 cd /home/opencv/opencv4.1.0/build
 #以下cmake命令可选[不支持xfeatures2d]
-cmake  -DBUILD_opencv_xfeatures2d=OFF  ..
+#cmake  -DBUILD_opencv_xfeatures2d=OFF  ..
 #带gpu支持[不可用]
-cmake  -DWITH_CUDA=ON -DBUILD_opencv_xfeatures2d=OFF  ..
+#cmake  -DWITH_CUDA=ON -DBUILD_opencv_xfeatures2d=OFF  ..
 #带pkgconfig[不可用]
 cmake  -DOPENCV_GENERATE_PKGCONFIG=ON  ..
 #带xfeatures2d全带[可用]
