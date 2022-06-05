@@ -61,9 +61,9 @@ private slots:
     void on_pushButton_RIGHT_pressed();
     void on_pushButton_RIGHT_released();
     void on_pushButtonCARFRONT_pressed();
-    void on_pushButtonCARFRONT_released();
+//    void on_pushButtonCARFRONT_released();
     void on_pushButtonCARLF_pressed();
-    void on_pushButtonCARLF_released();
+//    void on_pushButtonCARLF_released();
     void on_pushButtonCARRF_pressed();
     void on_pushButtonCARRF_released();
     void on_pushButtonCARLEFT_pressed();
@@ -89,11 +89,13 @@ private slots:
 
     void on_comboBox_ipAddr_currentTextChanged(const QString &arg1);
 
+    void on_pushButtonCARFRONT_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     QTcpSocket* controlSocket;
-    QString addr,port;
+    QString m_str_addr,port;
     QString m_ip_addr1,m_ip_addr2,m_ip_addr3,m_ip_addr4;
     const std::string m_ip_config_path="./CONFIG/ipAddr.conf";
     uchar imagebuffer[IMAGESIZE];

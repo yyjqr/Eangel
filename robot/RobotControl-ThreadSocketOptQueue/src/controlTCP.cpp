@@ -32,7 +32,6 @@ controlTCP::~controlTCP()
 
 bool controlTCP::connectSocket(QTcpSocket* m_tcpSocket,QString ip)
 {
-    //    qDebug()<< "this  :"<<this;
     m_tcpSocket->connectToHost(ip,6800);
     qDebug()<< "m_camSocket state  :"<<m_tcpSocket->state();
     connect(m_tcpSocket,SIGNAL(connected()),this,SLOT(startTime()));
@@ -53,7 +52,7 @@ bool controlTCP::connectSocket(QString ip)
     connect(m_camSocket,SIGNAL(connected()),this,SLOT(startTime()));
     qDebug()<< "m_camSocket->state:"<<m_camSocket->state();
     m_camSocket->waitForConnected(3000);//5s超时--->3s
-    //m_camSocket->state()==QTcpSocket::ConnectingState||
+
     if(m_camSocket->state()==QTcpSocket::ConnectedState){
 
         return true;
@@ -100,6 +99,7 @@ void controlTCP::sendCmdToServer()
     QDateTime datetime;
     QString timestr=datetime.currentDateTime().toString("HH:mm:ss.zzz");
     qDebug()<<__func__<<timestr<<":send CMD:PIC"<< "\n";
+    LogInfo("After read,send CMD time:%s\n",timestr.toStdString().c_str());
 }
 
 
@@ -107,7 +107,7 @@ void controlTCP::recvData(void)
 {
     QByteArray bytes=nullptr;
     long long int bytesNum=0;
-    //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+//        qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     //    bytes.resize(MAX_LEN);//ADD 0309
     mutex.lock();
     cout<<"socket Available bytes:"<<m_camSocket->bytesAvailable()<<endl;
@@ -119,7 +119,8 @@ void controlTCP::recvData(void)
         bytes.append((QByteArray)m_camSocket->read(CAM_ResolutionRatio*IMAGESIZE));
         bytesNum=m_camSocket->bytesAvailable();
         if(bytesNum>1E7){
-            cout<<"After read,socket bytes:"<<bytesNum<<endl;
+            qDebug()<<"\n\n After read,socket bytes:"<<bytesNum<<endl;
+            LogInfo("After read,socket bytes has too much:%ld\n",bytesNum);
         }
         if(bytes.size()>=CAM_ResolutionRatio*IMAGESIZE && bytes.size()<CAM_ResolutionRatio*IMAGESIZE*1.5)
         {
@@ -155,10 +156,6 @@ void controlTCP::recvData(void)
     bytes.clear();
     if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
         m_NoDataTimes++;
-//        if(bytes!=nullptr)
-//        {
-//            bytes.clear();
-//        }
         //网络连接断开后，是不能再启动定时器的，因此增加标志位判断  0302
         if(!b_realStopTimer){
             if(m_NoDataTimes>5){
