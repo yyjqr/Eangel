@@ -24,6 +24,19 @@ CamThread::CamThread():
 {
 
     //    extraDataSize=0;
+    if(CAM_ResolutionRatio==1){
+        oneCamInfo.imageWidth=640;
+        oneCamInfo.imageHeight=480;
+    }
+    else if(CAM_ResolutionRatio==3){
+        oneCamInfo.imageWidth=1280;
+        oneCamInfo.imageHeight=720;
+    }
+    else
+    {
+        oneCamInfo.imageWidth=1920;
+        oneCamInfo.imageHeight=1080;
+    }
 
     //    connect(m_pictureSocket,SIGNAL(dataReady(QByteArray)),this,SLOT(receiveValidPicture(QByteArray)),Qt::QueuedConnection);//不同线程
 }
@@ -48,8 +61,6 @@ void CamThread::run()
 
     qDebug()<<__func__<< "currentThreadId"<<QThread::currentThreadId();
     int i=0;
-
-
 
     connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
     while(b_run)
@@ -112,23 +123,10 @@ void CamThread::receiveValidPicture(QByteArray bytes)
             LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
             LogInfo("imageCount: %d\n",imageCount);
             imageCount++;
-            if(CAM_ResolutionRatio==1){
-                oneCamInfo.imageWidth=640;
-                oneCamInfo.imageHeight=480;
-            }
-            else if(CAM_ResolutionRatio==3){
-                oneCamInfo.imageWidth=1280;
-                oneCamInfo.imageHeight=720;
-            }
-            else
-            {
-                oneCamInfo.imageWidth=1920;
-                oneCamInfo.imageHeight=1080;
-            }
 
             m_camSaveQueue.push(oneCamInfo);
             qDebug() <<"Push one frame,m_camSaveQueue.size() "<<m_camSaveQueue.size();
-            LogError("Push one frame,m_camSaveQueue.size() %d\n ",m_camSaveQueue.size());
+            LogInfo("Push one frame,m_camSaveQueue.size() %d\n ",m_camSaveQueue.size());
         }
         else
         {
@@ -356,7 +354,7 @@ camInfo CamThread::getCamOneFrame()
         return oneFrameInfo; //取队列中弹出的一帧数据 0717
     }
     else{
-        qDebug() <<"camThread,NO frame to show-----\n ";
+//        qDebug() <<"camThread,NO frame to show-----\n ";
         return {nullptr,1280,720,0};
     }
 
