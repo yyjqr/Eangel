@@ -73,7 +73,7 @@ int commandDfResult()
         }
       
     }
-    pclose(fp);
+
 
     return 0;
 }

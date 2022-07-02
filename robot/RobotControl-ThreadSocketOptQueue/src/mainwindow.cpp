@@ -107,14 +107,14 @@ void MainWindow::startTime()
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
-    //        qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+//    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     m_getOneTimeImageNums=0;
-    ui->textBrowser_log->append(m_timestr+":连接ip:"+addr);
+    ui->textBrowser_log->append(m_timestr+":连接ip:"+m_str_addr);
     if(showThread==nullptr){
         qDebug()<<"\n fun:"<<__func__<<"showThread ptr:"<<showThread;
         showThread= new CamThread();
     }
-    if(showThread->connectTCPSocket(addr)){
+    if(showThread->connectTCPSocket(m_str_addr)){
         qDebug()<<"\n Test fun:"<<__func__<<"showThread ptr:"<<showThread<<endl;
         ui->textBrowser_log->append(TEXT_COLOR_GREEN("相机连接成功"));
         LogInfo("%s","相机连接成功");
@@ -130,9 +130,9 @@ void MainWindow::on_pushButtonConnect_clicked()
     }
     else {
         ui->pushButtonConnect->setStyleSheet("background-color:blue;");
-        QString tmp_qstr=m_timestr+"连接ip:"+addr +"失败";
+        QString tmp_qstr=m_timestr+"连接ip:"+m_str_addr +"失败";
         ui->textBrowser_log->append(TEXT_COLOR_RED("连接失败"));
-        LogInfo("相机连接失败，ip %s",addr.toStdString().c_str());
+        LogInfo("相机连接失败，ip %s",m_str_addr.toStdString().c_str());
         ui->pushButtonConnect->setEnabled(true);
     }
 
@@ -158,12 +158,12 @@ void MainWindow::getPicToShow()
         //每3帧显示一帧图像
         if(m_getImageCount%2==0)
         {
-            qDebug() <<"\n"<<__LINE__<<"frameToShow -----";  // <<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
+            //            qDebug() <<"\n"<<__LINE__<<"frameToShow -----";  // <<"frameToShow.imageBuf:"<<m_picToshow.imageBuf;
             assert(m_picToshow.imageBuf!=nullptr);
             ShowImage(m_picToshow.imageBuf, m_imageWidth,m_imageHeight,QImage::Format_RGB888);//(imread BGR格式） linux系统中只有Format_RGB888
-            qDebug() <<"\n"<<__LINE__<<"Show frame finish,test crash error -----";
+            qDebug() <<"\n"<<__LINE__<<"Show frame finish----";
         }
-       else
+        else
         {
             //add 未显示的数据，直接释放,避免内存增长 0620
             if(m_picToshow.imageBuf!=nullptr){
@@ -188,8 +188,8 @@ void MainWindow::getPicToShow()
 void MainWindow::systemInfoUpdate()
 {
     QDateTime datetime;
-    //    qDebug() <<m_sysTimestr<<":系统时间更新测试\n";
-    m_timestr=datetime.currentDateTime().toString("HH:mm:ss");  //revise 11.21
+    //        qDebug() <<m_sysTimestr<<":系统时间更新测试\n";
+    m_timestr=datetime.currentDateTime().toString("HH:mm:ss");  //
     systemTimer->setTimerType(Qt::PreciseTimer);
     m_sysTimestr=datetime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
     ui->label_sysTime->setStyleSheet("color:green;");
@@ -211,19 +211,20 @@ void MainWindow::onTimeGetFrameToShow()
         //        qDebug() << "Get the data,m_picToshow.imageBuf:"<<m_picToshow.imageBuf;
         getPicToShow();
         //每次的地址是不一样的，目前不需要在测试这里。 0404
-//        qDebug() << "After show:" <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
+        //        qDebug() << "After show:" <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
         m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717--->
         ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
         qDebug()<<"get and show ,take time(ms):"<<t_analysisMem.elapsed()<<endl;
+        ui->textBrowser_log->append(m_timestr+TEXT_COLOR_GREEN("图片获取")+QString::number(m_getImageCount));
         //为了获取连续多次没有取到图像数据的情况，因此一次获取正常，一次不正常，则需做减法！！ 0404
         if(m_NoDataToShow_Times>0){
-             m_NoDataToShow_Times--;
+            m_NoDataToShow_Times--;
         }
 
     }
     else
     {
-//              qDebug() << "No get data ,test picToshow.imageBuf:"<<m_picToshow.imageBuf;
+        //              qDebug() << "No get data ,test picToshow.imageBuf:"<<m_picToshow.imageBuf;
         qDebug() <<"no data to show------\n";
         m_NoDataToShow_Times++;
         if(m_NoDataToShow_Times>5){
@@ -238,7 +239,7 @@ void MainWindow::onTimeGetFrameToShow()
 
 void MainWindow::on_pushButtonCAR_clicked()
 {
-    controlSocket->connectToHost(addr,6868); //车的控制端口，6868
+    controlSocket->connectToHost(m_str_addr,6868); //车的控制端口，6868
     if(controlSocket->state()==QTcpSocket::ConnectingState){
         ui->textBrowser_log->append(m_timestr+"正在连接Robot---");
     }
@@ -329,6 +330,7 @@ void MainWindow::RIGHT(){
 
 void MainWindow::goHead(){
     char buf ='F';
+    qDebug()<<__LINE__<<"test send CAR CMD:"<<buf<<endl;
     controlSocket->write(&buf,sizeof(buf));
 }
 void MainWindow::goBack(){
@@ -337,7 +339,7 @@ void MainWindow::goBack(){
 }
 void MainWindow::goLeft(){
 
-    char buf ='M';
+    char buf ='L';
     qDebug()<<__LINE__<<"test send CAR CMD:"<<buf<<endl;
     controlSocket->write(&buf,sizeof(buf));
 }
@@ -346,7 +348,7 @@ void MainWindow::goRight(){
     controlSocket->write(&buf,sizeof(buf));
 }
 void MainWindow::goLeftHead(){
-    char buf[2] ="5";
+    char buf[] ="PlayMusic";
     controlSocket->write(buf,sizeof(buf));
 }
 void MainWindow::goLeftBack(){
@@ -393,23 +395,24 @@ void MainWindow::on_pushButton_RIGHT_released()
 
 void MainWindow::on_pushButtonCARFRONT_pressed()
 {
-    goHead();
+//    goHead();
 }
 
-void MainWindow::on_pushButtonCARFRONT_released()
-{
-    STOP();
-}
+//void MainWindow::on_pushButtonCARFRONT_released()
+//{
+//    STOP();
+//}
 
 void MainWindow::on_pushButtonCARLF_pressed()
 {
+   qDebug()<<"test play music"<<endl;
     goLeftHead();
 }
 
-void MainWindow::on_pushButtonCARLF_released()
-{
-    STOP();
-}
+//void MainWindow::on_pushButtonCARLF_released()
+//{
+//    STOP();
+//}
 
 void MainWindow::on_pushButtonCARRF_pressed()
 {
@@ -585,7 +588,14 @@ void MainWindow::ParseFromJson()
 
 void MainWindow::on_comboBox_ipAddr_currentTextChanged(const QString &arg1)
 {
-    addr=arg1;
-    qDebug()<<"current connect addr:"<<addr;
+    m_str_addr=arg1;
+    qDebug()<<"current connect addr:"<<m_str_addr;
+}
+
+
+void MainWindow::on_pushButtonCARFRONT_clicked()
+{
+  goHead();
+  qDebug()<<"test control car"<<endl;
 }
 
