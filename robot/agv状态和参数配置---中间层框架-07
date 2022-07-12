@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-07-12T09:50:23.692Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36" etag="A4_T5vEgnbpQKco4Whie" version="20.0.4" type="github">
+<mxfile host="app.diagrams.net" modified="2022-07-12T10:59:06.901Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36" etag="4ul4wCpURl1n_yrLTPrF" version="20.0.4" type="github">
   <diagram id="-FVmPhWK5fZbedYWOrp5" name="Page-1">
     <mxGraphModel dx="1125" dy="593" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -17,7 +17,10 @@
           <mxGeometry x="500" y="270" width="200" height="200" as="geometry" />
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-5" value="参数配置" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="ptDRxXs78anHLKh1mZNh-4">
-          <mxGeometry x="40" y="80" width="120" height="60" as="geometry" />
+          <mxGeometry x="40" y="52" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ptDRxXs78anHLKh1mZNh-39" value="网络配置" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="ptDRxXs78anHLKh1mZNh-4">
+          <mxGeometry x="28" y="130" width="100" height="50" as="geometry" />
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ptDRxXs78anHLKh1mZNh-6" target="ptDRxXs78anHLKh1mZNh-9">
           <mxGeometry relative="1" as="geometry" />
@@ -41,13 +44,13 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-11" value="修改时，先显示参数值" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="720" y="650" width="120" height="60" as="geometry" />
+          <mxGeometry x="720" y="640" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ptDRxXs78anHLKh1mZNh-13" target="ptDRxXs78anHLKh1mZNh-19">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-13" value="根据接口，修改参数key的value" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="520" y="650" width="120" height="60" as="geometry" />
+          <mxGeometry x="520" y="640" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-15" value="共享内存的方式读取车的相关运行状态" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="60" y="530" width="120" height="60" as="geometry" />
@@ -62,7 +65,7 @@
           <mxGeometry x="200" y="530" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-19" value="再写回文件" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="343" y="650" width="120" height="60" as="geometry" />
+          <mxGeometry x="350" y="640" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-21" value="Vertical Container" style="swimlane;" vertex="1" parent="1">
           <mxGeometry x="297" y="740" width="200" height="200" as="geometry" />
@@ -117,6 +120,9 @@
         </mxCell>
         <mxCell id="ptDRxXs78anHLKh1mZNh-34" value="使用一个map或表格存储不同位置的开关状态" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="340" y="240" width="70" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ptDRxXs78anHLKh1mZNh-38" value="整个配置文件的修改替换" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="430" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
