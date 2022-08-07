@@ -33,13 +33,14 @@ MainWindow::MainWindow(QWidget *parent) :
   ,showThread(nullptr)
   ,m_picToshow({nullptr,1280,720,0})
   ,m_NoDataToShow_Times(0)
+  ,m_imageSize(2764800)
 {
     ui->setupUi(this);
     ui->pushButton_disconnect->setEnabled(false);
     camTimer = new QTimer(this);
     systemTimer=new QTimer(this);
     controlSocket = new QTcpSocket(this);
-    showThread= new CamThread();
+    //    showThread= new CamThread();
     QStringList item_Resolution,item_ipAddrs;
     item_Resolution<<"720p"<<"480p"<<"1080p";
     ui->comboBox_Res->addItems(item_Resolution);
@@ -56,6 +57,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBox_ipAddr->addItems(item_ipAddrs);
     ui->comboBox_ipAddr->setCurrentIndex(0);
 
+    initControlUI(false);
+
     startTime();//开启系统定时
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
     connect(camTimer,SIGNAL(timeout()),this,SLOT(onTimeGetFrameToShow()));
@@ -65,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //    connect(showThread, SIGNAL(finished()), showThread, SLOT(deleteLater()));//信号槽中已有删除，析构函数中使用的回收资源更清晰！！！
 
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -97,6 +101,14 @@ MainWindow::~MainWindow()
 
 }
 
+void MainWindow::initControlUI(bool flag)
+{
+    ui->pushButtonCARFRONT->setEnabled(flag);
+    ui->pushButtonCARBACK->setEnabled(flag);
+    ui->pushButtonCARLEFT->setEnabled(flag);
+    ui->pushButtonCARRIGHT->setEnabled(flag);
+}
+
 void MainWindow::startTime()
 {
     qDebug() << "fun: " <<__func__;
@@ -107,16 +119,16 @@ void MainWindow::startTime()
 
 void MainWindow::on_pushButtonConnect_clicked()
 {
-//    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    //    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     m_getOneTimeImageNums=0;
     ui->textBrowser_log->append(m_timestr+":连接ip:"+m_str_addr);
     if(showThread==nullptr){
         qDebug()<<"\n fun:"<<__func__<<"showThread ptr:"<<showThread;
-        showThread= new CamThread();
+        showThread= new CamThread(m_imageSize);
     }
-    if(showThread->connectTCPSocket(m_str_addr)){
+    if(showThread->connectTCPSocket(m_str_addr,m_imageSize)){
         qDebug()<<"\n Test fun:"<<__func__<<"showThread ptr:"<<showThread<<endl;
-        ui->textBrowser_log->append(TEXT_COLOR_GREEN("相机连接成功"));
+        ui->textBrowser_log->append(TEXT_COLOR_GREEN("相机连接成功\n"));
         LogInfo("%s","相机连接成功");
         ui->pushButtonConnect->setStyleSheet("background-color:green;");
         ui->pushButtonConnect->setEnabled(false);
@@ -239,13 +251,16 @@ void MainWindow::onTimeGetFrameToShow()
 
 void MainWindow::on_pushButtonCAR_clicked()
 {
+    qDebug()<<"first test connect:"<<m_str_addr<<"controlSocket->state():"<<controlSocket->state()<<endl;
     controlSocket->connectToHost(m_str_addr,6868); //车的控制端口，6868
+    qDebug()<<"test connect:"<<m_str_addr<<"controlSocket->state():"<<controlSocket->state()<<endl;
     if(controlSocket->state()==QTcpSocket::ConnectingState){
-        ui->textBrowser_log->append(m_timestr+"正在连接Robot---");
+        ui->textBrowser_log->append(m_timestr+"正在连接:"+m_str_addr+" Robot---");
     }
     controlSocket->waitForConnected(3000);
     if(controlSocket->state()==QTcpSocket::ConnectedState){
-        ui->textBrowser_log->append(m_timestr+"机器人连接OK++");
+        ui->textBrowser_log->append(m_timestr+"机器人连接:"+m_str_addr+" OK++");
+        initControlUI(true);
     }
     else{
         ui->textBrowser_log->append(m_timestr+"机器人连接失败--");
@@ -360,7 +375,7 @@ void MainWindow::goRightHead(){
     controlSocket->write(buf,sizeof(buf));
 }
 void MainWindow::goRightBack(){
-    char buf[2] ="8";
+    char buf[] ="Cam";
     controlSocket->write(buf,sizeof(buf));
 }
 
@@ -395,7 +410,7 @@ void MainWindow::on_pushButton_RIGHT_released()
 
 void MainWindow::on_pushButtonCARFRONT_pressed()
 {
-//    goHead();
+    //    goHead();
 }
 
 //void MainWindow::on_pushButtonCARFRONT_released()
@@ -405,7 +420,7 @@ void MainWindow::on_pushButtonCARFRONT_pressed()
 
 void MainWindow::on_pushButtonCARLF_pressed()
 {
-   qDebug()<<"test play music"<<endl;
+    qDebug()<<"test play music"<<endl;
     goLeftHead();
 }
 
@@ -435,47 +450,36 @@ void MainWindow::on_pushButtonCARLEFT_released()
     //    STOP();
 }
 
-void MainWindow::on_pushButtonCARRIGHT_pressed()
-{
-    goRight();
-}
 
-void MainWindow::on_pushButtonCARRIGHT_released()
-{
-    STOP();
-}
 
-void MainWindow::on_pushButtonCARLB_pressed()
-{
-    goLeftBack();
-}
+//void MainWindow::on_pushButtonCARLB_pressed()
+//{
+//    goLeftBack();
+//}
 
-void MainWindow::on_pushButtonCARLB_released()
-{
-    STOP();
-}
+//void MainWindow::on_pushButtonCARLB_released()
+//{
+//    STOP();
+//}
 
-void MainWindow::on_pushButtonCARBACK_pressed()
-{
-    goBack();
-}
 
-void MainWindow::on_pushButtonCARBACK_released()
-{
-    STOP();
-}
 
 void MainWindow::on_pushButtonCARRB_pressed()
 {
-    goRightBack();
+    //    goRightBack();
+    qDebug()<<"test capture picture"<<endl;
+    camCapture();
 }
 
-void MainWindow::on_pushButtonCARRB_released()
-{
-    STOP();
+//void MainWindow::on_pushButtonCARRB_released()
+//{
+//    STOP();
+//}
+
+void MainWindow::camCapture(){
+    char buf[] ="Cam";
+    controlSocket->write(buf,sizeof(buf));
 }
-
-
 
 void MainWindow::on_lineEdit_port_editingFinished()
 {
@@ -531,7 +535,7 @@ void MainWindow::disconnect_Deal()
 
 void MainWindow::on_comboBox_Res_currentIndexChanged(int index)
 {
-    qDebug()<<"Resolution select index:"<<index;
+
     qDebug()<<"Resolution select index:"<<index;
     switch (index) {
     case Small_480p:
@@ -539,12 +543,14 @@ void MainWindow::on_comboBox_Res_currentIndexChanged(int index)
         m_CAM_ResolutionRatio=3;
         m_imageWidth=stCamLowRes.imageWidth;
         m_imageHeight=stCamLowRes.imageHeight;
+        m_imageSize=m_imageWidth*m_imageHeight*3;
         break;
     case Common_Type720p:
         cout<<"test cam default Res type:"<<Common_Type720p<<endl;
         m_CAM_ResolutionRatio=3;
         m_imageWidth=stCommon720pRes.imageWidth;
         m_imageHeight=stCommon720pRes.imageHeight;
+        m_imageSize=m_imageWidth*m_imageHeight*3;
         break;
     case Common_Type1080p:
         m_CAM_ResolutionRatio=3;
@@ -595,7 +601,26 @@ void MainWindow::on_comboBox_ipAddr_currentTextChanged(const QString &arg1)
 
 void MainWindow::on_pushButtonCARFRONT_clicked()
 {
-  goHead();
-  qDebug()<<"test control car"<<endl;
+    goHead();
+    qDebug()<<"test control car"<<endl;
+}
+
+
+void MainWindow::on_pushButtonCarStop_clicked()
+{
+    qDebug()<<"test Pause a car"<<endl;
+    STOP();
+}
+
+
+void MainWindow::on_pushButtonCARBACK_clicked()
+{
+    goBack();
+}
+
+
+void MainWindow::on_pushButtonCARRIGHT_clicked()
+{
+    goRight();
 }
 

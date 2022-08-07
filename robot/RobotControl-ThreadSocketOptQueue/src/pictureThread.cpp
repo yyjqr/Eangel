@@ -10,7 +10,7 @@ using namespace  std;
 unsigned int extraDataSize=0;
 
 
-CamThread::CamThread():
+CamThread::CamThread(int image_size):
     b_run(true),
     oneCamInfo({nullptr,1280,720,0}),
     oneFrameInfo({nullptr,1280,720,0}),
@@ -20,7 +20,8 @@ CamThread::CamThread():
     imageExtraDataBuf(nullptr),
     m_tryGetDataTimes(0),
     m_countGet(0),
-    m_malloc_times(0)
+    m_malloc_times(0),
+    m_read_image_size(image_size)
 {
 
     //    extraDataSize=0;
@@ -61,7 +62,7 @@ void CamThread::run()
 
     qDebug()<<__func__<< "currentThreadId"<<QThread::currentThreadId();
     int i=0;
-
+    qDebug()<<__func__<< "m_read_image_size:"<<m_read_image_size;
     connect(m_pictureSocket,SIGNAL(signalSocketDisconnect()),this,SLOT(socket_disconnect()));
     while(b_run)
     {
@@ -71,7 +72,7 @@ void CamThread::run()
         if(m_getFrame_byteArray.length()>0){
 //            qDebug()<<"m_getFrame_byteArray length: "<<m_getFrame_byteArray.length();
             //比正常数据多1.5倍,可尝试拷贝,如果多出10倍,拷贝报错  0927 m_getFrame_byteArray length:  1987737462
-            if(m_getFrame_byteArray.length()<=IMAGESIZE*CAM_ResolutionRatio*1.5){
+            if(m_getFrame_byteArray.length()<=m_read_image_size*CAM_ResolutionRatio*1.5){
 //                  qDebug()<<"analysis mem\n";
                 receiveValidPicture(m_getFrame_byteArray);
             }
@@ -92,14 +93,14 @@ void CamThread::run()
 
 }
 
-bool CamThread::connectTCPSocket(QString addr)
+bool CamThread::connectTCPSocket(QString addr,int m_read_image_size)
 {
     qDebug() <<"thread ,test connect fun:"<<__func__<<endl;
     //调用controlTCP的方法！！
     bool b_status=false;
     //add 0216--->20211007,线程退出后再次运行时，新建socket对象
     if(m_pictureSocket==nullptr){
-        m_pictureSocket = new controlTCP(this);
+        m_pictureSocket = new controlTCP(this,m_read_image_size);
     }
     b_status =m_pictureSocket->connectSocket(addr);
 
@@ -111,16 +112,16 @@ bool CamThread::connectTCPSocket(QString addr)
 
 void CamThread::receiveValidPicture(QByteArray bytes)
 {
-    if(bytes.size()>=IMAGESIZE*CAM_ResolutionRatio)
+    if(bytes.size()>=m_read_image_size)
     {
-        oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*CAM_ResolutionRatio); //分配内存 RGB 3倍
-//       qDebug() <<"malloc mem times:"<<m_malloc_times++<<endl;
+        oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*m_read_image_size); //分配内存 RGB 3倍
+       qDebug() <<"malloc mem m_read_image_size:"<<m_read_image_size<<endl;
         if (oneCamInfo.imageBuf!=nullptr)
         {
-//            memcpy(oneCamInfo.imageBuf,bytes,bytes.size()>IMAGESIZE*CAM_ResolutionRatio ? IMAGESIZE*CAM_ResolutionRatio:bytes.size());
-            memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*CAM_ResolutionRatio);
-            qDebug() <<"bytes.size()>=IMAGESIZE*3:" <<bytes.size();
-            LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
+//            memcpy(oneCamInfo.imageBuf,bytes,bytes.size()>m_read_image_size*CAM_ResolutionRatio ? m_read_image_size*CAM_ResolutionRatio:bytes.size());
+            memcpy(oneCamInfo.imageBuf,bytes,m_read_image_size);
+            qDebug() <<"bytes.size()>=m_read_image_size*3:" <<bytes.size();
+            LogInfo("bytes.size()>=m_read_image_size*3 ,SIZE:%d\n",bytes.size());
             LogInfo("imageCount: %d\n",imageCount);
             imageCount++;
 
@@ -149,7 +150,7 @@ void CamThread::receivePic(QByteArray bytes)
     //    qDebug()  <<" read cam data......\n";
     if(bytes.size()>0)
     {
-        oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE*3); //分配内存 RGB 3倍
+        oneCamInfo.imageBuf=(uint8_t*)malloc(sizeof(uint8_t)*m_read_image_size*3); //分配内存 RGB 3倍
 
         if(oneCamInfo.imageBuf!=nullptr)
         {
@@ -161,11 +162,11 @@ void CamThread::receivePic(QByteArray bytes)
             qDebug()  <<"malloc pic mem failed!......\n";
             return;
         }
-        if(bytes.size()<IMAGESIZE*3)
+        if(bytes.size()<m_read_image_size*3)
         {
-            qDebug() <<"\n Test bytes.size()<IMAGESIZE*3:" <<bytes.size()<<"extraDataSize:"<<extraDataSize;
+            qDebug() <<"\n Test bytes.size()<m_read_image_size*3:" <<bytes.size()<<"extraDataSize:"<<extraDataSize;
             qDebug()<<"imageExtraDataBuf:"<<imageExtraDataBuf<<"\n"; //<<" "<<*imageExtraDataBuf
-            if(extraDataSize>0&&extraDataSize<IMAGESIZE)
+            if(extraDataSize>0&&extraDataSize<m_read_image_size)
             {
                 qDebug()<<__func__<<__LINE__;
                 //修改  判断imageExtraDataBuf指针  0320----->  问题还是出在下面 0323
@@ -187,7 +188,7 @@ void CamThread::receivePic(QByteArray bytes)
                     free(imageExtraDataBuf);
                 }
 
-                if(extraDataSize+bytes.size()<IMAGESIZE*3)
+                if(extraDataSize+bytes.size()<m_read_image_size*3)
                 {
                     //地址应在之前的基础上进行偏移！！！！！地址增加，按p+1进行计算，不用每次增加4个   0219
                     qDebug()<<__func__<<__LINE__;
@@ -198,7 +199,7 @@ void CamThread::receivePic(QByteArray bytes)
                 }
                 else
                 {
-                    memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3-extraDataSize);
+                    memcpy(oneCamInfo.imageBuf,bytes,m_read_image_size*3-extraDataSize);
                 }
 
             }
@@ -207,29 +208,29 @@ void CamThread::receivePic(QByteArray bytes)
                 memcpy(oneCamInfo.imageBuf,bytes,bytes.size());
             }
 
-            qDebug() <<"bytes.size()<IMAGESIZE*3:" <<bytes.size();
-            LogInfo("bytes.size()<IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
+            qDebug() <<"bytes.size()<m_read_image_size*3:" <<bytes.size();
+            LogInfo("bytes.size()<m_read_image_size*3 ,SIZE:%d\n",bytes.size());
             LogInfo("imageCount: %d\n",imageCount);
             imageCount++;
         }
         else
         {
-            qDebug() <<"bytes.size()>=IMAGESIZE*3:" <<bytes.size();
-            LogInfo("bytes.size()>=IMAGESIZE*3 ,SIZE:%d\n",bytes.size());
+            qDebug() <<"bytes.size()>=m_read_image_size*3:" <<bytes.size();
+            LogInfo("bytes.size()>=m_read_image_size*3 ,SIZE:%d\n",bytes.size());
             LogInfo("imageCount: %d\n",imageCount);
-            //对读取多余IMAGESIZE*3字节数据的存储，放到后面存储
+            //对读取多余m_read_image_size*3字节数据的存储，放到后面存储
             //第一次如果读取过多，就进行多余存储处理 0323！！
-            extraDataSize=bytes.size()-IMAGESIZE*3;
+            extraDataSize=bytes.size()-m_read_image_size*3;
             qDebug() <<"extraDataSize:" <<extraDataSize;
             if(extraDataSize>0)
             {
                 //             qDebug() <<"bytes.right(extraDataSize):" <<bytes.right(extraDataSize);
-                imageExtraDataBuf=(uint8_t*)malloc(sizeof(uint8_t)*IMAGESIZE); //分配内存 RGB 3倍
+                imageExtraDataBuf=(uint8_t*)malloc(sizeof(uint8_t)*m_read_image_size); //分配内存 RGB 3倍
                 if(imageExtraDataBuf!=nullptr){   //对分配内存的判断
                     memcpy(imageExtraDataBuf,bytes.right(extraDataSize),extraDataSize);  //数组多余字节拷贝！！！！！ 0218
                 }
 
-                if(extraDataSize>0&&extraDataSize<IMAGESIZE)
+                if(extraDataSize>0&&extraDataSize<m_read_image_size)
                 {
                     qDebug()<<__func__<<__LINE__<< "extraDataSize"<<extraDataSize<<\
                               "oneCamInfo.imageBuf+extraDataSize:%x"<<oneCamInfo.imageBuf+extraDataSize;
@@ -240,15 +241,15 @@ void CamThread::receivePic(QByteArray bytes)
                         memcpy(oneCamInfo.imageBuf,imageExtraDataBuf,extraDataSize);
                     }
 
-                    if(IMAGESIZE*3-extraDataSize<bytes.size())
+                    if(m_read_image_size*3-extraDataSize<bytes.size())
                     {
-                        qDebug()<<__func__<<__LINE__<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<"<"<<bytes.size();
-                        memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,IMAGESIZE*3-extraDataSize);
+                        qDebug()<<__func__<<__LINE__<<"m_read_image_size*3-extraDataSize="<<m_read_image_size*3-extraDataSize<<"<"<<bytes.size();
+                        memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,m_read_image_size*3-extraDataSize);
                     }
                     else
                     {
-                        //IMAGESIZE*3-extraDataSize大于bytes.size()时，只能拷贝bytes.size()，避免内存溢出！  0317
-                        qDebug()<<"IMAGESIZE*3-extraDataSize="<<IMAGESIZE*3-extraDataSize<<">"<<bytes.size();
+                        //m_read_image_size*3-extraDataSize大于bytes.size()时，只能拷贝bytes.size()，避免内存溢出！  0317
+                        qDebug()<<"m_read_image_size*3-extraDataSize="<<m_read_image_size*3-extraDataSize<<">"<<bytes.size();
                         memcpy(oneCamInfo.imageBuf+extraDataSize,bytes,bytes.size());
                     }
 
@@ -261,8 +262,8 @@ void CamThread::receivePic(QByteArray bytes)
                 }
                 else
                 {
-                    qDebug() <<"\n **********extraDataSize >IMAGESIZE:" <<extraDataSize;
-                    memcpy(oneCamInfo.imageBuf,bytes,IMAGESIZE*3);
+                    qDebug() <<"\n **********extraDataSize >m_read_image_size:" <<extraDataSize;
+                    memcpy(oneCamInfo.imageBuf,bytes,m_read_image_size*3);
                     if(imageExtraDataBuf!=nullptr){
                         free(imageExtraDataBuf);
                         imageExtraDataBuf=nullptr;
@@ -283,17 +284,17 @@ void CamThread::receivePic(QByteArray bytes)
         qDebug() <<" \n -----Total bytes.size() "<<bytes.size()<<"------------ \n";
         //只把读取是完整字节及以上的数据存到队列  0620----->bytes.size()+extraDataSize  0626
         //将cam数据加入队列后，这部分内存需要释放
-        if(bytes.size()+extraDataSize>=IMAGESIZE*3)
+        if(bytes.size()+extraDataSize>=m_read_image_size*3)
         {
             m_camSaveQueue.push(oneCamInfo);
         }
-        else if(bytes.size()+extraDataSize>=IMAGESIZE)
+        else if(bytes.size()+extraDataSize>=m_read_image_size)
         {
             m_camSaveQueue.push(oneCamInfo);
         }
         else
         {
-            qDebug()<<__LINE__<<"read bytes.size()+extraSize<IMAGESIZE*3,free mem...\n";
+            qDebug()<<__LINE__<<"read bytes.size()+extraSize<m_read_image_size*3,free mem...\n";
             free(oneCamInfo.imageBuf);
             oneCamInfo.imageBuf=nullptr;
         }

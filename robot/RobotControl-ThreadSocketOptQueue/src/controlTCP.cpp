@@ -4,8 +4,9 @@
 #include "logging.h"
 #include <QThread>
 #include <QDateTime>
+const int count_softTrig_time =300;  //软触发定时设置的时长，ms
 
-controlTCP::controlTCP(QObject* parent):
+controlTCP::controlTCP(QObject* parent,int image_size):
     QTcpSocket(parent),
     m_NoDataTimes(0),
     b_realStopTimer(false)
@@ -13,6 +14,8 @@ controlTCP::controlTCP(QObject* parent):
     cmdTimer = new QTimer(this);
     m_camSocket = new QTcpSocket(this);
     m_byteArray_oneFrame.resize(MAX_LEN);
+//    m_pTimer = new CTimer("cmd定时器");
+    m_read_image_size=image_size;
     connect(cmdTimer,SIGNAL(timeout()),this,SLOT(sendCmdToServer()));
     //先把连接成功的信号，来做读取，然后再在线程里做接收处理？？？
     connect(m_camSocket,SIGNAL(readyRead()),this,SLOT(recvData()));
@@ -25,6 +28,10 @@ controlTCP::~controlTCP()
     if(cmdTimer!=nullptr){
         delete  cmdTimer;
     }
+    //删除定时器指针
+//    if(m_pTimer!=nullptr){
+//        delete m_pTimer;
+//    }
     if(m_camSocket!=nullptr){
         delete  m_camSocket;
     }
@@ -54,7 +61,7 @@ bool controlTCP::connectSocket(QString ip)
     m_camSocket->waitForConnected(3000);//5s超时--->3s
 
     if(m_camSocket->state()==QTcpSocket::ConnectedState){
-
+//       startSoftTrigAndCptTimer();
         return true;
     }
     else
@@ -102,29 +109,32 @@ void controlTCP::sendCmdToServer()
     LogInfo("After read,send CMD time:%s\n",timestr.toStdString().c_str());
 }
 
-
+//void controlTCP::startSoftTrigAndCptTimer()
+//{
+//    //打开相机时，才开启10ms定时器
+//    m_pTimer->AsyncLoop(count_softTrig_time, startTime, this);
+//}
 void controlTCP::recvData(void)
 {
     QByteArray bytes=nullptr;
     long long int bytesNum=0;
 //        qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    qDebug()<<"\n fun:"<<__func__<<"m_read_image_size:"<<m_read_image_size;
     //    bytes.resize(MAX_LEN);//ADD 0309
     mutex.lock();
-
     cout<<"socket Available bytes:"<<m_camSocket->bytesAvailable()<<endl;
     //读到一张图的字节或超时，就退出循环！！  0404
     while(m_camSocket->waitForReadyRead(200)) //200--->300 尽量读取到1张图像的数据 20211023
-
     {
         //        bytes.append((QByteArray)m_camSocket->readAll());
 
-        bytes.append((QByteArray)m_camSocket->read(CAM_ResolutionRatio*IMAGESIZE));
+        bytes.append((QByteArray)m_camSocket->read(m_read_image_size));
         bytesNum=m_camSocket->bytesAvailable();
         if(bytesNum>1E7){
             qDebug()<<"\n\n After read,socket bytes:"<<bytesNum<<endl;
             LogInfo("After read,socket bytes has too much:%ld\n",bytesNum);
         }
-        if(bytes.size()>=CAM_ResolutionRatio*IMAGESIZE && bytes.size()<CAM_ResolutionRatio*IMAGESIZE*1.5)
+        if(bytes.size()>=m_read_image_size && bytes.size()<m_read_image_size*1.5)
         {
             qDebug()<<" ------Socket Read data.size():"<<bytes.size()<< "\n";
             //            static int testNum=0;
@@ -146,7 +156,7 @@ void controlTCP::recvData(void)
     }
 
     qDebug()<<" \n Total Read  data.size():"<<bytes.size()<< "\n";
-    if( bytes.size() < CAM_ResolutionRatio*IMAGESIZE/4 ){
+    if( bytes.size() < CAM_ResolutionRatio*m_read_image_size/4 ){
         cerr<<"\n not have enough bytes to read"<<endl; //add
     }
 //    else{
@@ -156,8 +166,7 @@ void controlTCP::recvData(void)
 
 
     bytes.clear();
-    if(bytes.size()<CAM_ResolutionRatio*IMAGESIZE||bytes.size()>CAM_ResolutionRatio*IMAGESIZE*1.5){
-
+    if(bytes.size()<m_read_image_size||bytes.size()>m_read_image_size*1.5){
         m_NoDataTimes++;
         //网络连接断开后，是不能再启动定时器的，因此增加标志位判断  0302
         if(!b_realStopTimer){
@@ -169,7 +178,7 @@ void controlTCP::recvData(void)
             }
         }
 
-    }*/
+    }
 
 }
 
@@ -212,13 +221,13 @@ void controlTCP::recvDataOpt(void)
     int read_times=0;
     while(m_camSocket->waitForReadyRead(400))
     {
-        while(bytes.size()<=3*IMAGESIZE)
+        while(bytes.size()<=3*m_read_image_size)
         {
             //每次只读1280*720的大小  0627
-            bytes.append((QByteArray)m_camSocket->read(IMAGESIZE));
+            bytes.append((QByteArray)m_camSocket->read(m_read_image_size));
             qDebug()<<__func__<<__LINE__<<"\n One Read data.size():"<<bytes.size()<< "\n";
             read_times++;
-            if(bytes.size()>=3*IMAGESIZE||read_times>=5)
+            if(bytes.size()>=3*m_read_image_size||read_times>=5)
             {
                 qDebug()<<"\n Read finished,bytes.size(): "<<bytes.size()<< "\n";
                 break;

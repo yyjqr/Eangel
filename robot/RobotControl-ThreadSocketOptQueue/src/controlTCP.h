@@ -7,6 +7,8 @@
 //#include <queue>
 #include <QQueue>
 #include <QMutex>
+
+
 using namespace std;
 
 
@@ -16,12 +18,14 @@ class controlTCP :public QTcpSocket
     Q_OBJECT
 public:
     //    controlTCP();
-    explicit controlTCP(QObject *parent = Q_NULLPTR);
+    explicit controlTCP(QObject *parent = Q_NULLPTR,int imagesize=2764800);
     ~controlTCP();
     bool connectSocket(QString ip);
     bool connectSocket(QTcpSocket* m_tcpSocket,QString ip);
     bool disconnectSocket();
     QByteArray getOneFrameDATA(); //从二维数组中取出一帧数据
+    void startSoftTrigAndCptTimer();
+
 private slots:
     void startTime();
     void sendCmdToServer();
@@ -36,6 +40,8 @@ signals:
 private:
     QTcpSocket* m_camSocket;
     QTimer *cmdTimer;
+    //10ms定时器 线程
+//    CTimer* m_pTimer;
     //多线程读取与保护
     QMutex m_queueQByteMutex;
     QQueue<QByteArray> m_queue_camDataInCHAR;
@@ -43,6 +49,7 @@ private:
     QByteArray   m_byteArray_oneFrame;
     int  m_NoDataTimes;
     bool b_realStopTimer;
+    uint m_read_image_size;
 };
 
 #endif // CONTROLTCP_H

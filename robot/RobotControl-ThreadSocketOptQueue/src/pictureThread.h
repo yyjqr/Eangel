@@ -16,12 +16,12 @@ class CamThread : public QThread
 {
     Q_OBJECT
 public:
-    CamThread();
+    CamThread(int imagesize);
     ~CamThread();
     //    void receivePic();
        void setThreadStop();
     //    camInfo getOneFrame();
-    bool connectTCPSocket(QString addr);
+    bool connectTCPSocket(QString addr,int imagesize);
     //取出一帧的数据，用于显示
     camInfo getCamOneFrame();
     void setThreadFlag(bool b_runFlag);
@@ -52,6 +52,7 @@ private:
 
     int imageCount=0;
     int imageWidth,imageHeight;
+    int m_read_image_size;
     //多线程读取与保护
     QMutex m_dataMutex;
     int m_countNOdata,m_tryGetDataTimes;
