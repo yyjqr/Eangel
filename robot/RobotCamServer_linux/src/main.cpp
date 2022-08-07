@@ -9,7 +9,7 @@
 
 */
 
-
+#include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -24,7 +24,6 @@
 #include "tcpsocket.h"
 #include "logging.h"
 #include "file.h"
-#include "main.h"
 #include <thread>
 #include <boost/date_time/posix_time/posix_time.hpp> //ms
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -181,6 +180,7 @@ void threadFunc()
     int send_num=0;
     int notGetCmd_times=0;
     char buf[100]={'0'};
+    std::string strTimeOfDay;
 
     while (1)
     {
@@ -188,24 +188,23 @@ void threadFunc()
             boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::local_time();
 //    boost::posix_time::time_duration now_time_of_day = boost::posix::microsec_clock::local_time().;
 //    cout<<"start time:"<<pTime<<endl;
-    std::string strTimeOfDay = boost::posix_time::to_simple_string(startTime.time_of_day()); // 当前时间：15:03:55
-    cout<<"day time:"<<strTimeOfDay<<endl;
+//    std::string strTimeOfDay = boost::posix_time::to_simple_string(startTime.time_of_day()); // 当前时间：15:03:55
+//    cout<<"day time:"<<strTimeOfDay<<endl;
 
         memset(recvCMD,'\0',sizeof(recvCMD));
         b_recvStatus =   camSocket.recvData(recvCMD,sizeof(recvCMD));
      boost::posix_time::ptime secondTime = boost::posix_time::microsec_clock::local_time();
      strTimeOfDay = boost::posix_time::to_simple_string(secondTime.time_of_day()); // 当前时间：15:03:55
 
-           cout<<"\n after receive,cur_time:"<<strTimeOfDay<<endl;
+           //cout<<"\n after receive,cur_time:"<<strTimeOfDay<<endl;
 
-        //cout<<"In thread,recv:"<<b_recvStatus<<" CMD:"<<recvCMD<<endl;
-        cout<<"In socket thread,recv CMD:"<<recvCMD<<endl;
+        cout<<"Recv state:"<<b_recvStatus<<" CMD:"<<recvCMD<<endl;
+        //cout<<"In socket thread,recv CMD:"<<recvCMD<<endl;
         if(b_recvStatus)
         {
-
+         cout<<"\n Receive CMD,cur_time:"<<strTimeOfDay<<endl;
             if(strcasecmp(recvCMD,"PIC")==0)
             {
-
                 //判断size的大小，避免为0时，还在取数据0310
                 std::unique_lock<std::mutex> camDataUseLocker(camMutex);
                 if(cam_deque.size()>0){
@@ -223,10 +222,11 @@ void threadFunc()
                     }
                    boost::posix_time::ptime endTime = boost::posix_time::microsec_clock::local_time();
                    boost::posix_time::time_duration td = endTime - startTime;
-                   cout<<"duration time:"<<td.total_milliseconds()<<endl;
-                   if(td.total_milliseconds()>1500){
-                      cout<<"\n Duration time BIG:"<<td.total_milliseconds()<<endl;
-                      LogWarning("send time takes much:%d ms\n",td.total_milliseconds());           
+                   uint64_t  send_time =td.total_milliseconds();
+                   cout<<"duration time:"<<send_time<<endl;
+                   if(send_time>1500){
+                      cerr<<"\n Duration time BIG:"<<send_time<<endl;
+                      LogWarning("send time takes much:%d ms\n",send_time);           
                       } 
                    cam_deque.pop_front();
                     free(st_sendFrame.camPtr);//add 分析内存增长未释放的问题 0314

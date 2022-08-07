@@ -2,8 +2,10 @@
 #define MAIN_H
 #include "camdata.h"
 #include <time.h>
-
+#include <deque>
 #include <mutex>
+
+using namespace std;
 deque <st_CamData> cam_deque;
 st_CamData st_oneFrame,st_sendFrame,st_tmpFrame;
 
