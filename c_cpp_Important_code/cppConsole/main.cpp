@@ -1,10 +1,12 @@
-#include <iostream>
 
-using namespace std;
 #include <unistd.h>  
 //sleep func
 #include <string.h>
 #include <string>
+#include <stdio.h>
+#include <iostream>
+using namespace std;
+
 void  fun(){
 
 cout << "递归" <<endl;
@@ -19,11 +21,10 @@ fun();
 
 int main(int argc,char** argv)
 {
-    cout << "Please input your username!" << endl;
-    string username;
-    getline(cin,username);
-    cout <<username<<endl;
-    sleep(2);
+    //cout << "Please input your username!" << endl;
+  //  string username;
+//    getline(cin,username);
+   // cout <<username<<endl;
     //int a=atoi(argv[1]);
     //cout << "output the argument " <<a<<endl;
     string  gnss="[73944.60][113.294307][23.093303][0.0000]";
@@ -44,14 +45,18 @@ int main(int argc,char** argv)
             saveFormat=(char*)malloc(3);
         }
 //saveFormat="jpg";
-saveFormat="jpg";
+char format[]="jpg";
+memcpy(saveFormat,format,sizeof(format));
 printf("saveFormat addr %x,saveFormat value %c\n",saveFormat,*saveFormat);
    cout<<"saveFormat "<<saveFormat<<endl;
 if(saveFormat!=nullptr)
     {
             free(saveFormat);
-saveFormat=nullptr;
+     saveFormat=nullptr;
         }
     //fun();
+  srand((unsigned)time(NULL));
+    int c=random();
+    cout<<"number c="<<c<<endl;
     return 0;
 }
