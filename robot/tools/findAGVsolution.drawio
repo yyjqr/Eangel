@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-08-08T12:08:21.826Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" etag="n4ahKkcmrSO4XH3st5ZX" version="20.2.2" type="github">
+<mxfile host="app.diagrams.net" modified="2022-08-08T12:09:02.950Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" etag="F3lupPmyJuJNtguFtIGr" version="20.2.2" type="github">
   <diagram id="8amQzvExZQlctH47_4PJ" name="Page-1">
     <mxGraphModel dx="1350" dy="712" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -82,7 +82,7 @@
         <mxCell id="T1TRBmClJaxGZLmSdFnb-23" value="恢复按钮是否按了" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="270" y="780" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="T1TRBmClJaxGZLmSdFnb-25" value="恢复按钮是否按了" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-25" value="AGV是否能正常执行任务" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="250" y="520" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="T1TRBmClJaxGZLmSdFnb-30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-27" target="T1TRBmClJaxGZLmSdFnb-29">
@@ -93,6 +93,12 @@
         </mxCell>
         <mxCell id="T1TRBmClJaxGZLmSdFnb-29" value="AGV是否正常执行任务" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="450" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-31" value="N" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="110" y="600" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-32" value="Y" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="510" width="60" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
