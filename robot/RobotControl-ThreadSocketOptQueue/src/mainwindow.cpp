@@ -2,7 +2,7 @@
  *  @brief   Robot control GUI,based on USB cam and socket,tcp.
  *  机器人交互控制界面，采用USB摄像头，基于tcp,socket进行传输，qt多线程开发
  *  @author  Jack
- *  @date  2020.12-2022.03
+ *  @date  2020.12-2022.08
  *  @E-mail  yyjqr789@sina.com
 */
 
@@ -63,8 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
     connect(camTimer,SIGNAL(timeout()),this,SLOT(onTimeGetFrameToShow()));
 
-    //增加失去服务器连接的相关操作
-    connect(showThread,SIGNAL(SIGNAL_camSocketDisconnectToMainThread()),this,SLOT(disconnect_Deal()));
+
     //    connect(showThread, SIGNAL(finished()), showThread, SLOT(deleteLater()));//信号槽中已有删除，析构函数中使用的回收资源更清晰！！！
 
 }
@@ -125,6 +124,8 @@ void MainWindow::on_pushButtonConnect_clicked()
     if(showThread==nullptr){
         qDebug()<<"\n fun:"<<__func__<<"showThread ptr:"<<showThread;
         showThread= new CamThread(m_imageSize);
+        //增加失去服务器连接的相关操作--->revise to this 0821
+        connect(showThread,SIGNAL(SIGNAL_camSocketDisconnectToMainThread()),this,SLOT(disconnect_Deal()));
     }
     if(showThread->connectTCPSocket(m_str_addr,m_imageSize)){
         qDebug()<<"\n Test fun:"<<__func__<<"showThread ptr:"<<showThread<<endl;
@@ -180,11 +181,10 @@ void MainWindow::getPicToShow()
             //add 未显示的数据，直接释放,避免内存增长 0620
             if(m_picToshow.imageBuf!=nullptr){
 
-                //重点调试地方！！！！
+                //重点调试地方！！！！(maybe the QArray data operate sometimes error!!
                 try{
                     qDebug()<<__LINE__<<"test free IMAGE buf\n";
                     free(m_picToshow.imageBuf);
-
                 }
                 catch(std::exception &e ){
                     std::cout << "Standard exception: " << e.what() << std::endl;
@@ -224,7 +224,7 @@ void MainWindow::onTimeGetFrameToShow()
         getPicToShow();
         //每次的地址是不一样的，目前不需要在测试这里。 0404
         //        qDebug() << "After show:" <<__func__<<"picToshow.imageBuf:"<<m_picToshow.imageBuf;
-        m_picToshow.imageBuf=nullptr;//显示后，将其置空 0717--->
+        m_picToshow.imageBuf=nullptr;   //显示后，将其置空 0717--->
         ui->label_RecvPictureNums->setText(QString::number(m_getImageCount));
         qDebug()<<"get and show ,take time(ms):"<<t_analysisMem.elapsed()<<endl;
         ui->textBrowser_log->append(m_timestr+TEXT_COLOR_GREEN("图片获取")+QString::number(m_getImageCount));
@@ -500,7 +500,7 @@ void MainWindow::on_pushButton_grab_clicked()
 
 void MainWindow::on_pushButton_disconnect_clicked()
 {
-    QString tmp_qstr="<font color=\"#FF0000\">" + m_timestr + "断开连接"+ "</font>";
+    QString tmp_qstr="<font color=\"#FF0000\">" + m_timestr + "断开连接\n"+ "</font>";
     ui->textBrowser_log->append(tmp_qstr);
     LogInfo("%s","服务器断开");
     //增加对指针的判断，让程序更健壮  0122

@@ -14,7 +14,7 @@ controlTCP::controlTCP(QObject* parent,int image_size):
     cmdTimer = new QTimer(this);
     m_camSocket = new QTcpSocket(this);
     m_byteArray_oneFrame.resize(MAX_LEN);
-//    m_pTimer = new CTimer("cmd定时器");
+    //    m_pTimer = new CTimer("cmd定时器");
     m_read_image_size=image_size;
     connect(cmdTimer,SIGNAL(timeout()),this,SLOT(sendCmdToServer()));
     //先把连接成功的信号，来做读取，然后再在线程里做接收处理？？？
@@ -29,9 +29,9 @@ controlTCP::~controlTCP()
         delete  cmdTimer;
     }
     //删除定时器指针
-//    if(m_pTimer!=nullptr){
-//        delete m_pTimer;
-//    }
+    //    if(m_pTimer!=nullptr){
+    //        delete m_pTimer;
+    //    }
     if(m_camSocket!=nullptr){
         delete  m_camSocket;
     }
@@ -61,7 +61,7 @@ bool controlTCP::connectSocket(QString ip)
     m_camSocket->waitForConnected(3000);//5s超时--->3s
 
     if(m_camSocket->state()==QTcpSocket::ConnectedState){
-//       startSoftTrigAndCptTimer();
+        //       startSoftTrigAndCptTimer();
         return true;
     }
     else
@@ -101,11 +101,20 @@ void controlTCP::stopTimer()
 }
 void controlTCP::sendCmdToServer()
 {
-    m_camSocket->write("PIC");
-    m_camSocket->flush();
+    //    qDebug()<<"m_camSocket->state():"<<m_camSocket->state()<< "\n";
     QDateTime datetime;
     QString timestr=datetime.currentDateTime().toString("HH:mm:ss.zzz");
-    qDebug()<<__func__<<timestr<<":send CMD:PIC"<< "\n";
+    if(m_camSocket->state()==QTcpSocket::ConnectedState){
+        m_camSocket->write("PIC");
+        m_camSocket->flush();
+        qDebug()<<__func__<<timestr<<":send CMD:PIC"<< "\n";
+    }else{
+        qDebug()<<"m_camSocket->state():"<<m_camSocket->state()<< "\n";
+        LogInfo("Socket not connected,send CMD time:%s\n",timestr.toStdString().c_str());
+    }
+
+
+
     LogInfo("After read,send CMD time:%s\n",timestr.toStdString().c_str());
 }
 
@@ -118,7 +127,7 @@ void controlTCP::recvData(void)
 {
     QByteArray bytes=nullptr;
     long long int bytesNum=0;
-//        qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    //        qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
     qDebug()<<"\n fun:"<<__func__<<"m_read_image_size:"<<m_read_image_size;
     //    bytes.resize(MAX_LEN);//ADD 0309
     mutex.lock();
@@ -159,9 +168,9 @@ void controlTCP::recvData(void)
     if( bytes.size() < CAM_ResolutionRatio*m_read_image_size/4 ){
         cerr<<"\n not have enough bytes to read"<<endl; //add
     }
-//    else{
-//        qDebug()<<"Socket don't read a picture size:"<<bytes.size()<<endl;
-//    }
+    //    else{
+    //        qDebug()<<"Socket don't read a picture size:"<<bytes.size()<<endl;
+    //    }
     mutex.unlock();
 
 
