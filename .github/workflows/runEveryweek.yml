@@ -34,13 +34,13 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
     
       # Partial clone
-      - name: Partial clone
-        shell: bash
-        run: |
-          REPO="https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
-          git clone --filter=blob:none --no-checkout --depth 1  --sparse $REPO .
-          git sparse-checkout add 'latest/*'
-          git checkout
+#       - name: Partial clone
+#         shell: bash
+#         run: |
+#           REPO="https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
+#           git clone --filter=blob:none --no-checkout --depth 1  --sparse $REPO .
+#           git sparse-checkout add 'latest/*'
+#           git checkout
 #       - name: Get cache directory for npm
 #         id: cache-dir
 #         shell: bash
@@ -61,12 +61,12 @@ jobs:
 #         run: node currscript.js
 
       # commiting and pushing changes
-      - name: commit and push
-        shell: bash
-        run: |
-          git config --global user.email github-actions@github.com
-          git config --global user.name github-actions
-          git pull
-          git add --sparse -A
-          git commit -m 'Update News'
-          git push
+#       - name: commit and push
+#         shell: bash
+#         run: |
+#           git config --global user.email github-actions@github.com
+#           git config --global user.name github-actions
+#           git pull
+#           git add --sparse -A
+#           git commit -m 'Update News'
+#           git push
