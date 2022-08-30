@@ -41,24 +41,24 @@ jobs:
           git clone --filter=blob:none --no-checkout --depth 1  --sparse $REPO .
           git sparse-checkout add 'latest/*'
           git checkout
-      - name: Get cache directory for npm
-        id: cache-dir
-        shell: bash
-        run: echo "::set-output name=npmcache::$(npm config get cache)"
+#       - name: Get cache directory for npm
+#         id: cache-dir
+#         shell: bash
+#         run: echo "::set-output name=npmcache::$(npm config get cache)"
 
-      - name: Trying to use the old cache if available
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.cache-dir.outputs.npmcache }}
-          key: ${{ runner.os }}-cache-${{ hashFiles('**/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-cache-
-            ${{ runner.os }}-
-      - name: Install Dependencies
-        run: npm ci
+#       - name: Trying to use the old cache if available
+#         uses: actions/cache@v2
+#         with:
+#           path: ${{ steps.cache-dir.outputs.npmcache }}
+#           key: ${{ runner.os }}-cache-${{ hashFiles('**/package.json') }}
+#           restore-keys: |
+#             ${{ runner.os }}-cache-
+#             ${{ runner.os }}-
+#       - name: Install Dependencies
+#         run: npm ci
           
-      - name: Running the command
-        run: node currscript.js
+#       - name: Running the command
+#         run: node currscript.js
 
       # commiting and pushing changes
       - name: commit and push
