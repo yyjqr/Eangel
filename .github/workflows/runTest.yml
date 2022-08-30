@@ -16,5 +16,5 @@ jobs:
           ls -alh ${{ github.workspace }}
       - name: Do my job
         run:  chmod +x sendTest.sh
-        run:   ./sendTest.sh
+      - run:   ./sendTest.sh
       - run: echo "🍏 This job's status is ${{ job.status }}."
