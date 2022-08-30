@@ -7,14 +7,17 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
+#     - name: Checkout
+#       uses: actions/checkout@master
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
 
-    - name: Build and Deploy
-      uses: yyjqr/Eangel/@master
-      env :
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: master
-        FOLDER: pySpider
+      - name: Build and Deploy
+        uses: yyjqr/Eangel/@master
+        env :
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: master
+          FOLDER: pySpider
 #         -run echo "test pwd"
-        BUILD_SCRIPT: python spider_TechMili_Drive_OPT_V1.8.py
+          BUILD_SCRIPT: python spider_TechMili_Drive_OPT_V1.8.py
