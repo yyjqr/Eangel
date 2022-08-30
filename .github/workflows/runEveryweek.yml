@@ -8,9 +8,9 @@ on:
 
   workflow_dispatch:
   
-env: # Or as an environment variable
-  currlink: ${{ secrets.CURRLINK }}
-  cryptolink: ${{ secrets.CRYPTOLINK }}
+# env: # Or as an environment variable
+#   currlink: ${{ secrets.CURRLINK }}
+#   cryptolink: ${{ secrets.CRYPTOLINK }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
