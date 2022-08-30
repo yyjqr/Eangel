@@ -4,7 +4,7 @@
  * @Author: Jack
  * @Date: 2022-03-29 17:43:12
  * @LastEditors: Jack
- * @LastEditTime: 2022-07-15 18:55:24
+ * @LastEditTime: 2022-08-30 14:46:55
  */
 #include <iostream>
 #include <unistd.h>
@@ -63,10 +63,19 @@ int main(int argc,char** argv)
     cout<<"day time:"<<strTimeOfDay<<endl;
     std::cout << "system_clock::now():"<<system_clock::now() << '\n';
     std::cout << "high_resolution_clock::now():"<<high_resolution_clock::now() << '\n';
+    //overflow!! test
+    uint32_t value=5.5E12;  
+    uint64_t value64=5.5E12;
+    uint32_t valueMax=4.1E9;
+    uint32_t timestamp32=boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::steady_clock::now().time_since_epoch())
+            .count();
+            cout<<"uint32_t timestamp:"<<timestamp32<<" \n 32value:"<<value<<"value64:"<<value64<<endl;
+            
     uint64_t timestamp=boost::chrono::duration_cast<boost::chrono::milliseconds>(boost::chrono::steady_clock::now().time_since_epoch())
             .count();
-        cout<<"timestamp:"<<timestamp<<endl;
+        cout<<"uint64_t timestamp:"<<timestamp<<"test 32value :"<<valueMax<<endl;
 
     //fun();
+
     return 0;
 }
