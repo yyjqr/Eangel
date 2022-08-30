@@ -14,4 +14,6 @@ jobs:
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
+      - name: Do my job
+        run:   ./sendTest.sh
       - run: echo "🍏 This job's status is ${{ job.status }}."
