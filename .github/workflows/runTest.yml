@@ -13,7 +13,8 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: List files in the repository
         run: |
-          ls ${{ github.workspace }}
+          ls -alh ${{ github.workspace }}
       - name: Do my job
+        run:  chmod +x sendTest.sh
         run:   ./sendTest.sh
       - run: echo "🍏 This job's status is ${{ job.status }}."
