@@ -15,9 +15,13 @@ jobs:
 
       - name: Build and Deploy
         uses: yyjqr/Eangel/@master
-        env :
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: master
-          FOLDER: pySpider
-#         -run echo "test pwd"
-          BUILD_SCRIPT: python spider_TechMili_Drive_OPT_V1.8.py
+#         env :
+#           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+#           BRANCH: master
+#         FOLDER: pySpider
+# #         -run echo "test pwd"
+#         BUILD_SCRIPT: python spider_TechMili_Drive_OPT_V1.8.py
+      - run:  pip install bs4
+      - run:  cd pySpider
+      - run:  python spider_TechMili_Drive_OPT_V1.8.py
+
