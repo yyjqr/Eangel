@@ -1,10 +1,10 @@
 
 /** @brief
- * c服务器,获取USB相机图像，另外一个线程通过socket发送出去***
+ * c/c++服务器端,获取USB相机图像，另外一个线程通过socket发送出去***
  * 基于opencv4 c++，摄像头拍摄图片。硬件基于树莓派/Jetson。
  * @author Jack
  * @date 20170908--->201907 -->
-   202003 -->202203
+   202003 -->202203  --->07-09
  *
 
 */
@@ -31,8 +31,7 @@ using namespace std;
 
 using namespace cv;
 string Absolute_exec_path=""; //定义执行程序绝对路径的变量
-const int total_len=2764800;//1280*720*3的字节数
-
+const int kCamCacheFrameSize =20;
 void camReadFunc();
 void threadFunc();
 
@@ -66,8 +65,6 @@ int main(int argc, char **argv) {
 
     int count=0;//add 0807
 
-
-    //cin >>timeDuration;
     std::thread camReadThread(camReadFunc);
     std::thread camSendThread(threadFunc);
 
@@ -87,31 +84,36 @@ void camReadFunc()
     char buf[100]={0};
     string cur_time_str="";
     /* init camera */
-    VideoCapture pCapture;
-    pCapture.open(-1); //从摄像头读入视频 0表示从摄像头读入  -1表示任意摄像头 202003
+    VideoCapture video_capture;
+    video_capture.open(-1); //从摄像头读入视频 0表示从摄像头读入  -1表示任意摄像头 202003
     //double rate=25.0;//fps
 
-    pCapture.set(CAP_PROP_FRAME_WIDTH, 1280);
-    pCapture.set(CAP_PROP_FRAME_HEIGHT, 720);
+    video_capture.set(CAP_PROP_FRAME_WIDTH, 1280);
+    video_capture.set(CAP_PROP_FRAME_HEIGHT, 720);
 
-    if (!pCapture.isOpened())
+    if (!video_capture.isOpened())
     {
         cerr << "can not open camera"<<endl;
         exit(0);
         return ;
-    }
-
-
-    cout<<"Video capture 拍摄交互"<<endl;
-    if(pCapture.isOpened())  //revise 202205
-    {
+    }else{
+      unsigned int width = video_capture.get(CAP_PROP_FRAME_WIDTH);
+      unsigned int height = video_capture.get(CAP_PROP_FRAME_HEIGHT);
+      frame_width =width;
+      frame_height=height;
+      total_len=frame_width*frame_height*3;
+		cout << " video info"
+			 << "[Width:" << width << ", Height:" << height
+			 << ", FPS: " << video_capture.get(CAP_PROP_FPS)
+			 << ", Total_len:"<< total_len
+			 << "]" << std::endl;
       for(;;)
       {
         tOne=time(&timep); //放在循环里面才行
         local = localtime(&tOne); //转为本地时间
         strftime(buf, 64, "%H-%M-%S", local);//
         cur_time_str=buf;
-        pCapture >>frame;
+        video_capture >>frame;
   //      imshow("RobotCam",frame);
 
 //        waitKey(100); //延时0.1s
@@ -121,7 +123,7 @@ void camReadFunc()
 
             cvtColor(frame,rgbFrame,COLOR_BGR2RGB);//CV_BGR2RGB
             //            imshow("RobotCamRGB",rgbFrame);
-            st_oneFrame.camPtr=(uint8_t*)malloc(height*width*channel*sizeof(uint8_t));
+            st_oneFrame.camPtr=(uint8_t*)malloc(total_len*sizeof(uint8_t));
             if(st_oneFrame.camPtr!=nullptr){
                memcpy(st_oneFrame.camPtr,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
                cam_deque.push_back(st_oneFrame);
@@ -135,7 +137,7 @@ void camReadFunc()
             if(cam_deque.size()>8){
 
                 usleep(500);
-                if(cam_deque.size()>25){
+                if(cam_deque.size()>kCamCacheFrameSize){
                     cout<<"cam size is big:"<<cam_deque.size()<<endl;
                     st_tmpFrame=cam_deque.front();
                     //尝试把相关相机数据内存释放出去！！！0314
@@ -226,7 +228,11 @@ void threadFunc()
                    cout<<"duration time:"<<send_time<<endl;
                    if(send_time>1500){
                       cerr<<"\n Duration time BIG:"<<send_time<<endl;
-                      LogWarning("send time takes much:%d ms\n",send_time);           
+                      LogWarning("send time takes much:%llu ms\n",send_time);
+                      if(send_time>10000){
+                        cerr<<"\n Duration time Too BIG:"<<send_time<<endl;
+                        LogError("Send time takes too much:%llu ms\n",send_time);
+                         }           
                       } 
                    cam_deque.pop_front();
                     free(st_sendFrame.camPtr);//add 分析内存增长未释放的问题 0314
