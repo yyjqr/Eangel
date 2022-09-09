@@ -4,7 +4,7 @@
  * @Author: Jack
  * @Date: 2022-03-29 11:10:09
  * @LastEditors: Jack
- * @LastEditTime: 2022-08-30 14:43:36
+ * @LastEditTime: 2022-09-09 13:45:53
  */
 #include <stdio.h>
 #include <string.h>
@@ -29,7 +29,7 @@ int main(void) {
   int CC[] = {4, 5, 6};
   int* ABC[] = {AA, BB, CC};
   printf("sizeof(ABC):%d,sizeof(BB):%d \n", sizeof(ABC), sizeof(BB));
-  printf("sizeof(int):%d,sizeof(AA):%d,AA:0x%x,BB:0x%x  \n", sizeof(int), sizeof(AA), AA, BB);
+  printf("sizeof(int):%d,sizeof(AA):%d,AA:0x%x,BB:0x%x \n", sizeof(int), sizeof(AA), AA, BB);
   for (int i = 0; i < 3; i++) {
     printf("sizeof(ABC[%d]):%d,ABC[i]:0x%x \n", i, sizeof(ABC[i]), ABC[i]);
     //   int* p=ABC[i];
@@ -45,6 +45,12 @@ int main(void) {
     //     }
     // }
   }
+// 数组排列顺序
+  int array[3][3]={1,2,3,4,5,6,7,8,9};
+  for(int i=0;i<3;i++){
+    printf("array[%d][%d]:%d\n",i, 2-i, array[i][2-i]);
+  }
+
   string log_Path = "./log";
   //    cout<<" log path:"<<log_Path<<endl;
   string logDir = "mkdir -p " + log_Path;
@@ -54,16 +60,16 @@ int main(void) {
   tm local;  // pointer ---->tm
   char buf[100] = {0};
 
-  printf("test pointer local:0x%x\n", local);
+  printf("test pointer local:0x%x\n", &local);
   current_time = time(&timep);  //
                                 //   local=localtime(&current_time);
 
   // if local define as tm*,then will has this error. 08.30
   // test pointer local:0x6
   // Segmentation fault (core dumped)
-  localtime_r(&current_time, local);  // 转为本地时间   thread_safe!!
-  printf("After assign ,test pointer local:0x%x\n", local);
-  strftime(buf, 64, "%Y-%m-%d_%H:%M:%S", local);
+  localtime_r(&current_time, &local);  // 转为本地时间   thread_safe!!
+  printf("After assign ,test pointer local:0x%x\n", &local);
+  strftime(buf, 64, "%Y-%m-%d_%H:%M:%S", &local);
   printf("time buf:%s\n", buf);
   log_file += buf;
   log_file += "-test.log";
