@@ -1,0 +1,115 @@
+<mxfile host="app.diagrams.net" modified="2022-08-08T12:13:00.299Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36" etag="VDhqWgPPk2LEyB8TKMSo" version="20.2.2" type="github">
+  <diagram id="8amQzvExZQlctH47_4PJ" name="Page-1">
+    <mxGraphModel dx="1350" dy="712" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-1" target="T1TRBmClJaxGZLmSdFnb-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-1" target="T1TRBmClJaxGZLmSdFnb-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-1" value="AGV是否能走" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-2" target="T1TRBmClJaxGZLmSdFnb-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-2" target="T1TRBmClJaxGZLmSdFnb-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-2" value="急停是否按下" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-4" value="N" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="190" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-5" target="T1TRBmClJaxGZLmSdFnb-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-5" target="T1TRBmClJaxGZLmSdFnb-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-5" value="灯的显示是否正常" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="380" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-7" value="N" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="320" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-8" value="AGV其它功能是否正常" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-10" value="Y" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="180" y="90" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-11" target="T1TRBmClJaxGZLmSdFnb-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-11" target="T1TRBmClJaxGZLmSdFnb-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-11" target="T1TRBmClJaxGZLmSdFnb-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-11" value="恢复按钮是否按了" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="520" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-13" value="其它开关传感器是否正常" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="380" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-15" value="N" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="460" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-16" value="Y" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="370" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-17" value="ME初始化是否正常" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="660" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-19" target="T1TRBmClJaxGZLmSdFnb-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-37" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-19" target="T1TRBmClJaxGZLmSdFnb-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-19" value="是否在二维码上" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="780" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-21" value="benniao是否正常运行" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="980" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-23" value="是否能识别为在位" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="780" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-25" value="AGV是否能正常执行任务" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="520" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-27" target="T1TRBmClJaxGZLmSdFnb-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-27" value="松开急停按钮" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-29" value="AGV是否正常执行任务" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-31" value="N" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="110" y="600" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-32" value="Y" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="510" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-33" value="Y" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="190" y="770" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-35" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="T1TRBmClJaxGZLmSdFnb-34" target="T1TRBmClJaxGZLmSdFnb-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="T1TRBmClJaxGZLmSdFnb-34" value="摄像头拍照是否有图片" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="880" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

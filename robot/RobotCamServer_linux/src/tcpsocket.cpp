@@ -36,7 +36,14 @@ bool tcpSocket::connectSocket()
     //    serAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); //这里可以改成服务端的IP，若是都在一台电脑就不用改变
     serAddr.sin_addr.s_addr = htonl(INADDR_ANY); //这里可以改成服务端的IP，若是都在一台电脑就不用改变
     server_len = sizeof(serAddr);
-    bind(m_server_sockfd, (struct sockaddr *)&serAddr, server_len);
+    int ret=-1;
+    ret =bind(m_server_sockfd, (struct sockaddr *)&serAddr, server_len);
+    if(ret>0){
+     cerr<<"端口占用，绑定失败"<<endl;
+     LogError("port has been used,or not can't be binded,ret %d",ret);
+     return false;
+
+     }
     listen(m_server_sockfd, 5); //监听队列最多容纳5个
     cout<<"Server start to listen"<<endl;
 
