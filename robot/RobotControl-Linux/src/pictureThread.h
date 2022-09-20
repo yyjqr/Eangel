@@ -47,9 +47,9 @@ private:
     int m_index=0;
     bool b_dataFlag;
     controlTCP* m_pictureSocket;
-
-    queue<camInfo> m_camSaveQueue;
-
+    QTcpSocket* m_tcpSocket;
+    queue<camInfo> camSaveQueue;
+//    QTimer *getFrameTimer;
     int imageCount=0;
     int imageWidth,imageHeight;
     //多线程读取与保护
