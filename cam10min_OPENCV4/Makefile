@@ -7,7 +7,8 @@ CC	   := g++
 #编译的参数
 #CFLAG	   := -g -Wall  
 CFLAGS = -g -Wall 
-OPENCV=`pkg-config --cflags opencv --libs opencv` 
+#OPENCV=`pkg-config --cflags opencv --libs opencv` 
+OPENCV=`pkg-config --cflags opencv4 --libs ` 
 #OPENCV=`pkg-config --cflags --libs opencv`
 LIBS = $(OPENCV)
 
