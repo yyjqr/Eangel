@@ -34,15 +34,12 @@ signals:
     void  signalSocketToRead();
     void signalSocketDisconnect();
 private:
-    QTcpSocket* m_camSocket;
+    QTcpSocket* pictureSocket;
     QTimer *cmdTimer;
-    //多线程读取与保护
-    QMutex m_queueQByteMutex;
+//    queue<queue<char>> m_2vec_camDataInCHAR;
     QQueue<QByteArray> m_queue_camDataInCHAR;
     QMutex  mutex;
     QByteArray   m_byteArray_oneFrame;
-    int  m_NoDataTimes;
-    bool b_realStopTimer;
 };
 
 #endif // CONTROLTCP_H
