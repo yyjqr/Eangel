@@ -26,7 +26,7 @@ from datetime import datetime
 import re
 import json
 import codecs # use for write a file 0708
-import mysqlWriteNewsV2
+#import mysqlWriteNewsV2
 import random
 from lxml.html.clean import Cleaner  #CLEANER 0415
 
@@ -44,7 +44,7 @@ s.keep_alive = False
 
 ##news path 202204
 save_news_path="./techNews/"
-
+useDatabase=False
  # get the sys date and hour,minutes!!
 #def GetDate():
 now_time = datetime.now()
@@ -219,8 +219,9 @@ class GrabNewsAI():
                     print(newsIndex)
                     newsOne=(newsIndex, '1',news.text,'Jack',date, 'content',
                       newsUrl, '人工智能')
-                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
-                    print("write DB state: %d" %result)
+                    if useDatabase :
+                       result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+                       print("write DB state: %d" %result)
 
 class GrabNewsProduct():
     def __init__(self):
@@ -238,7 +239,6 @@ class GrabNewsProduct():
         #print(soup.get_text())
         #for news in soup.select('a.enk2x9t2 css-7v7n8p epl65fo4'):  #更换了class相关字段,class前要加点.  202202 ---->enk2x9t2 css-7v
         for news in soup.select('a.enk2x9t2'): 
-        #for news in soup.select('a#data-vars-ga-outbound-link'):  #更换了class相关字段,class前要加点.  202202 
             if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
                tittle=news.text
                print(news.text)
@@ -338,11 +338,12 @@ class GrabDriveWEB():
                     
                     self.NewsList.append({string:newsUrl})
                     #newsIndex=newsIndex+1
-                    print(newsIndex)
-                    newsOne=(newsIndex,'2', news.text,'Jack',date, 'Barbare',
+                    if useDatabase:
+                        print(newsIndex)
+                        newsOne=(newsIndex,'2', news.text,'Jack',date, 'Barbare',
                       newsUrl, '军事')
-                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
-                    print("write DB state: %d" %result)
+                        result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+                        print("write DB state: %d" %result)
 
 
 #adopt from other article,techCrunch
