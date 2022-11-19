@@ -23,7 +23,7 @@ int main(int argc, char** argv)
   char stop_cmd[30]={0};  
   double elapsedseconds;
   unsigned int fps_set=10;
-  VideoCapture videoCapturer(0);//   Numerical value 0 cv::CAP_ANY  
+  VideoCapture videoCapturer(-1);//   Numerical value 0 cv::CAP_ANY  
 	
   //char play_cmd[80];
   //double rate = capture.get(CV_CAP_PROP_FPS);//视频的帧率  
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     }
   else
     {
-      cout<<"Capture not OK";
+      cout<<"Cam isn't open, Capture not OK!!";
       return -1;
     }
   //Mat frame;  
