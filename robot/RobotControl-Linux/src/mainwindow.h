@@ -43,7 +43,6 @@ public:
     void goRightHead();
     void goRightBack();
     void getPicToShow();
-    void getPicToShow(const camInfo& oneFrameInfo);  //add 0213
     bool ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint64_t nPixelFormat);
 //    bool ShowImageOpt(int nWidth, int nHeight, uint64_t nPixelFormat);
     void ParseFromJson();
@@ -52,7 +51,7 @@ private slots:
     void systemInfoUpdate();
     void onTimeGetFrameToShow();
     void startTime();
-//
+//    void getPicToShow(camInfo& frameToShow);  //add 0213
     void tips();
     void on_pushButton_LEFT_pressed();
     //    void on_pushButton_LEFT_released();
@@ -61,9 +60,9 @@ private slots:
     void on_pushButton_RIGHT_pressed();
     void on_pushButton_RIGHT_released();
     void on_pushButtonCARFRONT_pressed();
-//    void on_pushButtonCARFRONT_released();
+    void on_pushButtonCARFRONT_released();
     void on_pushButtonCARLF_pressed();
-//    void on_pushButtonCARLF_released();
+    void on_pushButtonCARLF_released();
     void on_pushButtonCARRF_pressed();
     void on_pushButtonCARRF_released();
     void on_pushButtonCARLEFT_pressed();
@@ -89,13 +88,11 @@ private slots:
 
     void on_comboBox_ipAddr_currentTextChanged(const QString &arg1);
 
-    void on_pushButtonCARFRONT_clicked();
-
 private:
     Ui::MainWindow *ui;
 
     QTcpSocket* controlSocket;
-    QString m_str_addr,port;
+    QString addr,port;
     QString m_ip_addr1,m_ip_addr2,m_ip_addr3,m_ip_addr4;
     const std::string m_ip_config_path="./CONFIG/ipAddr.conf";
     uchar imagebuffer[IMAGESIZE];
@@ -115,7 +112,7 @@ private:
     int m_saveIndex;
 
     CamThread *showThread;
-    int m_getImageCount,m_getOneTimeImageNums,m_NoDataToShow_Times;
+    int m_getImageCount;
     int m_CAM_ResolutionRatio;
     QString m_sysTimestr;
 

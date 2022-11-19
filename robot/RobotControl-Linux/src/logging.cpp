@@ -19,11 +19,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- 
-#include "logging.h"
-#include <stdio.h>
-#include <string.h>
 
+#include "logging.h"
+#include <strings.h>
 #include <iostream>
 #include <QDateTime>
 
@@ -33,8 +31,33 @@ Log::Level Log::mLevel = Log::DEFAULT;
 FILE* Log::mFile = stdout;
 std::string Log::mFilename = "stdout";
 
+// ParseCmdLine
+//void Log::ParseCmdLine( const int argc, char** argv )
+//{
+//    ParseCmdLine(commandLine(argc, argv));
+//}
 
 
+//// ParseCmdLine
+//void Log::ParseCmdLine( const commandLine& cmdLine )
+//{
+//    const char* levelStr = cmdLine.GetString("log-level");
+
+//    if( levelStr != NULL )
+//    {
+//        SetLevel(LevelFromStr(levelStr));
+//    }
+//    else
+//    {
+//        if( cmdLine.GetFlag("verbose") )
+//            SetLevel(VERBOSE);
+
+//        if( cmdLine.GetFlag("debug") )
+//            SetLevel(DEBUGING);//DEBUG--->DEBUGING
+//    }
+
+//    SetFile(cmdLine.GetString("log-file"));
+//}
 
 Log::Log()
 {
@@ -50,103 +73,100 @@ Log::~Log()
 // SetFile
 void Log::SetFile( FILE* file )
 {
-	if( !file || mFile == file )
-		return;
+    if( !file || mFile == file )
+        return;
 
-	mFile = file;
+    mFile = file;
 
-	if( mFile == stdout )
-		mFilename = "stdout";
-	else if( mFile == stderr )
-		mFilename = "stderr";
+    if( mFile == stdout )
+        mFilename = "stdout";
+    else if( mFile == stderr )
+        mFilename = "stderr";
 }
 
 
 // SetFilename
 void Log::SetFile( const char* filename )
 {
-	if( !filename )
+    if( !filename )
         return ;
 
-    if( stricmp(filename, "stdout") == 0 )
-		SetFile(stdout);
-
-    else if( stricmp(filename, "stderr") == 0 )
-		SetFile(stderr);
-	else
-	{
-        if( stricmp(filename, mFilename.c_str()) == 0 )
+    if( strcasecmp(filename, "stdout") == 0 )
+        SetFile(stdout);
+    else if( strcasecmp(filename, "stderr") == 0 )
+        SetFile(stderr);
+    else
+    {
+        if( strcasecmp(filename, mFilename.c_str()) == 0 )
             return ;
 
-       FILE* file = fopen(filename, "w+");
-       
-		if( file != NULL )  
-		{
-			SetFile(file);
-			mFilename = filename;
+        FILE* file = fopen(filename, "w+");
+
+        if( file != NULL )
+        {
+            SetFile(file);
+            mFilename = filename;
             //return file;   //ADD  JACK
-            std::cout<<"filename:"<<filename<<std::endl;//<<" save file* "<<file
+            std::cout<<"filename: "<<filename<<std::endl;
             LogInfo("filename is %s \n",filename);
 
             //fprintf(Log::GetFile(), "filename is %s \n",filename);
 
-		}
-		else
-		{
-			LogError("failed to open '%s' for logging\n", filename);
+        }
+        else
+        {
+            LogError("failed to open '%s' for logging\n", filename);
             return ;
-		}
+        }
 
-	}	
+    }
 }
 
 // LevelToStr
 const char* Log::LevelToStr( Log::Level level )
 {
-	switch(level)
-	{
-		case SILENT:	return "silent";
-        case ERROR:    return "error";
-		case WARNING:  return "warning";
-		case SUCCESS:  return "success";
-        case INFO:	   return "info";
-		case VERBOSE:	return "verbose";
-        case DEBUGING:	return "debug";
-	}
+    switch(level)
+    {
+    case SILENT:	return "silent";
+    case ERROR:    return "error";
+    case WARNING:  return "warning";
+    case SUCCESS:  return "success";
+    case INFO:	   return "info";
+    case VERBOSE:	return "verbose";
+    case DEBUGING:	return "debug";
+    }
 
-	return "default";
+    return "default";
 }
 
 
 // LevelFromStr
 Log::Level Log::LevelFromStr( const char* str )
 {
-	if( !str )
-		return DEFAULT;
+    if( !str )
+        return DEFAULT;
 
     for( int n=0; n <= DEBUGING; n++ )
-	{
-		const Level level = (Level)n;
+    {
+        const Level level = (Level)n;
 
-        if( stricmp(str, LevelToStr(level)) == 0 )
-			return level;
-	}
+        if( strcasecmp(str, LevelToStr(level)) == 0 )
+            return level;
+    }
 
-    if( stricmp(str, "disable") == 0 || stricmp(str, "disabled") == 0 || stricmp(str, "none") == 0 )
-		return SILENT;
+    if( strcasecmp(str, "disable") == 0 || strcasecmp(str, "disabled") == 0 || strcasecmp(str, "none") == 0 )
+        return SILENT;
 
-	return DEFAULT;
+    return DEFAULT;
 }
 
 void Log::writeLogHead(){
-//    string log_head=TimeUtil::getLogTime();
     QDateTime datetime;
-    QString timestr=datetime.currentDateTime().toString("HH:mm:ss.zzz"); //fff为毫秒部分  202108
+    QString timestr=datetime.currentDateTime().toString("HH:mm:ss");
     std::string log_head=timestr.toStdString();
-//    std::string log_head;10
     fprintf(Log::GetFile(), "%s:", log_head.c_str());
 }
 
 
 
-	
+

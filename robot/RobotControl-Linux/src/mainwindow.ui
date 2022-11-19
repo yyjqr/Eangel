@@ -287,7 +287,7 @@
        <property name="minimumSize">
         <size>
          <width>60</width>
-         <height>30</height>
+         <height>0</height>
         </size>
        </property>
        <property name="text">
@@ -325,7 +325,7 @@
        <property name="minimumSize">
         <size>
          <width>60</width>
-         <height>30</height>
+         <height>0</height>
         </size>
        </property>
        <property name="text">
@@ -538,7 +538,7 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>1280</x>
+      <x>1310</x>
       <y>270</y>
       <width>120</width>
       <height>30</height>
@@ -568,70 +568,6 @@
       <width>100</width>
       <height>40</height>
      </size>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_RecvStatus">
-    <property name="geometry">
-     <rect>
-      <x>650</x>
-      <y>680</y>
-      <width>141</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>100</width>
-      <height>0</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>0</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_6">
-    <property name="geometry">
-     <rect>
-      <x>520</x>
-      <y>680</y>
-      <width>120</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>120</width>
-      <height>20</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>数据接收状态:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_7">
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>680</y>
-      <width>91</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>本次接收图片：</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_RecvOneTimePictureNums">
-    <property name="geometry">
-     <rect>
-      <x>380</x>
-      <y>680</y>
-      <width>54</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>0</string>
     </property>
    </widget>
   </widget>

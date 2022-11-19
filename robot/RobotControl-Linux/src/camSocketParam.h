@@ -6,7 +6,6 @@
 //#define IMAGESIZE (921600*3)
 const int IMAGESIZE=921600;
 const int CAM_ResolutionRatio=3;
-const int MAX_LEN=2764800;
 enum CAM_TYPE{ Small_480p=0,Common_Type720p,Common_Type1080p};
 struct camInfo
 {
@@ -15,17 +14,5 @@ struct camInfo
     int imageHeight;
     int type;
 };
-
-typedef struct ST_CamResolution {
-    int imageWidth=1280;
-    int imageHeight=720;
-    int type=Common_Type720p;
-}stCamResolution;
-
-
-
-//stCamResolution  stHDRes;
-
-
 
 #endif // CAMSOCKETPARAM_H
