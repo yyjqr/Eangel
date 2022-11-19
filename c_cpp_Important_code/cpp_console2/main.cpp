@@ -1,3 +1,11 @@
+/*
+ * @Descripttion: 
+ * @version: 
+ * @Author: Jack
+ * @Date: 2022-03-29 11:10:09
+ * @LastEditors: Jack
+ * @LastEditTime: 2022-07-12 19:15:18
+ */
 #include <iostream>
 #include <unistd.h>
 
@@ -24,6 +32,12 @@ typedef struct stRobotInfo
     double  driveDistance;
 }st_robotInfo;
 
+class robot{
+    public:
+    void robotControl();
+    private:
+    double veloctity;
+};
 int main(int argc,char** argv)
 {
     cout << "Please input your username!" << endl;
@@ -70,5 +84,10 @@ int main(int argc,char** argv)
         saveFormat=nullptr;
     }
     //fun();
+   std::size_t len=gnss.length();
+   cout<<"size_t:"<<typeid(len).name()<<endl;
+    // robot* robotOne=new robot();
+    robot robotOne;
+    cout<<"typeid robotOne:"<<typeid(robotOne).name()<<endl;
     return 0;
 }

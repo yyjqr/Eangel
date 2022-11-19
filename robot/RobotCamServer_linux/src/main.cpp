@@ -1,16 +1,15 @@
 
 /** @brief
- * c服务器,获取USB相机图像，另外一个线程通过socket发送出去***
+ * c/c++服务器端,获取USB相机图像，另外一个线程通过socket发送出去***
  * 基于opencv4 c++，摄像头拍摄图片。硬件基于树莓派/Jetson。
  * @author Jack
  * @date 20170908--->201907 -->
-   202003 -->202203
+   202003 -->202203  --->07-09
  *
 
 */
 
-
-
+#include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -25,20 +24,19 @@
 #include "tcpsocket.h"
 #include "logging.h"
 #include "file.h"
-#include "main.h"
 #include <thread>
+#include <boost/date_time/posix_time/posix_time.hpp> //ms
+#include <boost/date_time/gregorian/gregorian.hpp>
 using namespace std;
 
 using namespace cv;
 string Absolute_exec_path=""; //定义执行程序绝对路径的变量
-const int total_len=2764800;//1280*720*3的字节数
-
+const int kCamCacheFrameSize =20;
 void camReadFunc();
 void threadFunc();
 
 
 int main(int argc, char **argv) {
-
     char buf[100]={0};
 
     Log camlog;
@@ -67,9 +65,6 @@ int main(int argc, char **argv) {
 
     int count=0;//add 0807
 
-
-
-    //cin >>timeDuration;
     std::thread camReadThread(camReadFunc);
     std::thread camSendThread(threadFunc);
 
@@ -89,50 +84,61 @@ void camReadFunc()
     char buf[100]={0};
     string cur_time_str="";
     /* init camera */
-    VideoCapture pCapture;
-    pCapture.open(-1); //从摄像头读入视频 0表示从摄像头读入  -1表示任意摄像头 202003
+    VideoCapture video_capture;
+    video_capture.open(-1); //从摄像头读入视频 0表示从摄像头读入  -1表示任意摄像头 202003
     //double rate=25.0;//fps
 
-    pCapture.set(CAP_PROP_FRAME_WIDTH, 1280);
-    pCapture.set(CAP_PROP_FRAME_HEIGHT, 720);
+    video_capture.set(CAP_PROP_FRAME_WIDTH, 1280);
+    video_capture.set(CAP_PROP_FRAME_HEIGHT, 720);
 
-    if (!pCapture.isOpened())
+    if (!video_capture.isOpened())
     {
         cerr << "can not open camera"<<endl;
-        //cin.get();
+        exit(0);
         return ;
-    }
-
-
-
-    cout<<"Video capture 拍摄交互"<<endl; // for(unsigned int i=0;i<timeDuration*42;i++)   //
-    while(1)
-    {
-
+    }else{
+      unsigned int width = video_capture.get(CAP_PROP_FRAME_WIDTH);
+      unsigned int height = video_capture.get(CAP_PROP_FRAME_HEIGHT);
+      frame_width =width;
+      frame_height=height;
+      total_len=frame_width*frame_height*3;
+		cout << " video info"
+			 << "[Width:" << width << ", Height:" << height
+			 << ", FPS: " << video_capture.get(CAP_PROP_FPS)
+			 << ", Total_len:"<< total_len
+			 << "]" << std::endl;
+      for(;;)
+      {
         tOne=time(&timep); //放在循环里面才行
         local = localtime(&tOne); //转为本地时间
         strftime(buf, 64, "%H-%M-%S", local);//
         cur_time_str=buf;
-        pCapture >>frame;
-        imshow("RobotCam",frame);
+        video_capture >>frame;
+  //      imshow("RobotCam",frame);
 
 //        waitKey(100); //延时0.1s
         if(frame.isContinuous())
         {
-            std::lock_guard<std::mutex> locker(camMutex);
+            std::unique_lock<std::mutex> locker(camMutex);
 
             cvtColor(frame,rgbFrame,COLOR_BGR2RGB);//CV_BGR2RGB
             //            imshow("RobotCamRGB",rgbFrame);
-            st_oneFrame.camPtr=(uint8_t*)malloc(height*width*channel*sizeof(uint8_t));
-            //            memcpy(camData,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
-            memcpy(st_oneFrame.camPtr,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
-            cam_deque.push_back(st_oneFrame);
+            st_oneFrame.camPtr=(uint8_t*)malloc(total_len*sizeof(uint8_t));
+            if(st_oneFrame.camPtr!=nullptr){
+               memcpy(st_oneFrame.camPtr,rgbFrame.data,rgbFrame.rows*rgbFrame.cols*channel);
+               cam_deque.push_back(st_oneFrame);
+            }
+            else{
+                cerr<<"malloc cam mem failed"<<endl;
+            }
+            
 
             cout<<cur_time_str<<":cam deque size:"<<cam_deque.size()<<endl;
             if(cam_deque.size()>8){
 
                 usleep(500);
-                if(cam_deque.size()>15){
+                if(cam_deque.size()>kCamCacheFrameSize){
+                    cout<<"cam size is big:"<<cam_deque.size()<<endl;
                     st_tmpFrame=cam_deque.front();
                     //尝试把相关相机数据内存释放出去！！！0314
                     cam_deque.pop_front();
@@ -159,7 +165,12 @@ void camReadFunc()
         //          }
         //       }
     }
+     cerr<<"pCapture.isOpened()"<<"failed"<<endl;
+     LogError("Cam Open failed ");
+  }
+
 }
+
 
 
 void threadFunc()
@@ -171,29 +182,31 @@ void threadFunc()
     int send_num=0;
     int notGetCmd_times=0;
     char buf[100]={'0'};
+    std::string strTimeOfDay;
 
     while (1)
     {
-        t=time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
 
-        local = localtime(&t); //转为本地时间
-        strftime(buf, 64, "%H:%M:%S", local);//%Y-%m-%d_
-        string cur_time_str="";
-        cur_time_str=buf;
-
+            boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::local_time();
+//    boost::posix_time::time_duration now_time_of_day = boost::posix::microsec_clock::local_time().;
+//    cout<<"start time:"<<pTime<<endl;
+//    std::string strTimeOfDay = boost::posix_time::to_simple_string(startTime.time_of_day()); // 当前时间：15:03:55
+//    cout<<"day time:"<<strTimeOfDay<<endl;
 
         memset(recvCMD,'\0',sizeof(recvCMD));
         b_recvStatus =   camSocket.recvData(recvCMD,sizeof(recvCMD));
-        //        cout<<"cur_time:"<<cur_time_str<<endl;
+     boost::posix_time::ptime secondTime = boost::posix_time::microsec_clock::local_time();
+     strTimeOfDay = boost::posix_time::to_simple_string(secondTime.time_of_day()); // 当前时间：15:03:55
 
-        cout<<"In thread,recv:"<<b_recvStatus<<" CMD:"<<recvCMD<<endl;
+           //cout<<"\n after receive,cur_time:"<<strTimeOfDay<<endl;
 
+        cout<<"Recv state:"<<b_recvStatus<<" CMD:"<<recvCMD<<endl;
+        //cout<<"In socket thread,recv CMD:"<<recvCMD<<endl;
         if(b_recvStatus)
         {
-
+         cout<<"\n Receive CMD,cur_time:"<<strTimeOfDay<<endl;
             if(strcasecmp(recvCMD,"PIC")==0)
             {
-
                 //判断size的大小，避免为0时，还在取数据0310
                 std::unique_lock<std::mutex> camDataUseLocker(camMutex);
                 if(cam_deque.size()>0){
@@ -201,17 +214,29 @@ void threadFunc()
                     int ret=camSocket.sendData((char*)st_sendFrame.camPtr,total_len);
                     if(ret==total_len){
                         send_num++;
-                        cout<<cur_time_str<<" send pics:"<<send_num<<endl;
+                       // cout<<cur_time_str<<" send pics:"<<send_num<<endl;
+                        cout<<strTimeOfDay<<" send pics:"<<send_num<<endl;
                         LogInfo("Send pics:%d\n",send_num);
                     }
                     else{
-                        cout<<cur_time_str<<"部分发送,长度"<<ret<<"图片数:"<<send_num<<endl;
+                        //cout<<cur_time_str<<"部分发送,长度"<<ret<<"图片数:"<<send_num<<endl;
                         LogError("Send len:%d\n",ret);
                     }
-
-                    cam_deque.pop_front();
+                   boost::posix_time::ptime endTime = boost::posix_time::microsec_clock::local_time();
+                   boost::posix_time::time_duration td = endTime - startTime;
+                   uint64_t  send_time =td.total_milliseconds();
+                   cout<<"duration time:"<<send_time<<endl;
+                   if(send_time>1500){
+                      cerr<<"\n Duration time BIG:"<<send_time<<endl;
+                      LogWarning("send time takes much:%llu ms\n",send_time);
+                      if(send_time>10000){
+                        cerr<<"\n Duration time Too BIG:"<<send_time<<endl;
+                        LogError("Send time takes too much:%llu ms\n",send_time);
+                         }           
+                      } 
+                   cam_deque.pop_front();
                     free(st_sendFrame.camPtr);//add 分析内存增长未释放的问题 0314
-                    cout<<"\n After free mem,cam deque size:"<<cam_deque.size()<<endl;
+                    cout<<"After send and free,cam deque size:"<<cam_deque.size()<<endl;
                 }
 
 

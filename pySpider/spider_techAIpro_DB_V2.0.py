@@ -1,7 +1,10 @@
+
+
 #拼接字符串并换行## -*- coding: UTF-8 -*-
 #@author: JACK YANG
 #@date:201902-->10-->202008->202011 
-#       ->202104-->202201--->0307--->0425-0503
+#       ->202104-->202201--->0307--->0425
+#       ->202206
 #Email:  yyjqr789@sina.com
 #!/usr/bin/python3
 
@@ -26,7 +29,7 @@ from datetime import datetime
 import re
 import json
 import codecs # use for write a file 0708
-#import mysqlWriteNewsV2
+import mysqlWriteNewsV2
 import random
 from lxml.html.clean import Cleaner  #CLEANER 0415
 
@@ -34,7 +37,7 @@ from lxml.html.clean import Cleaner  #CLEANER 0415
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
 receiver='yyjqr789@sina.com' #收件人邮箱账号
 #receiver=my_sender
-_pwd = "nufuxycoehyoXYji"  #需在qq邮箱开启SMTP服务并获取授权码
+_pwd = "nufuxycoehyoXXji"  #需在qq邮箱开启SMTP服务并获取授权码
 
 #1、增加重试连接次数
 requests.DEFAULT_RETRIES = 5
@@ -44,7 +47,7 @@ s.keep_alive = False
 
 ##news path 202204
 save_news_path="./techNews/"
-useDatabase=False
+
  # get the sys date and hour,minutes!!
 #def GetDate():
 now_time = datetime.now()
@@ -198,30 +201,33 @@ class GrabNewsAI():
         self.NewsList = []
     def getNews(self):
         url = 'https://aitopics.org/search'
-        r2 = requests.get(url)
-        r2.encoding = 'utf-8'
-
-        soup = BeautifulSoup(r2.text, "html.parser")
+        headers = { 'User-Agent':'Mozilla/5.0 (Windows NT 6.3;Win64;x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36'}
+        try:
+            r2 = requests.get(url,headers = headers, timeout=5)
+            r2.encoding = 'utf-8'
+            soup = BeautifulSoup(r2.text, "html.parser")
         #print("sql index:%d" %mysqlWriteNewsV1.getLastInsertId() )
-        #newsIndex=random.randint(20,100000)
-        newsIndex=0
-        for news in soup.select('.searchtitle   a'):
-            if findKeyWordInNews(news.text):
-               tittle=news.text
-               print(news.text)
-               for string in news.stripped_strings:
-                    
-                    newsUrl=news.attrs['href']
-                    #article.append(url.strip())
-                    print(newsUrl)
-                    self.NewsList.append({string:newsUrl})
-                    #newsIndex=newsIndex+1
-                    print(newsIndex)
-                    newsOne=(newsIndex, '1',news.text,'Jack',date, 'content',
-                      newsUrl, '人工智能')
-                    if useDatabase :
-                       result = mysqlWriteNewsV2.writeDb(sql, newsOne)
-                       print("write DB state: %d" %result)
+            newsIndex=0
+            for news in soup.select('.searchtitle   a'):
+                if findKeyWordInNews(news.text):
+                   tittle=news.text
+                   print(news.text)
+                   for string in news.stripped_strings:
+                        
+                        newsUrl=news.attrs['href']
+                        #article.append(url.strip())
+                        print(newsUrl)
+                        self.NewsList.append({string:newsUrl})
+                        #newsIndex=newsIndex+1
+                        print(newsIndex)
+                        newsOne=(newsIndex, '1',news.text,'Jack',date, 'content',
+                        newsUrl, '人工智能')
+                        result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+                        print("write DB state: %d" %result)
+
+        except Exception as e:
+            print("except error:" ,e)
+            
 
 class GrabNewsProduct():
     def __init__(self):
@@ -229,20 +235,22 @@ class GrabNewsProduct():
     def getNews(self):
         url = 'https://www.popularmechanics.com/'
         headers = { 'User-Agent':'Mozilla/5.0 (Windows NT 6.3;Win64;x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36'}
-        html = requests.get(url,headers = headers).text
-       # r2.encoding = 'utf-8'
+        #html = requests.get(url,headers = headers).text
+        print("time out optimize")
+        req  = requests.get(url,headers = headers, timeout=5)
+        html =req.text      
+ # r2.encoding = 'utf-8'
         print ("requests.get {} encoding: {} " .format(url, requests.get(url).encoding))
         
         soup = BeautifulSoup(html, "html.parser")
         #soup=filterHtml(soup)
-        #print(soup.prettify())
-        #print(soup.get_text())
-        #for news in soup.select('a.enk2x9t2 css-7v7n8p epl65fo4'):  #更换了class相关字段,class前要加点.  202202 ---->enk2x9t2 css-7v
         for news in soup.select('a.enk2x9t2'): 
+        #for news in soup.select('a#data-vars-ga-outbound-link'):  #更换了class相关字段,class前要加点.  202202 
             if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
                tittle=news.text
                print(news.text)
-               #str_news=news.txt
+               str_news=news.txt
+               print("After filter\n")
                #if str_news !="":
                    #newsHtml=str_news.decode('utf-8') # python3
         #匹配所有html标签并用“”代替 
@@ -274,6 +282,7 @@ def remove_attrs(soup, whitelist=["colspan", "rowspan"]):
 
 
 def filterHtml(new_page):
+    #html = requests.get(url, headers=headers).content
     html=new_page
 #清除不必要的标签
     cleaner = Cleaner(style = True,scripts=True,comments=True,javascript=True,page_structure=True,safe_attrs_only=False)
@@ -296,7 +305,6 @@ def filterHtml(new_page):
     content = re.sub(r'<td class="rank">', '', content)  #add 匹配td开始>$
     content = re.sub(r'<td class="cBlue">', '', content)  #add 匹配td开始$
     content = re.sub(r'<td class="gray">', '', content)  #add 匹配td开始>$
-    #content = re.sub(r'<span>^[0-9]*</span>', '', content)  #add 匹配spa$
     content = re.sub(r'<span>[^>]*</span>', '', content)  #add 匹配span开$
     
     #content = re.sub(r'<td ^class>', '', content)  #add Test 0502  
@@ -338,12 +346,11 @@ class GrabDriveWEB():
                     
                     self.NewsList.append({string:newsUrl})
                     #newsIndex=newsIndex+1
-                    if useDatabase:
-                        print(newsIndex)
-                        newsOne=(newsIndex,'2', news.text,'Jack',date, 'Barbare',
+                    print(newsIndex)
+                    newsOne=(newsIndex,'2', news.text,'Jack',date, 'Barbare',
                       newsUrl, '军事')
-                        result = mysqlWriteNewsV2.writeDb(sql, newsOne)
-                        print("write DB state: %d" %result)
+                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+                    print("write DB state: %d" %result)
 
 
 #adopt from other article,techCrunch
@@ -406,7 +413,7 @@ def writeNewsProduct():
     fp = codecs.open(newsFullPath, 'w', 'utf-8')
     #fp = codecs.open("newsProduct.html", 'w', 'utf-8') 
     for news in grabNews.NewsList:
-        for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
+        for key in news.keys(): 
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
             #print("test write")
             #print(news[key])
@@ -419,9 +426,9 @@ def mail():
   try:
     #msg = MIMEMultipart('alternative')
     msg = MIMEMultipart()  # test two html file 201907
-    #writeNewsAI()
+    writeNewsAI()
     #writeNewsProduct()
-    writeNews()
+    #writeNews()
     writeNewsDrive()
     #writeNewsTechNet()
     fp = open(newsFullPath,'rb+')
@@ -448,14 +455,14 @@ def mail():
         print("no pic capture!")  
     msg['From']=formataddr(["smart Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
-    msg['Subject']="科技milPro %s" %year_month  #邮件的主题，也可以说是标题
+    msg['Subject']="科prod %s" %year_month  #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
     server.sendmail(my_sender,[receiver,],msg.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
     print ('SEND AI NEWS and write to DB OK')
     server.quit()  #这句是关闭连接的意思
-  except Exception as e:  #如果try中的语句没有执行，则会执行下面的ret=False
+  except Exception as e:  #
     print (str(e))
     ret=False
   return ret

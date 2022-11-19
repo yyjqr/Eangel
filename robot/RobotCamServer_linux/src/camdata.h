@@ -2,6 +2,7 @@
 #define CAMDATA_H
 #include <stdio.h>
 #include <queue>
+#include <stdint.h>  //uint8_t
 
 typedef struct ST_CAMDATA
 {
