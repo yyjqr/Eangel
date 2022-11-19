@@ -4,6 +4,10 @@
 #@date:201902-->10 --->
       #202006-->202101--->202110
       # 2022.09 add rank map
+<<<<<<< HEAD
+      # key 2022.11
+=======
+>>>>>>> master
 # Email: yyjqr789@sina.com
 
 #!/usr/bin/python3
@@ -32,14 +36,14 @@ from pprint import pprint
 #一些数据写入文件时会有编码不统一的问题，so codecs to assign code type!!
 import codecs # use for write a file 0708
 import mysqlWriteNewsV2  #mysql database
+import base64
 
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
-receiver='yyjqr789@sina.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
+receiver='yyjqr789@sina.com' #收件人邮箱账号
 #receiver=my_sender
-_pwd ="rulnucenyqcpXYZf"  #202010---202102   #需在qq邮箱开启SMTP服务并获取授权码
 
-use_database=True;
-pin1=13
+use_database=False;
+
 #GPIO.setup(pin1,GPIO.OUT)
 save_news_path="./techNews/"
 # get the sys date and hour,minutes!!
@@ -65,6 +69,20 @@ with open('./tech_key_config_map.json') as j:
      #print(cfg)
      KEYWORDS_RANK_MAP=json.load(j)['KEYWORDS_RANK_MAP']
 #print(KEYWORDS_RANK_MAP)
+
+
+def encrypt_getKey(key):
+    a = base64.b64encode(key)
+    print(a) #  b'aGVsbG8gd29ybGQ='
+ 
+    b = base64.b64decode(a)
+
+    print(b) # b"hello world"
+
+def decrypt_getKey(key):
+    b = base64.b64decode(key)
+    #print(b)
+    return b
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
@@ -102,12 +120,10 @@ def findKeyWordInNews(str):
    return False
 
 def findValuedInfoInNews(str,keyWords):
-   #print(str)
-   #print(len(keyWords))
-   #print(keyWords)
    for i in range(len(keyWords)):
        
        if keyWords[i] in str:
+           #print("test")
            return True
    return False
 
@@ -136,6 +152,20 @@ def findValuedInfoRank(str,keyMap):
    if rankValue !=0:
       print("Final news:{0} rank value:{1}\n\n".format(str,rankValue))
    return rankValue
+
+def run_cmd_Popen_fileno(cmd_string):
+    """
+    执行cmd命令，并得到执行后的返回值，python调试界面输出返回值
+    :param cmd_string: cmd命令，如：'adb devices'
+    :return:
+    """
+    import subprocess
+    
+    print('运行cmd指令：{}'.format(cmd_string))
+    pipe = subprocess.Popen(cmd_string, shell=True, stdout=None, stderr=None)
+    print ("test popen")
+    return pipe.communicate()
+
 
 
 ### techcrunch,can't visit from 2021.11,because of yahoo info!!!
@@ -231,8 +261,11 @@ class GrabNewsAI():
         self.NewsList = []
     def getNews(self):
         url = 'https://aitopics.org/search'
-        r2 = requests.get(url)
+
+        r2 = requests.get(url,timeout=5)
         r2.encoding = 'utf-8'
+
+
 
         soup = BeautifulSoup(r2.text, "html.parser")
         newsIndex =0
@@ -247,11 +280,15 @@ class GrabNewsAI():
                     newsUrl=news.attrs['href']
                 #article.append(url.strip())
                     print(newsUrl)
-                    self.NewsList.append({string:newsUrl})
+
+                    if  "techcrunch" not in newsUrl:
+                       self.NewsList.append({string:newsUrl})
                ## 写入数据库
-                    newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
+                    if use_database == True : 
+                        newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
                         newsUrl, '人工智能')
-                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+                        result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+
 
 
 class GrabNewsTechnet():
@@ -347,11 +384,23 @@ def writeNewsProduct():
 
 def mail():
   ret=True
+
+  _pwd =decrypt_getKey("cnVsbnVjZW55cWNwYmJiZg==".encode("utf-8"))
+
   try:
     #msg = MIMEMultipart('alternative')
     msg = MIMEMultipart()  # test two html file 201907
     #add AI topic search 202006
-    writeNewsAI()
+
+    try:
+       writeNewsAI()
+    except Exception as e:
+       print (str(e))
+       try:
+           run_cmd_Popen_fileno("telnet 34.72.71.171 443")
+       except Exception as e:
+           print (str(e))
+
     try:
         writeNewsProduct()  
         writeNewsSina()
@@ -379,7 +428,10 @@ def mail():
     msg['Subject']="EXAID 价值Rank %s" %year_month  #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
-    server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
+
+    server.login(my_sender,_pwd.decode("utf-8"))  #括号中对应的是发件人邮箱账号、邮箱密码---->bytes need decode to string 1113
+
+    
     server.sendmail(my_sender,[receiver,],msg.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
     print ('SEND NEWS AND IMG OK')
     server.quit()  #这句是关闭连接的意思
