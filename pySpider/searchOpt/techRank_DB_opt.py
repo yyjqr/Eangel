@@ -1,9 +1,9 @@
-#拼接字符串并换行
 ## -*- coding: UTF-8 -*-
 #@author: JACK YANG 
 #@date:201902-->10 --->
       #202006-->202101--->202110
       # 2022.09 add rank map
+      # 2022.11 KEY OPT
 # Email: yyjqr789@sina.com
 
 #!/usr/bin/python3
@@ -32,16 +32,15 @@ from pprint import pprint
 #一些数据写入文件时会有编码不统一的问题，so codecs to assign code type!!
 import codecs # use for write a file 0708
 import mysqlWriteNewsV2  #mysql database
+import encrypt_and_verify_url
 
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
-receiver='yyjqr789@sina.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
-#receiver=my_sender
-_pwd ="rulnucenyqcpXYZf"  #202010---202102   #需在qq邮箱开启SMTP服务并获取授权码
+receiver='yyjqr789@sina.com' #收件人邮箱
 
-use_database=True;
+use_database=False;
 pin1=13
 #GPIO.setup(pin1,GPIO.OUT)
-save_news_path="./techNews/"
+save_news_path="/home/pi/techNews/"
 # get the sys date and hour,minutes!!
 now_time = datetime.now()
 date=datetime.now().strftime('%Y-%m-%d_%H:%M')
@@ -73,9 +72,8 @@ def make_img_msg(fn):
     data=f.read()
     f.close()
     image=MIMEImage(data,name=fn.split("/")[2])  #以/分隔目录文件/tmp/xxx.jpg，只要后面的文件名 20190222！
-    #image.add_header('Content-ID','attachment;filenam="%s" ' %fn)
-    image.add_header('Content-ID','EangelCam2019')  #发送的图片附件名称 0603
-    #msg.attach(image)
+    image.add_header('Content-ID','attachment;filenam="%s" ' %fn)
+    #image.add_header('Content-ID','EangelCam2019')  #发送的图片附件名称 0603
     return image
 
 def get_file_list(file_path):
@@ -93,9 +91,8 @@ def get_file_list(file_path):
 
 
 def findKeyWordInNews(str):
-   #print(str)
-   for i in range(14):
-       
+
+   for i in range(14):       
        if array[i] in str:
            #print("test")
            return True
@@ -104,39 +101,51 @@ def findKeyWordInNews(str):
 def findValuedInfoInNews(str,keyWords):
    #print(str)
    #print(len(keyWords))
-   #print(keyWords)
    for i in range(len(keyWords)):
        
        if keyWords[i] in str:
+           #print("test")
            return True
    return False
 
 def findValuedInfoRank(str,keyMap):
-   #print(str)
    #print('{0}'.format(len(keyMap)))
    #print(keyMap)
    rankValue=0
    rankOldValue=0
    print_flag=True
-   #for i in range(len(keyWords)):
    for i in keyMap:
        #print(i)   
        if  i in str:
-           #print(i)
-           rankValue+=keyMap[i]
-       if rankValue!=0 :
+           rankValue += keyMap[i]
+       if rankValue != 0 :
           if print_flag:
-              print("compute str: {0} \n Rank key:{1} value:{2}\n".format(str,i,rankValue))
+              #print("compute str: {0} \n Rank key:{1} value:{2}\n".format(str,i,rankValue))
               print_flag=False
               rankOldValue=rankValue
           else:
               if rankValue>rankOldValue :
-                  print("Add rank: {0} value:{1}".format(i,rankValue))
+                  #print("Add rank: {0} value:{1}".format(i,rankValue))
                   rankOldValue=rankValue
    if rankValue !=0:
       print("Final news:{0} rank value:{1}\n\n".format(str,rankValue))
    return rankValue
 
+def validate_url_access(self, url):
+	# 定义响应头文文件
+        headers = {"Content-Type": "application/json"}
+	# 通过requests库
+        try:
+           res = requests.get(url=url, headers=headers,timeout=10)
+           #print("validating the url access,waiting......")
+	# 如果返回值非200 则跳出该函数返回false
+           if res.status_code != 200:
+              print("get url:{0} error:{1}\n".format(url,res))
+              return False
+        except Exception as e:
+           print (str(e))
+           return False
+        return True
 
 ### techcrunch,can't visit from 2021.11,because of yahoo info!!!
 class GrabNews():
@@ -183,10 +192,6 @@ class GrabNewsProduct():
                print(news.text)
                str_news=news.txt
                #print("After filter\n")
-               #if str_news !="":
-                   #newsHtml=str_news.decode('utf-8') # python3
-                   #newHtml = newsHtml.replace('/n',"") #将换行符替换成空
-                   #print("After filter\n")
                for string in news.stripped_strings:
                     
                     if news.attrs['href'].startswith('http'):
@@ -200,6 +205,11 @@ class GrabNewsProduct():
                         self.NewsList.append({string:newsUrl})
                     else:
                         print("------- ")
+                    
+                    if validate_url_access(self,newsUrl)==False :
+                        del self.NewsList[-1]
+                                                 
+                        print("Error,this url {0} can't browse!!\n".format(newsUrl))
                     newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
                         newsUrl, '产品科技')
                     result = mysqlWriteNewsV2.writeDb(sql, newsOne)
@@ -247,7 +257,11 @@ class GrabNewsAI():
                     newsUrl=news.attrs['href']
                 #article.append(url.strip())
                     print(newsUrl)
-                    self.NewsList.append({string:newsUrl})
+##if  "techcrunch" not in newsUrl:   validate_url_access can verify browsing techcrunch or not!! 11.20
+                    if validate_url_access(self,newsUrl)==True :
+                        self.NewsList.append({string:newsUrl})
+                    else :
+                        print("Error,this url can't browse!!\n")
                ## 写入数据库
                     newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
                         newsUrl, '人工智能')
@@ -276,7 +290,13 @@ class GrabNewsTechnet():
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
                     print(newsUrl)
-                    self.NewsList.append({string:newsUrl})
+                    if validate_url_access(self,newsUrl)==True :
+                        #print ("test validate")
+                        self.NewsList.append({string:newsUrl})
+                    else :
+                        print("Error,this url can't browse!!\n")
+
+                    #self.NewsList.append({string:newsUrl})
 
 
 
@@ -339,7 +359,6 @@ def writeNewsProduct():
     for news in grabNews.NewsList:
         for key in news.keys(): 
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
-            #print("test write")
             #print(news[key])
             fp.write('<hr />')
     fp.close()
@@ -347,11 +366,20 @@ def writeNewsProduct():
 
 def mail():
   ret=True
+  _pwd =encrypt_and_verify_url.decrypt_getKey("cnVsbnVjZW55cWNwYmJiZg==".encode("utf-8"))
   try:
     #msg = MIMEMultipart('alternative')
     msg = MIMEMultipart()  # test two html file 201907
     #add AI topic search 202006
-    writeNewsAI()
+    try:
+       writeNewsAI()
+    except Exception as e:
+       print (str(e))
+       try:
+           encrypt_and_verify_url.run_cmd_Popen_fileno("telnet 34.72.71.171 443")
+       except Exception as e:
+           print (str(e))
+
     try:
         writeNewsProduct()  
         writeNewsSina()
@@ -379,7 +407,7 @@ def mail():
     msg['Subject']="EXAID 价值Rank %s" %year_month  #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
-    server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
+    server.login(my_sender,_pwd.decode("utf-8"))  #括号中对应的是发件人邮箱账号、邮箱密码
     server.sendmail(my_sender,[receiver,],msg.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
     print ('SEND NEWS AND IMG OK')
     server.quit()  #这句是关闭连接的意思
