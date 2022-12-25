@@ -23,6 +23,7 @@ int main(void) {
   printf("%d\n", sizeof(p));
 
   Func(str);
+ printf("c++ val:%d\n", __cplusplus);  
 
   int AA[] = {1, 3};
   int BB[] = {2, 3};
