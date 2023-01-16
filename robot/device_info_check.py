@@ -1,8 +1,10 @@
-#拼接字符串并换行
 ## -*- coding: UTF-8 -*-
+#拼接字符串并换行
+
 #@author: JACK YANG 
 #@date:201902-->10 --->
-      #202006-->202101--->202110
+      #202006-->202101--->202210
+      #202301
 # Email: yyjqr789@sina.com
 #!/usr/bin/python3.5
 import smtplib
