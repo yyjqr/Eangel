@@ -34,8 +34,8 @@ import codecs # use for write a file 0708
 #import RPi.GPIO as GPIO
 
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
-receiver='yyjqr789@sina.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
-_pwd ="rulnucenyqcpbbbf"  #202010---202102   #需在qq邮箱开启SMTP服务并获取授权码
+receiver='yyjqr789@sina.com' #收件人邮箱账号
+_pwd ="rulnucenyqcpXXXf"  #202010---202102   #需在qq邮箱开启SMTP服务并获取授权码
 
 pin0=11
 pin1=13
