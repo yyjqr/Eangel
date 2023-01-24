@@ -6,7 +6,7 @@
       #202006-->202101--->202210
       #202301
 # Email: yyjqr789@sina.com
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 import smtplib
 #from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -34,7 +34,7 @@ import codecs # use for write a file 0708
 #import RPi.GPIO as GPIO
 
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
-receiver='yyjqr789@sina.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
+receiver='yyjqr789@sina.com' #收件人邮箱账号
 _pwd ="rulnucenyqcpXXXf"  #202010---202102   #需在qq邮箱开启SMTP服务并获取授权码
 
 pin0=11
@@ -302,6 +302,51 @@ def mail(data):
     print (str(e))
     ret=False
   return ret
+
+
+def mail(data, deviceName):
+  ret=True
+  global dev_alert_info
+
+  try:
+    #msg = MIMEMultipart('alternative')
+    msg = MIMEMultipart()  # test two html file 201907
+    #add AI topic search 202006
+    writeNewsAI()
+    try:
+        writeNewsSina()
+    except Exception as e:
+        print (str(e))
+
+   # writeNewsTechNet()
+    print("test get device log")
+    #print(data)
+    get_device_log(data)
+    msg.attach(get_device_log(data))
+    path = '/tmp'         # 替换为你的路径
+    listN=get_file_list(path)
+    #print (listN)
+    if listN:
+       imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
+       print('Send IMG is "%s" ' %imgPath)
+       msg.attach(make_img_msg(imgPath))
+    else: 
+        print("no pic capture!")     
+    msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
+    msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
+    #msg['Subject']="设备状态通知 %s" %year_month  #邮件的主题，也可以说是标题
+    msg['Subject']="设备状态{0} 通知 {1}".format(deviceName, year_month)
+    server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
+    server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
+    server.sendmail(my_sender,[receiver,],msg.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
+    print ('SEND NEWS AND IMG OK')
+    server.quit()  #这句是关闭连接的意思
+  except Exception as e:  #如果try中的语句没有执行，则会执行下面的ret=False
+    print (str(e))
+    ret=False
+  return ret
+
+
 
 
 def mailAlert():
