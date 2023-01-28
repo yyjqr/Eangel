@@ -42,6 +42,7 @@ logger.info("Eangel raspi RUN>>>>>>>>>>>>>")
 #logger.info("Arduino UNO  RUN>>>>>>>>>>>>>")
 ArduinoState=True
 DeviceName=""
+DevicdInfo=""
 
 def get_ip_address():
         s =socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
@@ -76,13 +77,14 @@ def sendAlert():
        now_time = datetime.now()
        date=now_time.strftime('%Y-%m-%d_%H:%M:%S')
        print ('date:{0} device:{1}'.format(date,DeviceName))
-       info= date+"\n设备"+str(DeviceName)+"\n ip:"+host_addr+"\n 存储空间不足，目前使用"+str(num)
+       info= date+"\n设备信息：\n"+str(DeviceInfo)+"\n ip:"+host_addr+"\n 存储空间不足，目前使用"+str(num)
        #subprocess.Popen('~/sendAlert.sh', stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = True)
        #device_info_check.get_device_log(info)
-       device_info_check.mail(info)
+       device_info_check.mail(info,DeviceName)
 def getDeviceCpuOrOsInfo():
      import platform   #导入platform模块
      global  DeviceName
+     global   DeviceInfo
      print('操作系统名称：', platform.system()) #获取操作系统名称
      print('操作系统名称及版本号：', platform.platform()) #获取操作系统名称及版本号
      print('操作系统版本号：', platform.version()) #获取操作系统版本号
@@ -91,8 +93,9 @@ def getDeviceCpuOrOsInfo():
      print('计算机的网络名称：', platform.node()) #计算机的网络名称
      print('计算机处理器信息：', platform.processor()) #计算机处理器信息
      print('包含上面所有的信息汇总：', platform.uname())#包含上面所有的信息汇总
-     DeviceName = platform.uname()
-     print("test Device:", DeviceName)
+     DeviceName =platform.node()
+     DeviceInfo = platform.uname()
+     print("test Device:", DeviceInfo)
 getDeviceCpuOrOsInfo()
 
 sendAlert()

@@ -18,5 +18,7 @@ jobs:
         run:  chmod +x sendTest.sh
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - run:  pip install bs4
+      - run:  pip install pymysql
+      - run:  pip install pandas
       - run:   ./sendTest.sh
       - run: echo "🍏 This job's status is ${{ job.status }}."
