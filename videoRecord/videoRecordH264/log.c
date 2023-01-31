@@ -114,7 +114,7 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
 
   /* Get current time */
   time_t t = time(NULL);
-   t+=8*60*60; //转换为当地中国时间,加上8小时对应的秒数  20200102 Jack
+  // t+=8*60*60; //转换为当地中国时间,加上8小时对应的秒数  20200102 Jack
   struct tm *lt = localtime(&t);
   
      /* Log to stderr */
