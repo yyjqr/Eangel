@@ -406,8 +406,8 @@ def mail():
        print (str(e))
        try:
 
-           encrypt_and_verify_url.run_cmd_Popen_fileno("telnet 34.72.71.171 443")
-
+           #encrypt_and_verify_url.run_cmd_Popen_fileno("telnet 34.72.71.171 443")
+           print("test connect")
        except Exception as e:
            print (str(e))
 

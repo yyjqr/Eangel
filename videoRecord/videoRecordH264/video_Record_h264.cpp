@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 {
 
 	time_t timep, t, NOW;
-	tm *local;
+	struct tm *local;
 	char stop_cmd[30] = {0};
 	double elapsedseconds;
 	VideoCapture videoCapturer(-1); //   Numerical value 0 cv::CAP_ANY
@@ -124,7 +124,6 @@ int main(int argc, char **argv)
 	pVideoFileName = str[0];
 	cout << str[0] << endl;
 	cout << "FileName:" << pVideoFileName << endl;
-	//VideoWriter writer(pVideoFileName, CV_FOURCC('M', 'P','4', '2'), videoCapturer.get(CAP_PROP_FPS),Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH),videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));//AVI 0901   avi格式 MJPG编码
 
 //	VideoWriter writer(pVideoFileName, VideoWriter::fourcc('M', 'P', '4', '2'), videoCapturer.get(CAP_PROP_FPS),
 //					   Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH), videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
