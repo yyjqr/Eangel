@@ -107,7 +107,7 @@ void controlTCP::sendCmdToServer()
     if(m_camSocket->state()==QTcpSocket::ConnectedState){
         m_camSocket->write("PIC");
         m_camSocket->flush();
-        qDebug()<<__func__<<timestr<<":send CMD:PIC"<< "\n";
+        qDebug()<<__func__<<timestr<< "\n";
     }else{
         qDebug()<<"m_camSocket->state():"<<m_camSocket->state()<< "\n";
         LogInfo("Socket not connected,send CMD time:%s\n",timestr.toStdString().c_str());

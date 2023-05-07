@@ -183,7 +183,8 @@ void MainWindow::getPicToShow()
 
                 //重点调试地方！！！！(maybe the QArray data operate sometimes error!!
                 try{
-                    qDebug()<<__LINE__<<"test free IMAGE buf\n";
+//                    qDebug()<<__LINE__<<"test free IMAGE buf\n";
+                    assert(m_picToshow.imageBuf!=nullptr);
                     free(m_picToshow.imageBuf);
                 }
                 catch(std::exception &e ){
