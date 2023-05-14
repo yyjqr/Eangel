@@ -10,8 +10,8 @@ CC	   := g++
 #CFLAGS = -g -Wall  -pedantic -ansi -lpthread 
 CFLAGS = -g -Wall  -pedantic -lpthread
 # OPENCV3---->OPENCV4 库文件有所不同 201907
-OPENCV=`pkg-config --cflags opencv --libs opencv` 
-#OPENCV=`pkg-config --cflags --libs opencv`
+#OPENCV=`pkg-config --cflags opencv --libs opencv` 
+OPENCV=`pkg-config --cflags --libs opencv4`
 LIBS = $(OPENCV)
 
 #编译包含的头文件所在目录 

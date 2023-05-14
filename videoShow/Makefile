@@ -6,7 +6,7 @@ TARGET     := videoShow_10fps
 CC	   := g++  
 #编译的参数
 #CFLAG	   := -g -Wall  
-CFLAGS = -g -Wall -lpthread 
+CFLAGS = -g -Wall  
 # OPENCV3---->OPENCV4 库文件有所不同 201907--->opencv4.pc   202108
 OPENCV=`pkg-config --cflags opencv4 --libs opencv4`
 #OPENCV=`pkg-config --cflags --libs opencv`
@@ -26,7 +26,7 @@ SRCS    =  video_thread_10fpsRecord_v1.4.cpp
 #重定义隐藏规则，匹配上述目标：myhello.o & ./common/abc.c & ./common/test/test.c
 #%.o:%.c 
 default:
-	$(CC)   $(CFLAGS) $(INCLUDES) $(SRCS)  -o $(TARGET) $(LIBS)
+	$(CC)   $(CFLAGS) $(INCLUDES) $(SRCS)  -o $(TARGET) $(LIBS) -lpthread
 #清空除源文件外的所有生成文件 
 #clean:     rm -rf $(basename $(TARGET)) $(SRCS:.c=.o)
 clean:  
