@@ -26,7 +26,7 @@ public:
 
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+    void initControlUI(bool flag);
     void UP();
     void DOWN();
     void LEFT();
@@ -46,6 +46,7 @@ public:
     bool ShowImage(uint8_t* pRgbFrameBuf, int nWidth, int nHeight, uint64_t nPixelFormat);
 //    bool ShowImageOpt(int nWidth, int nHeight, uint64_t nPixelFormat);
     void ParseFromJson();
+    void camCapture();
 private slots:
     void on_pushButtonConnect_clicked();
     void systemInfoUpdate();
@@ -67,14 +68,14 @@ private slots:
     void on_pushButtonCARRF_released();
     void on_pushButtonCARLEFT_pressed();
     void on_pushButtonCARLEFT_released();
-    void on_pushButtonCARRIGHT_pressed();
-    void on_pushButtonCARRIGHT_released();
-    void on_pushButtonCARLB_pressed();
-    void on_pushButtonCARLB_released();
-    void on_pushButtonCARBACK_pressed();
-    void on_pushButtonCARBACK_released();
+//    void on_pushButtonCARRIGHT_pressed();
+//    void on_pushButtonCARRIGHT_released();
+//    void on_pushButtonCARLB_pressed();
+//    void on_pushButtonCARLB_released();
+//    void on_pushButtonCARBACK_pressed();
+//    void on_pushButtonCARBACK_released();
     void on_pushButtonCARRB_pressed();
-    void on_pushButtonCARRB_released();
+//    void on_pushButtonCARRB_released();
     void on_pushButtonCAR_clicked();
 
     void on_lineEdit_port_editingFinished();
@@ -88,6 +89,17 @@ private slots:
 
     void on_comboBox_ipAddr_currentTextChanged(const QString &arg1);
 
+<<<<<<< HEAD:robot/RobotControl-ThreadSocketOptQueue/src/mainwindow.h
+    void on_pushButtonCARFRONT_clicked();
+
+    void on_pushButtonCarStop_clicked();
+
+    void on_pushButtonCARBACK_clicked();
+
+    void on_pushButtonCARRIGHT_clicked();
+
+=======
+>>>>>>> master:robot/RobotControl-Linux/src/mainwindow.h
 private:
     Ui::MainWindow *ui;
 
@@ -95,7 +107,7 @@ private:
     QString addr,port;
     QString m_ip_addr1,m_ip_addr2,m_ip_addr3,m_ip_addr4;
     const std::string m_ip_config_path="./CONFIG/ipAddr.conf";
-    uchar imagebuffer[IMAGESIZE];
+
     //     QVector2D
     QTimer* systemTimer;
     QTimer *camTimer;
@@ -105,7 +117,7 @@ private:
 
 
     int imageCount=0;
-    int m_imageWidth,m_imageHeight;
+    int m_imageWidth,m_imageHeight,m_imageSize;
     camInfo m_picToshow;
     camInfo oneCamInfo;
     bool b_grabPic;

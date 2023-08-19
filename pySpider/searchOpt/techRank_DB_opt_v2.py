@@ -3,7 +3,7 @@
 #@date:201902-->10 --->
       #202006-->202101--->202110
       # 2022.09 add rank map
-      # 2022.11 KEY OPT -->2023.06 verify web
+      # 2022.11 KEY OPT -->2023.06 verify web ---》yahoo visit filter 2023.08
 # Email: yyjqr789@sina.com
 
 #!/usr/bin/python3
@@ -34,7 +34,7 @@ import codecs # use for write a file 0708
 import mysqlWriteNewsV2  #mysql database
 import encrypt_and_verify_url
 
-my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
+my_sender='840056598@qq.com' #发件人邮箱账号
 receiver='yyjqr789@sina.com' #收件人邮箱
 
 use_database=False;
@@ -51,7 +51,7 @@ newsFullPath=os.path.join(save_news_path,date+'.html')
 print(newsFullPath)
 sql = """ INSERT INTO techTB(Id,Rate,title,author,publish_time,content,url,key_word) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) """
 
-kRankLevelValue =0.72   ##judge value
+kRankLevelValue =0.75   ##judge value
 
 
 
@@ -146,12 +146,12 @@ def validate_url_access(self, url):
 def filterYahoo(self, url):
     # 定义一个正则表达式匹配模式
     pattern = re.compile(r'.*(yahoo|gadget|techcrunch).*')
-# 过滤掉含有"yahoo"或"gadget"关键字，并且服务器IP在中国大陆的网址
+# 过滤掉含有"yahoo"或"gadget"关键词
     #filtered_urls = [url for url in urls if not pattern.match(url) ]
     if not pattern.match(url):
        return True
     else:
-      print(url)
+      #print("yahoo website, can't visit:%s" %url)
       return False
 
 

@@ -4,11 +4,11 @@ TARGET     := videoRecord_Cam
 CC	   := g++  
 #编译的参数
 #CFLAG	   := -g -Wall  
+CFLAGS = -g -Wall 
+OPENCV=`pkg-config --cflags opencv4 --libs ` 
 #使用ansi,会产生很多源码编译错误
-#CFLAGS = -g -Wall  -pedantic -ansi -lpthread 
 CFLAGS = -g -Wall  -pedantic -lpthread
 # OPENCV3---->OPENCV4 库文件有所不同 201907
-OPENCV=`pkg-config --cflags opencv --libs opencv` 
 #OPENCV=`pkg-config --cflags --libs opencv`
 LIBS = $(OPENCV)
 
