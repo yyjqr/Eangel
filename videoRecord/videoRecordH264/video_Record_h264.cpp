@@ -39,8 +39,15 @@ int MSG_LEVEL_OFF     = 0;
 int MSG_LEVEL_MAX =5;
 int trace_level = MSG_LEVEL_OFF;
 int b_dump = 0;
-const string str_saveDir="/home/pi/Videos/";
+const string str_saveDir="/home/ai/Videos/";
 
+// 判断文件是否存在
+bool IsPathExist(const std::string &path) {
+    if (access(path.c_str(), 0) == F_OK) {
+        return true;
+    }
+    return false;
+}
 
 int main(int argc, char **argv)
 {
@@ -112,6 +119,15 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	if(IsPathExist(str_saveDir)){
+        cout << " save path exists\n";
+	}
+	else{
+		char mkdir_cmd[20]="";
+		sprintf(mkdir_cmd,"mkdir -p %s",str_saveDir.c_str());
+		system(mkdir_cmd);
+	}
+
 	t = time(&timep); //放在循环里面才行，外面的话，时间是一个固定的，不符合要求！！！0907
 	local = localtime(&t); //转为本地时间
 	strftime(buf, 64, "%Y-%m-%d_%H%M%S", local);
@@ -128,7 +144,7 @@ int main(int argc, char **argv)
 //	VideoWriter writer(pVideoFileName, VideoWriter::fourcc('M', 'P', '4', '2'), videoCapturer.get(CAP_PROP_FPS),
 //					   Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH), videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
  // X,V,I,D --- H264   DIVX -mp4
-VideoWriter writer(pVideoFileName, VideoWriter::fourcc('H', '2', '6', '4'), videoCapturer.get(CAP_PROP_FPS),
+    VideoWriter writer(pVideoFileName, VideoWriter::fourcc('H', '2', '6', '4'), videoCapturer.get(CAP_PROP_FPS),
                                            Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH), videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
 	recordFlag = 1;
 	pthread_create(&record_thread_t, NULL, record_thread, NULL);
