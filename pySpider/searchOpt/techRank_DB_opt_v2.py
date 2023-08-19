@@ -392,7 +392,7 @@ def mail():
     except Exception as e:
        print (str(e))
        try:
-           encrypt_and_verify_url.run_cmd_Popen_fileno("nc -v 34.72.71.171 443")
+           encrypt_and_verify_url.run_cmd_Popen_fileno("nc -v -w 4 34.72.71.171 443")
        except Exception as e:
            print (str(e))
 
@@ -418,16 +418,16 @@ def mail():
        msg.attach(make_img_msg(imgPath))
     else: 
         print("no pic capture!")     
-    msg['From']=formataddr(["Eangel Robot pi4B",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
-    msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
-    msg['Subject']="EXAID 价值Rank %s" %year_month  #邮件的主题，也可以说是标题
+    msg['From']=formataddr(["Eangel Robot pi4B",my_sender])  #括号里的对应发件人邮箱昵称
+    msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱
+    msg['Subject']="EXAID 价值Rank PI %s" %year_month  #邮件的主题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd.decode("utf-8"))  #括号中对应的是发件人邮箱账号、邮箱密码
     server.sendmail(my_sender,[receiver,],msg.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
     print ('SEND NEWS AND IMG OK')
-    server.quit()  #这句是关闭连接的意思
-  except Exception as e:  #如果try中的语句没有执行，则会执行下面的ret=False
+    server.quit()  #这句是关闭连接
+  except Exception as e:  #
     print (str(e))
     ret=False
   return ret
