@@ -7,16 +7,18 @@
 # Email: yyjqr789@sina.com
 
 #!/usr/bin/python3
-import smtplib
-#from smtplib import SMTP
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.image import MIMEImage  #20180603add JACK
-from email.header import Header
 import ssl
 import sys,os  #os.listdir 201902
 import time
 from datetime import datetime # date for file
+
+import smtplib
+
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage  #20180603add JACK
+from email.header import Header
+
 import glob  #查找通配文件 201902
 
 from email.utils import formataddr
@@ -156,21 +158,43 @@ def filterYahoo(self, url):
 
 
 ### techcrunch,can't visit from 2021.11,because of yahoo info!!!
+### MIT ,search with AI
 class GrabNews():
     def __init__(self):
         self.NewsList = []
     def getNews(self):
-        url = 'https://techcrunch.com/'
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, "html.parser")
-        for news in soup.select('.post-block__title  a'):
-            if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
-                tittle=news.text
-                print(news.text) 
-                for string in news.stripped_strings:
-                    newsUrl=news.attrs['href']
-                #article.append(url.strip())
-                    self.NewsList.append({string:newsUrl})
+
+        url = 'https://www.technologyreview.com/'
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        news_titles = []
+        news_links = []
+        kRankLevelValue =0.5 ##use local param to check
+        news_elements = soup.find_all(class_='homepageStoryCard__wrapper--5d95dc382241d259dc249996a6e29782')
+        for news_element in news_elements:
+            #print(news_element)
+           ## class h3  header 
+            news_title = news_element.find(class_='homepageStoryCard__hed--92c78a74bbc694463e43e32aafbbdfd7').text.strip()
+            news_link = news_element.find('a')['href']
+            #if findValuedInfoInNews(news_title,arrayKEYWORDS_EN):
+            curent_news_rank =findValuedInfoRank(news_title,KEYWORDS_RANK_MAP)
+            if curent_news_rank > kRankLevelValue :   
+	 #       tittle=news.text
+                print("test MIT titles {0},url:{1}".format(news_title, news_link))
+                #for string in news_element.stripped_strings:
+                    #newsUrl=news_element.attrs['href']
+                    #print(newsUrl)
+                self.NewsList.append({news_title:news_link})
+            #news_titles.append(news_title)
+            #news_links.append(news_link)
+
+        #for i in range(len(news_titles)):
+        #    print("标题：", news_titles[i])
+        #    print("链接：", news_links[i])
+	    #print()
+		#for news in soup.select('.story-hero h1  a'):
+		
 
 
 
@@ -331,17 +355,16 @@ def writeNewsTechNet():
 
 
 
-#adopt AI from other article
+#adopt AI analysis,202309
+
 def writeNews():
-    grabNews = GrabNews()
-    grabNews.getNews()
+    news_grabber = GrabNews()
+    news_grabber.getNews()
+    print("test search MIT")
     # 加上获取新闻的日期
-    fp = codecs.open(newsFullPath , 'a', 'utf-8')
-    for news in grabNews.NewsList:
-        for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
-            fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
-            fp.write('<hr />')
-    fp.close()
+    with codecs.open(newsFullPath, 'a', 'utf-8') as file_pointer:
+        news_links = ['<a href={}>{}</a>'.format(news[key], '*' + key) for news in news_grabber.NewsList for key in news.keys()]
+        file_pointer.write('<hr />'.join(news_links))
 
 def writeNewsSina():
     grabNews = GrabNewsSina()
@@ -389,21 +412,23 @@ def mail():
     #add AI topic search 202006
     try:
        writeNewsAI()
+       #print("test")
     except Exception as e:
        print (str(e))
        try:
-           encrypt_and_verify_url.run_cmd_Popen_fileno("nc -v -w 4 34.72.71.171 443")
+           encrypt_and_verify_url.run_cmd_Popen_fileno("nc -v 34.72.71.171 443")
        except Exception as e:
            print (str(e))
 
     try:
+## search MIT  ,add 2023.09
+        writeNews()
         writeNewsProduct()  
         writeNewsSina()
     except Exception as e:
         print (str(e))
 
     writeNewsTechNet()
-    #writeNews2()
     with open(newsFullPath,'rb+') as fp:
         techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
         msg.attach(techHtml)
@@ -418,16 +443,16 @@ def mail():
        msg.attach(make_img_msg(imgPath))
     else: 
         print("no pic capture!")     
-    msg['From']=formataddr(["Eangel Robot pi4B",my_sender])  #括号里的对应发件人邮箱昵称
-    msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱
-    msg['Subject']="EXAID 价值Rank PI %s" %year_month  #邮件的主题
+    msg['From']=formataddr(["Eangel Robot pi4B",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
+    msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
+    msg['Subject']="EXAID 价值Rank %s" % year_month  #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd.decode("utf-8"))  #括号中对应的是发件人邮箱账号、邮箱密码
     server.sendmail(my_sender,[receiver,],msg.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
     print ('SEND NEWS AND IMG OK')
-    server.quit()  #这句是关闭连接
-  except Exception as e:  #
+    server.quit()  #这句是关闭连接的意思
+  except Exception as e:  #如果try中的语句没有执行，则会执行下面的ret=False
     print (str(e))
     ret=False
   return ret

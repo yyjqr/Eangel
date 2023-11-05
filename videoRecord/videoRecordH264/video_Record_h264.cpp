@@ -18,23 +18,23 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。 2019--->202004
 
 #include "log.h"
 
-#include "log.h"
 
 #define STR_OK "[\x1b[1;32m OK \x1b[0m]"
 #define STR_FAIL "[\x1b[1;31mFAIL\x1b[0m]"
-#define VIDEO_LOG_FILE "./video_cap.log"
+#define VIDEO_LOG_FILE "/var/log/video_cap.log"
 
 using namespace cv;
 using namespace std;
 
 char buf[50] = {0}; //全局变量，用于获取文件名的时间
-int recordFlag = 0;
 void *record_thread(void *args);
 extern void *monitor_mem_thread_proc(void *arg); //ADD 0427
 static int program_para(int argc, char **argv, int *fps);
 void printHelp(void);
 
-int bCapture = 1;
+bool bCapture = true;
+bool gb_recordFlag = true;
+
 int MSG_LEVEL_OFF     = 0;
 int MSG_LEVEL_MAX =5;
 int trace_level = MSG_LEVEL_OFF;
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 {
 
 	time_t timep, t, NOW;
-	struct tm *local;
+	tm *local;
 	char stop_cmd[30] = {0};
 	double elapsedseconds;
 	VideoCapture videoCapturer(-1); //   Numerical value 0 cv::CAP_ANY
@@ -81,17 +81,21 @@ int main(int argc, char **argv)
 
 		if (b_dump)
 		{
-			log_set_level(LOG_INFO);
+			log_set_level(LOG_DEBUG);
 			log_set_quiet(0);
 		}
 		else
 		{
-			log_set_level(LOG_ERROR);
+			log_set_level(LOG_INFO);  //将info 信息记录 202309
 			log_set_quiet(1);
 		}
 
 		log_info("Open log file success");
 	}
+        else
+       {
+              printf("open log file error\n");
+       }
 
 	/**
 		* Get some information of the video and print them
@@ -116,6 +120,7 @@ int main(int argc, char **argv)
 	else
 	{
 		cout << " " STR_FAIL " Capture not OK";
+                log_error(" " STR_FAIL " Capture not OK");
 		return -1;
 	}
 
@@ -140,26 +145,27 @@ int main(int argc, char **argv)
 	pVideoFileName = str[0];
 	cout << str[0] << endl;
 	cout << "FileName:" << pVideoFileName << endl;
+	//VideoWriter writer(pVideoFileName, CV_FOURCC('M', 'P','4', '2'), videoCapturer.get(CAP_PROP_FPS),Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH),videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));//AVI 0901   avi格式 MJPG编码
 
 //	VideoWriter writer(pVideoFileName, VideoWriter::fourcc('M', 'P', '4', '2'), videoCapturer.get(CAP_PROP_FPS),
 //					   Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH), videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
  // X,V,I,D --- H264   DIVX -mp4
     VideoWriter writer(pVideoFileName, VideoWriter::fourcc('H', '2', '6', '4'), videoCapturer.get(CAP_PROP_FPS),
                                            Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH), videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
-	recordFlag = 1;
 	pthread_create(&record_thread_t, NULL, record_thread, NULL);
 
 	pthread_t card_monitor_thread;
 	pthread_create(&card_monitor_thread, NULL, monitor_mem_thread_proc, NULL);
-	//namedWindow("Capture", WINDOW_AUTOSIZE);
+	namedWindow("RobotCam", WINDOW_NORMAL);
     Mat frame;
 	while (videoCapturer.isOpened())
 	{
 		
 		//frame=cvQueryFrame(capture); //首先取得摄像头中的一帧     add
-		if (bCapture == 1)
+		if (bCapture)
 		{
-			elapsedseconds = difftime(time(&NOW), t); //比较前后时间差 0912
+			gb_recordFlag  = true;
+                        elapsedseconds = difftime(time(&NOW), t); //比较前后时间差 0912
 			
 			videoCapturer >> frame;
 			/*if ((frame.rows==0)||(frame.cols==0))
@@ -174,11 +180,11 @@ int main(int argc, char **argv)
 			//这里运行提示捕获失败！！
 
 			writer << frame;
-			//imshow("EangelUSBVideo", frame);
+			//imshow("RobotCam", frame);
 			if (elapsedseconds > 10 * 60) //录制10分钟左右的视频
 			{
 				//cout<<"recording time is over"<<endl;
-				recordFlag = 0;
+				gb_recordFlag = false;
 				printf("Recording time is %f  minutes,finished!", elapsedseconds / 60);
 				videoCapturer.release(); //增加，避免声音录制未退出 201906
 				//return 0;
@@ -199,7 +205,8 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
-	sprintf(stop_cmd, "pkill arecord");
+	sprintf(stop_cmd, "pkill -f  arecord");
+        log_info("STOP RECORD audio!\n");
 	system(stop_cmd);
 	writer.release();
 	//videoCapturer.release();
@@ -209,6 +216,7 @@ int main(int argc, char **argv)
 void *record_thread(void *args)
 {
 	char play_cmd[80];
+        char stop_cmd[80];
 	/*
 	-f --format=FORMAT
 	设置格式.格式包括:S8  U8  S16_LE  S16_BE  U16_LE
@@ -223,13 +231,17 @@ void *record_thread(void *args)
 	*/
         log_info("audio save path is %s\n",str_saveDir.c_str());
 	sprintf(play_cmd, "arecord  -f cd -t wav -r 10000 -D plughw:1,0 %s%s.wav",str_saveDir.c_str(), buf); //buf 为时间名称
-	if (recordFlag)
+	if (gb_recordFlag )
 	{
 		system(play_cmd); //增加录音 20190601
 	}
 	else
 	{
 		printf("finsh recording!");
+                sprintf(stop_cmd, "pkill -f  arecord");
+        log_info("in thread, STOP RECORD audio!\n");
+        system(stop_cmd);
+
 		exit(0); //结束录制进程
 	}
 	return 0;
