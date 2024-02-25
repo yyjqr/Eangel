@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <iostream>
 #include <fstream>
+#include <QMessageBox>
 #include "jsonxx/json.hpp"
 
 
@@ -86,6 +87,14 @@ void MainWindow::startTime()
     qDebug() << "fun: " <<__func__;
 
     p_systemTimer->start(500);
+}
+
+void MainWindow::warningOnce(QString info)
+{
+    QMessageBox*  box = new  QMessageBox(QMessageBox::Warning, tr("告警"), info);
+    QTimer::singleShot(2500, box, SLOT(accept()));   // 2.5s弹框自动消失
+    box->exec();
+    delete box;
 }
 
 void MainWindow::systemInfoUpdate()
@@ -190,6 +199,7 @@ void MainWindow::on_pushButton_CARconnect_clicked()
     }
     else{
         ui->textBrowser_log->append(m_timestr+"机器人连接失败--");
+        warningOnce(tr("机器人连接失败,请检查"));
     }
 
     //    ui->textBrowser_log->append(p_controlSocket->peerAddress().toString());
@@ -204,20 +214,36 @@ void MainWindow::on_comboBox_ipAddr_currentTextChanged(const QString &arg1)
 }
 
 /*-------------car control-----------------*/
-void MainWindow::STOP(){
-    char buf ='P';  // UNO单片机端，目前只支持单字母。 2023.05 （python端，支持字符串）
-    long ret = 0;
+void MainWindow::writeCmdToSocketBuf(char cmd )
+{
+    long ret = -1;
     // 对写入命令是否成功做判断 2023.06
-    ret = p_controlSocket->write(&buf,sizeof(buf));
+    qDebug()<<__LINE__<<"test send CAR CMD:"<<cmd<<endl;
+    ret = p_controlSocket->write(&cmd,sizeof(cmd));
     if(ret < 0){
-         ui->textBrowser_log->append(m_timestr+"写入命令:"+buf+" "+"failed"+" ret:"+QString::number(ret));
+         ui->textBrowser_log->append(m_timestr+"写入命令:"+cmd+" "+"failed"+" ret:"+QString::number(ret));
     }
+}
+
+void MainWindow::writeCmdStringToSocketBuf(char *pCmd )
+{
+    long ret = -1;
+    // 对写入命令是否成功做判断 2023.06
+    qDebug()<<__LINE__<<"test send CAR CMD:"<<*pCmd<<"strlen(pCmd)"<<strlen(pCmd)<<endl;
+    ret = p_controlSocket->write(pCmd,strlen(pCmd)+1);
+    if(ret < 0){
+         ui->textBrowser_log->append(m_timestr+"写入命令:"+pCmd+" "+"failed"+" ret:"+QString::number(ret));
+    }
+}
+
+void MainWindow::STOP(){
+    char buf ='P';  // UNO单片机端，目前只支持单字母。 （python端，支持字符串） 2023.05
+    writeCmdToSocketBuf(buf);
 }
 
 void MainWindow::goHead(){
     char buf ='F';
-    qDebug()<<__LINE__<<"test send CAR CMD:"<<buf<<endl;
-    p_controlSocket->write(&buf,sizeof(buf));
+    writeCmdToSocketBuf(buf);
 }
 void MainWindow::goBack(){
     char buf ='B';
@@ -226,12 +252,7 @@ void MainWindow::goBack(){
 void MainWindow::goLeft(){
 
     char buf ='L';
-    qDebug()<<__LINE__<<"test send CAR CMD:"<<buf<<endl;
-    long ret = 0;
-    ret = p_controlSocket->write(&buf,sizeof(buf));
-    if(ret < 0){
-         ui->textBrowser_log->append(m_timestr+"写入命令:"+buf+" "+"failed"+" ret:"+QString::number(ret));
-    }
+    writeCmdToSocketBuf(buf);
 }
 void MainWindow::goRight(){
     char buf ='R';
@@ -252,6 +273,11 @@ void MainWindow::goRightHead(){
 void MainWindow::goRightBack(){
     char buf[] ="Cam";
     p_controlSocket->write(buf,sizeof(buf));
+}
+
+void MainWindow::cleanCommandBuffer(){
+    char buf[] ="Clear";
+    writeCmdStringToSocketBuf(buf);
 }
 
 void MainWindow::on_pushButton_goFront_clicked()
@@ -311,6 +337,8 @@ void MainWindow::ParseFromJson()
 }
 
 
+
+
 void MainWindow::carControl()
 {
     ui->pushButton_CARconnect->setEnabled(false);
@@ -336,6 +364,7 @@ void MainWindow::on_pushButton_disconnect_clicked()
 
     ui->textBrowser_log->append(tmp_qstr);
     ui->pushButton_CARconnect->setEnabled(true);
+    ui->pushButton_disconnect->setEnabled(false);
 }
 
 void MainWindow::onDisconnect()
@@ -369,3 +398,9 @@ void MainWindow::recvData()
 //        bytesNum=m_camSocket->bytesAvailable();
      }
 }
+
+void MainWindow::on_pushButton_clearCommand_clicked()
+{
+     cleanCommandBuffer();
+}
+

@@ -1,19 +1,19 @@
 #!/bin/bash
  sudo apt-get update
  sudo apt-get upgrade
- sudo apt-get install cmake gfortran
- sudo apt-get install python3-dev python3-numpy
- sudo apt-get install libjpeg-dev libtiff-dev libgif-dev
- sudo apt-get install libgstreamer1.0-dev gstreamer1.0-gtk3
- sudo apt-get install libgstreamer-plugins-base1.0-dev gstreamer1.0-gl
- sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev
- sudo apt-get install libgtk2.0-dev libcanberra-gtk*
- sudo apt-get install libxvidcore-dev libx264-dev libgtk-3-dev
- sudo apt-get install libtbb2 libtbb-dev libdc1394-22-dev libv4l-dev
- sudo apt-get install libopenblas-dev libatlas-base-dev libblas-dev
- sudo apt-get install libjasper-dev liblapack-dev libhdf5-dev
+ sudo apt-get install cmake gfortran -y
+ sudo apt-get install python3-dev python3-numpy -y
+ sudo apt-get install libjpeg-dev libtiff-dev libgif-dev -y
+ sudo apt-get install libgstreamer1.0-dev gstreamer1.0-gtk3 -y
+ sudo apt-get install libgstreamer-plugins-base1.0-dev gstreamer1.0-gl -y
+ sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev -y
+ sudo apt-get install libgtk2.0-dev libcanberra-gtk* -y
+ sudo apt-get install libxvidcore-dev libx264-dev libgtk-3-dev -y
+ sudo apt-get install libtbb2 libtbb-dev libdc1394-22-dev libv4l-dev -y
+ sudo apt-get install libopenblas-dev libatlas-base-dev libblas-dev -y
+ sudo apt-get install libjasper-dev liblapack-dev libhdf5-dev -y
 
- sudo apt-get install protobuf-compiler
+ sudo apt-get install protobuf-compiler -y
 
 echo "是否有opencv相关的代码?"
 #git clone https://github.com/opencv/opencv.git
