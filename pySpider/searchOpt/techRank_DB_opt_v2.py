@@ -172,6 +172,7 @@ class GrabNews():
         news_links = []
         kRankLevelValue =0.5 ##use local param to check
         news_elements = soup.find_all(class_='homepageStoryCard__wrapper--5d95dc382241d259dc249996a6e29782')
+        current_date = datetime.now()  # Get current date
         for news_element in news_elements:
             #print(news_element)
            ## class h3  header 
@@ -185,6 +186,14 @@ class GrabNews():
                 #for string in news_element.stripped_strings:
                     #newsUrl=news_element.attrs['href']
                     #print(newsUrl)
+                # news_date = news_element.find_next(class_='date').text.strip()
+                
+                # # Convert news date to datetime object
+                # news_datetime = datetime.strptime(news_date, '%B %d, %Y')
+                
+                # if (current_date - news_datetime).days > 60:  # Filter out news older than 60 days
+                #     print("news is old:" news_title )
+                #     continue
                 self.NewsList.append({news_title:news_link})
             #news_titles.append(news_title)
             #news_links.append(news_link)
@@ -220,10 +229,14 @@ class GrabNewsProduct():
             curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP) 
             #if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
             if curent_news_rank >kRankLevelValue :
-               tittle=news.text
-               print(news.text)
-               str_news=news.txt
-               #print("After filter\n")
+               title=news.text.strip()
+ 
+               if len(title) > 30:  # Filter out overly long titles
+                    print('######title is long:',title)
+                    continue
+                
+               if not title or 'advertisement' in title.lower():  # Filter out empty or advertisement titles
+                    continue
                for string in news.stripped_strings:
                     
                     if news.attrs['href'].startswith('http'):
