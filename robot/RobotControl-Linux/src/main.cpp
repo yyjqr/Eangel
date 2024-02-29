@@ -1,5 +1,7 @@
-/** @brief moving robot control, using cam
+/** @brief moving robot control, using cam.
+ *  传输不同分辨率的摄像头图像，并显示
  *  @date 2020.12--2021.06
+ *  @date 2022.01--2022.10
  * @author Jack
  * @addr  yyjqr789@sina.com
  */
@@ -34,6 +36,6 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
     //软件_v1.5.0
-    w.setWindowTitle(QString::fromLocal8Bit("Robot InterControl"));
+    w.setWindowTitle(QString::fromLocal8Bit("机器人交互控制—v1.2"));
     return a.exec();
 }

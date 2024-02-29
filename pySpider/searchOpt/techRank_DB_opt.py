@@ -3,10 +3,7 @@
 #@date:201902-->10 --->
       #202006-->202101--->202110
       # 2022.09 add rank map
-
-      # 2022.11 KEY OPT
-
-
+      # 2022.11 KEY OPT -->2023.06 verify web
 # Email: yyjqr789@sina.com
 
 #!/usr/bin/python3
@@ -35,7 +32,6 @@ from pprint import pprint
 #一些数据写入文件时会有编码不统一的问题，so codecs to assign code type!!
 import codecs # use for write a file 0708
 import mysqlWriteNewsV2  #mysql database
-
 import encrypt_and_verify_url
 
 my_sender='840056598@qq.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
@@ -43,7 +39,6 @@ receiver='yyjqr789@sina.com' #收件人邮箱
 
 use_database=False;
 pin1=13
-
 #GPIO.setup(pin1,GPIO.OUT)
 save_news_path="/home/pi/techNews/"
 # get the sys date and hour,minutes!!
@@ -56,33 +51,15 @@ newsFullPath=os.path.join(save_news_path,date+'.html')
 print(newsFullPath)
 sql = """ INSERT INTO techTB(Id,Rate,title,author,publish_time,content,url,key_word) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) """
 
-kRankLevelValue =0.78   ##judge value
+kRankLevelValue =0.72   ##judge value
 
-array=['机器人','新冠','量子','物联网','硬科技','数字','5G','Robot','robot','COVID','Digital','AI','IOT','ML']
 
-arrayKEYWORDS_CN=['机器人','新冠','量子','物联网','硬科技','数字','5G','高端制造','智慧','智能','绿色','低碳','新能源','碳中和']
-
-arrayKEYWORDS_EN=['chip','Chip','risc','RISC-V','5G','Robot','robot','COVID','Digital','AI','IOT','ML','APPLE','light','big data','auto','deep learning','bot','energy','clean']
 
 with open('./tech_key_config_map.json') as j:
      #cfg = json.load(j)
      #print(cfg)
      KEYWORDS_RANK_MAP=json.load(j)['KEYWORDS_RANK_MAP']
 #print(KEYWORDS_RANK_MAP)
-
-
-def encrypt_getKey(key):
-    a = base64.b64encode(key)
-    print(a) #  b'aGVsbG8gd29ybGQ='
- 
-    b = base64.b64decode(a)
-
-    print(b) # b"hello world"
-
-def decrypt_getKey(key):
-    b = base64.b64decode(key)
-    #print(b)
-    return b
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
@@ -118,7 +95,8 @@ def findKeyWordInNews(str):
    return False
 
 def findValuedInfoInNews(str,keyWords):
-
+   #print(str)
+   #print(len(keyWords))
    for i in range(len(keyWords)):
        
        if keyWords[i] in str:
@@ -164,6 +142,17 @@ def validate_url_access(self, url):
            print (str(e))
            return False
         return True
+
+def filterYahoo(self, url):
+    # 定义一个正则表达式匹配模式
+    pattern = re.compile(r'.*(yahoo|gadget|techcrunch).*')
+# 过滤掉含有"yahoo"或"gadget"关键字，并且服务器IP在中国大陆的网址
+    #filtered_urls = [url for url in urls if not pattern.match(url) ]
+    if not pattern.match(url):
+       return True
+    else:
+      print(url)
+      return False
 
 
 ### techcrunch,can't visit from 2021.11,because of yahoo info!!!
@@ -245,7 +234,9 @@ class GrabNewsSina():
         soup = BeautifulSoup(r2.text, "html.parser")
         
         for news in soup.select('.tech-news li  a'):
-           if findValuedInfoInNews(news.text,arrayKEYWORDS_CN):
+           #if findValuedInfoInNews(news.text,arrayKEYWORDS_CN):
+            curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
+            if curent_news_rank > kRankLevelValue :
                tittle=news.text
                print(news.text)
                for string in news.stripped_strings:
@@ -260,14 +251,13 @@ class GrabNewsAI():
         self.NewsList = []
     def getNews(self):
         url = 'https://aitopics.org/search'
-
-        r2 = requests.get(url,timeout=5)
+        r2 = requests.get(url)
         r2.encoding = 'utf-8'
-
-
 
         soup = BeautifulSoup(r2.text, "html.parser")
         newsIndex =0
+        #avaliable = validate_url_access(self,"https://www.techCrunch.com")
+        #print("test visit yahoo,techCrunch ret:",avaliable)
         for news in soup.select('.searchtitle   a'):
             #if findValuedInfoInNews(news.text,array):
             curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
@@ -279,19 +269,17 @@ class GrabNewsAI():
                     newsUrl=news.attrs['href']
                 #article.append(url.strip())
                     print(newsUrl)
-
-##if  "techcrunch" not in newsUrl:   validate_url_access can verify browsing techcrunch or not!! 11.20
-                    if validate_url_access(self,newsUrl)==True :
+                    #if  "techcrunch" not in newsUrl:   validate_url_access can't verify browsing techcrunch !! 11.20--->202308
+                    #if validate_url_access(self,newsUrl)==True and "techcrunch" not in newsUrl: filterYahoo
+                    if validate_url_access(self,newsUrl)==True and filterYahoo(self,newsUrl)==True :
+                        #print("++++test add url:{0}".format(newsUrl))
                         self.NewsList.append({string:newsUrl})
                     else :
-                        print("Error,this url can't browse!!\n")
-
+                        print("Error,this url:{0} can't browse!!\n".format(newsUrl))
                ## 写入数据库
-                    if use_database == True : 
-                        newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
+                    newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
                         newsUrl, '人工智能')
-                        result = mysqlWriteNewsV2.writeDb(sql, newsOne)
-
+                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
 
 
 class GrabNewsTechnet():
@@ -305,7 +293,9 @@ class GrabNewsTechnet():
         soup = BeautifulSoup(r2.text, "html.parser")
         for news in soup.select('div.fp_subtitle   a'):  ##ti_news---->fp_title
         #for news in soup.select('div.ti_news   a'):
-            if findKeyWordInNews(news.text):
+            #if findKeyWordInNews(news.text):
+            curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
+            if curent_news_rank > kRankLevelValue :
                tittle=news.text
                print(news.text)
                for string in news.stripped_strings:
@@ -392,22 +382,17 @@ def writeNewsProduct():
 
 def mail():
   ret=True
-
   _pwd =encrypt_and_verify_url.decrypt_getKey("cnVsbnVjZW55cWNwYmJiZg==".encode("utf-8"))
-
   try:
     #msg = MIMEMultipart('alternative')
     msg = MIMEMultipart()  # test two html file 201907
     #add AI topic search 202006
-
     try:
        writeNewsAI()
     except Exception as e:
        print (str(e))
        try:
-
-           #encrypt_and_verify_url.run_cmd_Popen_fileno("telnet 34.72.71.171 443")
-           print("test connect")
+           encrypt_and_verify_url.run_cmd_Popen_fileno("nc -v 34.72.71.171 443")
        except Exception as e:
            print (str(e))
 
@@ -433,14 +418,12 @@ def mail():
        msg.attach(make_img_msg(imgPath))
     else: 
         print("no pic capture!")     
-    msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
+    msg['From']=formataddr(["Eangel Robot pi4B",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     msg['Subject']="EXAID 价值Rank %s" %year_month  #邮件的主题，也可以说是标题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
-
-    server.login(my_sender,_pwd.decode("utf-8"))  #括号中对应的是发件人邮箱账号、邮箱密码---->bytes need decode to string 1113
-
+    server.login(my_sender,_pwd.decode("utf-8"))  #括号中对应的是发件人邮箱账号、邮箱密码
     server.sendmail(my_sender,[receiver,],msg.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
     print ('SEND NEWS AND IMG OK')
     server.quit()  #这句是关闭连接的意思

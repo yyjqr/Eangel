@@ -31,11 +31,11 @@ void* monitor_mem_thread_proc(void* arg) {
         ret = commandDfResult();
       // printf("ret is %d \n",ret);
         if (ret == 0) {
-				bCapture=1;
+				bCapture = true;
         }
         else{
 				
-				bCapture=0;
+				bCapture = false;
 				printf("SD card or usb disk is not mount,NOT RECORD video \n");
                 log_error("SD card or usb disk is not mount,NOT RECORD video  ###\n");
                 sleep(10);
@@ -64,9 +64,9 @@ int commandDfResult()
             pclose(fp);
              double ratio;
              ratio=atof(buf);
-            if(ratio>95)
+            if(ratio >= 98)
              {
-            printf("storage is %f,FULL!\n",ratio);
+             printf("storage is %f,FULL!\n",ratio);
              return -1;
 
              }
