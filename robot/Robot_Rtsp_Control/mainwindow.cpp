@@ -4,8 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <QMessageBox>
-#include "jsonxx/json.hpp"
-
+#include "json.hpp"
+#include "logging.h"
+using json=nlohmann::json ;
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -189,16 +190,19 @@ void MainWindow::on_pushButton_CARconnect_clicked()
     qDebug()<<"first test connect:"<<m_str_addr<<"controlSocket->state():"<<p_controlSocket->state()<<endl;
     p_controlSocket->connectToHost(m_str_addr,6868); //车的控制端口，6868
     qDebug()<<"test connect:"<<m_str_addr<<"p_controlSocket->state():"<<p_controlSocket->state()<<endl;
+    LogInfo("connect robot ip:%s, state:%d",m_str_addr.toStdString().c_str(),p_controlSocket->state());
     if(p_controlSocket->state()==QTcpSocket::ConnectingState){
         ui->textBrowser_log->append(m_timestr+"正在连接:"+m_str_addr+" Robot---");
     }
     p_controlSocket->waitForConnected(3000);
     if(p_controlSocket->state()==QTcpSocket::ConnectedState){
         ui->textBrowser_log->append(m_timestr+"机器人连接:"+m_str_addr+" OK++");
+        LogInfo("connect robot OK,ip:%s, state:%d",m_str_addr.toStdString().c_str(),p_controlSocket->state());
         //        initControlUI(true);
     }
     else{
         ui->textBrowser_log->append(m_timestr+"机器人连接失败--");
+        LogWarning("connect robot ip:%s, state:%d",m_str_addr.toStdString().c_str(),p_controlSocket->state());
         warningOnce(tr("机器人连接失败,请检查"));
     }
 
@@ -220,6 +224,7 @@ void MainWindow::writeCmdToSocketBuf(char cmd )
     // 对写入命令是否成功做判断 2023.06
     qDebug()<<__LINE__<<"test send CAR CMD:"<<cmd<<endl;
     ret = p_controlSocket->write(&cmd,sizeof(cmd));
+    LogInfo("send cmd to robot,cmd:%c, ret:%d",cmd,ret);
     if(ret < 0){
          ui->textBrowser_log->append(m_timestr+"写入命令:"+cmd+" "+"failed"+" ret:"+QString::number(ret));
     }
@@ -231,6 +236,7 @@ void MainWindow::writeCmdStringToSocketBuf(char *pCmd )
     // 对写入命令是否成功做判断 2023.06
     qDebug()<<__LINE__<<"test send CAR CMD:"<<*pCmd<<"strlen(pCmd)"<<strlen(pCmd)<<endl;
     ret = p_controlSocket->write(pCmd,strlen(pCmd)+1);
+    LogInfo("send long cmd to robot,cmd:%s, ret:%d",pCmd,ret);
     if(ret < 0){
          ui->textBrowser_log->append(m_timestr+"写入命令:"+pCmd+" "+"failed"+" ret:"+QString::number(ret));
     }
@@ -317,18 +323,18 @@ void MainWindow::ParseFromJson()
     else
     {
         std::ifstream ifs(m_ip_config_path);
-        jsonxx::json json_flow;
+        json json_flow;
         ifs >> json_flow;
         std::string  str_ip1,str_ip2,str_ip3,str_ip4;
 
-        str_ip1       = json_flow["ip_addr1"].as_string();
+        str_ip1       = json_flow["ip_addr1"];
         m_ip_addr1=QString::fromStdString(str_ip1);
 
-        str_ip2       = json_flow["ip_addr2"].as_string();
+        str_ip2       = json_flow["ip_addr2"];
         m_ip_addr2=QString::fromStdString(str_ip2);
-        str_ip3       = json_flow["ip_addr3"].as_string();
+        str_ip3       = json_flow["ip_addr3"];
         m_ip_addr3=QString::fromStdString(str_ip3);
-        str_ip4       = json_flow["ip_addr4"].as_string();
+        str_ip4       = json_flow["ip_addr4"];
         m_ip_addr4=QString::fromStdString(str_ip4);
 
 
