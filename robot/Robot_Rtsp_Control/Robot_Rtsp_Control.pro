@@ -12,12 +12,14 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     qdisplay.cpp \
-    videoplayer.cpp
+    videoplayer.cpp\
+    logging.cpp
 
 HEADERS += \
     mainwindow.h \
     qdisplay.h \
-    videoplayer.h
+    videoplayer.h \
+    logging.h
 
 FORMS += \
     mainwindow.ui
