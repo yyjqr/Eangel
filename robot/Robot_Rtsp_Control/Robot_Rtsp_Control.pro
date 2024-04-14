@@ -53,7 +53,7 @@ LIBS += $$PWD/ffmpeg-4.4/libs/avcodec.lib \
 #                -lswresample \
 #                -lswscale
 
-
+greaterThan(QT_MAJOR_VERSION,5):QT+=core5compat
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
