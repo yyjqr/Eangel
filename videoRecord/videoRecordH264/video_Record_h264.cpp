@@ -40,7 +40,7 @@ int MSG_LEVEL_OFF     = 0;
 int MSG_LEVEL_MAX =5;
 int trace_level = MSG_LEVEL_OFF;
 int b_dump = 1;
-const string str_saveDir="/home/pi/Videos/";
+const string str_saveDir="/home/ai/Videos/";
 
 bool IsPathExist(const std::string &path) 
 {
@@ -59,11 +59,20 @@ int main(int argc, char **argv)
 	char stop_cmd[30] = {0};
 	double elapsedseconds;
 	VideoCapture videoCapturer(-1); //   Numerical value 0 cv::CAP_ANY
+
 	string str[20] = {" "};
 	//int level = -1;
 	int fps = -1;
 	char imu_module[LOG_MOD_NAME_LEN] = "[video_cap]";
+
 	FILE *log_file = NULL;
+        std::string rtspPath = "rtsp://127.0.0.1:8554/test";
+        videoCapturer.open(rtspPath);
+    if (!videoCapturer.isOpened())
+    {
+        cout << "cannot open video!" << endl;
+        return 0;
+    }
 	if (argc >= 2)
 	{
 		printHelp();
