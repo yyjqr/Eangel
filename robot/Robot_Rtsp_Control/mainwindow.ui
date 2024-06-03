@@ -73,7 +73,7 @@
         </size>
        </property>
        <property name="text">
-        <string>暂停播放</string>
+        <string>播放控制</string>
        </property>
       </widget>
      </widget>
@@ -113,10 +113,55 @@
          <x>10</x>
          <y>29</y>
          <width>361</width>
-         <height>121</height>
+         <height>181</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
+        <item row="1" column="2">
+         <widget class="QPushButton" name="pushButton_turnRight">
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>右转</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="pushButton_clearCommand">
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>清除命令</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="pushButton_goFront">
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>前进</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="0">
          <widget class="QPushButton" name="pushButton_turnLeft">
           <property name="maximumSize">
@@ -149,90 +194,46 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="pushButton_goFront">
+        <item row="2" column="0">
+         <widget class="QPushButton" name="pushButton_stop">
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>70</height>
+            <height>65</height>
            </size>
           </property>
           <property name="text">
-           <string>前进</string>
+           <string>暂停</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QPushButton" name="pushButton_turnRight">
+        <item row="2" column="1">
+         <widget class="QPushButton" name="pushButtonCARBACK">
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>70</height>
+            <height>65</height>
            </size>
           </property>
           <property name="text">
-           <string>右转</string>
+           <string>后退</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QPushButton" name="pushButton_disconnect">
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>65</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>断开连接</string>
           </property>
          </widget>
         </item>
        </layout>
-      </widget>
-      <widget class="QPushButton" name="pushButtonCARBACK">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>150</y>
-         <width>100</width>
-         <height>63</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>70</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>后退</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_stop">
-       <property name="geometry">
-        <rect>
-         <x>12</x>
-         <y>150</y>
-         <width>100</width>
-         <height>63</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>70</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>暂停</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_disconnect">
-       <property name="geometry">
-        <rect>
-         <x>260</x>
-         <y>150</y>
-         <width>100</width>
-         <height>63</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>65</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>断开连接</string>
-       </property>
       </widget>
      </widget>
     </item>
@@ -257,7 +258,7 @@
           </item>
           <item>
            <property name="text">
-            <string>rtsp://192.168.3.66:8554/stream</string>
+            <string>rtsp://192.168.3.20:8554/test</string>
            </property>
           </item>
           <item>
@@ -338,7 +339,7 @@
      <x>0</x>
      <y>0</y>
      <width>1480</width>
-     <height>21</height>
+     <height>17</height>
     </rect>
    </property>
   </widget>
