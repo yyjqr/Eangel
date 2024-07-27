@@ -4,8 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <QMessageBox>
-#include "jsonxx/json.hpp"
-
+#include "json.hpp"
+#include "logging.h"
+using json=nlohmann::json ;
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -31,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(p_controlSocket,SIGNAL(disconnected()),this,SLOT(onDisconnect()));
 
     ui->pauseButton->setDisabled(true);
+    ui->pauseButton->setCheckable(true);  // set to use checked flag
     mPlayer_run_flag = false;
 }
 
@@ -42,6 +44,12 @@ MainWindow::~MainWindow()
         p_systemTimer = nullptr;
     }
     delete ui;
+    if(mPlayer != nullptr)
+    {
+        delete mPlayer;
+        mPlayer = nullptr;
+    }
+
 }
 
 
@@ -67,17 +75,17 @@ void MainWindow::on_startButton_clicked()
     }else {
         //停止播放线程
         if(mPlayer->state()==Paused)
-            on_pauseButton_clicked();
+            on_pauseButton_clicked(true);
         qDebug() << "fun: " <<__func__ <<"line:"<< __LINE__<< "analysis stop play or rtsp server stop (connect disconnect)";
         disconnect(mPlayer,SIGNAL(sig_GetOneFrame(QImage)),this,SLOT(slotGetOneFrame(QImage)));
         mPlayer->stopPlay();
+        qDebug()<<__func__<<"line:"<<__LINE__<<"play or connect error issue";
         mPlayer_run_flag = false;
         ui->textBrowser_log->append(getCurrentTime()+":stop play");
         //改变ui
         ui->startButton->setText("Open");
         ui->pauseButton->setDisabled(true);
-        delete mPlayer;
-        mPlayer = nullptr;
+
         flag = true;
     }
 }
@@ -128,24 +136,24 @@ void MainWindow::closeEvent(QCloseEvent *event)
 }
 
 
-void MainWindow::on_pauseButton_clicked()
+void MainWindow::on_pauseButton_clicked(bool checked)
 {
-    static bool flag = true;
 
-    if(flag)
+    qDebug()<<"line:"<<__LINE__<<"test checked"<<checked;
+    if(checked)  //  not use flag variable, static variable!
     {
-
-        //暂停播放线程开启播放线程
+        qDebug()<<"line:"<<__LINE__<<"play or connect error issue";
+        //暂停播放线程
         mPlayer->pause();
         //改变ui
-        ui->pauseButton->setText("play");
-        flag = false;
+        ui->pauseButton->setText(tr("继续播放"));
+        // flag = false;
     }else {
         //开启播放线程
         mPlayer->resume();
         //改变ui
-        ui->pauseButton->setText("pause");
-        flag = true;
+        ui->pauseButton->setText(tr("暂停播放"));
+        qDebug()<<"line:"<<__LINE__<<"play or connect error issue";
     }
 }
 
@@ -179,26 +187,29 @@ void MainWindow::saveImage(QImage img)
 
 void MainWindow::on_pushButton_saveImg_clicked()
 {
-    //    qDebug()<<__LINE__<<"save Img button clicked:"<<endl;
+    //    qDebug()<<__LINE__<<"save Img button clicked:";
     b_grabPic = true;
 }
 
 
 void MainWindow::on_pushButton_CARconnect_clicked()
 {
-    qDebug()<<"first test connect:"<<m_str_addr<<"controlSocket->state():"<<p_controlSocket->state()<<endl;
+    qDebug()<<"first test connect:"<<m_str_addr<<"controlSocket->state():"<<p_controlSocket->state();
     p_controlSocket->connectToHost(m_str_addr,6868); //车的控制端口，6868
-    qDebug()<<"test connect:"<<m_str_addr<<"p_controlSocket->state():"<<p_controlSocket->state()<<endl;
+    qDebug()<<"test connect:"<<m_str_addr<<"p_controlSocket->state():"<<p_controlSocket->state();
+    LogInfo("connect robot ip:%s, state:%d",m_str_addr.toStdString().c_str(),p_controlSocket->state());
     if(p_controlSocket->state()==QTcpSocket::ConnectingState){
         ui->textBrowser_log->append(m_timestr+"正在连接:"+m_str_addr+" Robot---");
     }
     p_controlSocket->waitForConnected(3000);
     if(p_controlSocket->state()==QTcpSocket::ConnectedState){
         ui->textBrowser_log->append(m_timestr+"机器人连接:"+m_str_addr+" OK++");
+        LogInfo("connect robot OK,ip:%s, state:%d",m_str_addr.toStdString().c_str(),p_controlSocket->state());
         //        initControlUI(true);
     }
     else{
         ui->textBrowser_log->append(m_timestr+"机器人连接失败--");
+        LogWarning("connect robot ip:%s, state:%d",m_str_addr.toStdString().c_str(),p_controlSocket->state());
         warningOnce(tr("机器人连接失败,请检查"));
     }
 
@@ -218,8 +229,9 @@ void MainWindow::writeCmdToSocketBuf(char cmd )
 {
     long ret = -1;
     // 对写入命令是否成功做判断 2023.06
-    qDebug()<<__LINE__<<"test send CAR CMD:"<<cmd<<endl;
+    qDebug()<<__LINE__<<"test send CAR CMD:"<<cmd;
     ret = p_controlSocket->write(&cmd,sizeof(cmd));
+    LogInfo("send cmd to robot,cmd:%c, ret:%d",cmd,ret);
     if(ret < 0){
          ui->textBrowser_log->append(m_timestr+"写入命令:"+cmd+" "+"failed"+" ret:"+QString::number(ret));
     }
@@ -229,8 +241,9 @@ void MainWindow::writeCmdStringToSocketBuf(char *pCmd )
 {
     long ret = -1;
     // 对写入命令是否成功做判断 2023.06
-    qDebug()<<__LINE__<<"test send CAR CMD:"<<*pCmd<<"strlen(pCmd)"<<strlen(pCmd)<<endl;
+    qDebug()<<__LINE__<<"test send CAR CMD:"<<*pCmd<<"strlen(pCmd)"<<strlen(pCmd);
     ret = p_controlSocket->write(pCmd,strlen(pCmd)+1);
+    LogInfo("send long cmd to robot,cmd:%s, ret:%d",pCmd,ret);
     if(ret < 0){
          ui->textBrowser_log->append(m_timestr+"写入命令:"+pCmd+" "+"failed"+" ret:"+QString::number(ret));
     }
@@ -283,7 +296,7 @@ void MainWindow::cleanCommandBuffer(){
 void MainWindow::on_pushButton_goFront_clicked()
 {
     goHead();
-    qDebug()<<"test control car"<<endl;
+    qDebug()<<"test control car";
 }
 
 
@@ -317,18 +330,18 @@ void MainWindow::ParseFromJson()
     else
     {
         std::ifstream ifs(m_ip_config_path);
-        jsonxx::json json_flow;
+        json json_flow;
         ifs >> json_flow;
         std::string  str_ip1,str_ip2,str_ip3,str_ip4;
 
-        str_ip1       = json_flow["ip_addr1"].as_string();
+        str_ip1       = json_flow["ip_addr1"];
         m_ip_addr1=QString::fromStdString(str_ip1);
 
-        str_ip2       = json_flow["ip_addr2"].as_string();
+        str_ip2       = json_flow["ip_addr2"];
         m_ip_addr2=QString::fromStdString(str_ip2);
-        str_ip3       = json_flow["ip_addr3"].as_string();
+        str_ip3       = json_flow["ip_addr3"];
         m_ip_addr3=QString::fromStdString(str_ip3);
-        str_ip4       = json_flow["ip_addr4"].as_string();
+        str_ip4       = json_flow["ip_addr4"];
         m_ip_addr4=QString::fromStdString(str_ip4);
 
 
@@ -348,7 +361,7 @@ void MainWindow::carControl()
 
 void MainWindow::on_pushButton_stop_clicked()
 {
-    qDebug()<<"test Pause a car"<<endl;
+    qDebug()<<"test Pause a car";
     STOP();
 }
 
@@ -381,7 +394,7 @@ void MainWindow::recvData()
 //    qDebug()<<"\n fun:"<<__func__<<"size:"<<m_read_image_size;
     //    bytes.resize(MAX_LEN);//ADD 0309
 //    mutex.lock();
-    qDebug() <<"socket Available bytes:"<<p_controlSocket->bytesAvailable()<<endl;
+    qDebug() <<"socket Available bytes:"<<p_controlSocket->bytesAvailable();
     //读到一张图的字节或超时，就退出循环！！  0404
     while(p_controlSocket->waitForReadyRead(300)) //200--->300
     {
@@ -401,6 +414,6 @@ void MainWindow::recvData()
 
 void MainWindow::on_pushButton_clearCommand_clicked()
 {
-     cleanCommandBuffer();
+    cleanCommandBuffer();
 }
 

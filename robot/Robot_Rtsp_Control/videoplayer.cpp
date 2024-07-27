@@ -8,7 +8,7 @@ VideoPlayer::VideoPlayer()
 {
     pauseFlag = false;
     stopFlag = false;
-    qDebug()<<"ffmpeg  avcodec version:"<<avcodec_version()<<endl;
+    qDebug()<<"ffmpeg  avcodec version:"<<avcodec_version();
 
 
 }
@@ -26,13 +26,13 @@ void VideoPlayer::startPlay()
 
 void VideoPlayer::stopPlay()
 {
-    qDebug()<<getCurrentTime()<<"stopFlag:"<<stopFlag<<endl;
+    qDebug()<<getCurrentTime()<<"stopFlag:"<<stopFlag<<"QThread::isRunning():"<<QThread::isRunning();
     if (QThread::isRunning())
     {
         stopFlag = true;
         condition.wakeAll();
-        QThread::quit();
-        QThread::wait();
+
+        qDebug()<<"line:"<<__LINE__<<"play or connect error issue";
     }
 }
 
@@ -194,8 +194,12 @@ void VideoPlayer::run()
         }
         if (av_read_frame(pFormatCtx, packet) < 0)
         {
-            qDebug()<<"read frame over!!!"<<endl;
-            break; //这里认为视频读取完了
+            qDebug()<<"read frame over!!!";
+            m_not_get_times++; //add
+            if(m_not_get_times >10){
+                break; //这里认为视频读取完了,跳出循环
+            }
+
         }
 
         if (packet->stream_index == videoStream) {
@@ -221,7 +225,7 @@ void VideoPlayer::run()
                 m_not_get_times++;
                 if(m_not_get_times >3)
                 {
-                    qDebug()<<getCurrentTime()<<"not get frame!!!"<<endl;
+                    qDebug()<<getCurrentTime()<<"not get frame!!!";
                     QMessageBox*  box = new   QMessageBox(QMessageBox::Warning, tr("告警"), "取流失败");
                      QTimer::singleShot(2500, box, SLOT(accept()));   // 1.5s弹框自动消失
                      box->exec();
@@ -243,6 +247,7 @@ void VideoPlayer::run()
 
     pauseFlag = false;
     stopFlag = false;
+    qDebug() <<__func__<<__LINE__<<" test end thread";
     QMessageBox*  box = new   QMessageBox(QMessageBox::Warning, tr("告警"), "取流失败,结束取流");
     QTimer::singleShot(4500, box, SLOT(accept()));   // 1.5s弹框自动消失
     box->exec();

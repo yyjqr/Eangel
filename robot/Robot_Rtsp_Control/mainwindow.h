@@ -44,7 +44,7 @@ private:
 
 private slots:
     void on_startButton_clicked();
-    void on_pauseButton_clicked();
+    void on_pauseButton_clicked(bool checked);
     void closeEvent(QCloseEvent *event);
 
 
@@ -74,6 +74,8 @@ private slots:
     void recvData(void);
 
     void on_pushButton_clearCommand_clicked();
+
+    // void on_pushButton_playControl_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;

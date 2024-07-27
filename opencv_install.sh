@@ -8,8 +8,18 @@ python-numpy  libtbb2 libtbb-dev libjpeg-dev
 sudo apt-get install -y libtiff-dev libjasper-dev libdc1394-22-dev libopenexr-dev
 
 cd /home/opencv
-wget -O opencv4.1.0.zip https://github.com/opencv/opencv/archive/4.1.0.zip
+#wget -O opencv4.1.0.zip https://github.com/opencv/opencv/archive/4.1.0.zip
 pwd
+directory="/home/opencv"
+file="opencv4.1.0.zip"
+
+if [ -f "$directory/$file" ]; then
+    echo "File exists"
+else
+    echo "File does not exist"
+    exit 0 
+fi
+
 sudo unzip opencv4.1.0.zip
 sudo mkdir -p /home/opencv/opencv4.1.0/build
 wget -O opencv_contrib-4.1.0.tar.gz https://github.com/opencv/opencv_contrib/archive/4.1.0.tar.gz

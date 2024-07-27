@@ -12,12 +12,14 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     qdisplay.cpp \
-    videoplayer.cpp
+    videoplayer.cpp\
+    logging.cpp
 
 HEADERS += \
     mainwindow.h \
     qdisplay.h \
-    videoplayer.h
+    videoplayer.h \
+    logging.h
 
 FORMS += \
     mainwindow.ui
@@ -51,7 +53,7 @@ LIBS += $$PWD/ffmpeg-4.4/libs/avcodec.lib \
 #                -lswresample \
 #                -lswscale
 
-
+greaterThan(QT_MAJOR_VERSION,5):QT+=core5compat
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
