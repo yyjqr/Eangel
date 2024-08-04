@@ -4,7 +4,8 @@
       #202006-->202101--->202110
       # 2022.09 add rank map
       # 2022.11 KEY OPT -->2023.06 verify web ---》yahoo visit filter 2023.08
-# Email: yyjqr789@sina.com
+      # scikit-learn
+# @Email: yyjqr789@sina.com
 
 #!/usr/bin/python3
 import smtplib
@@ -40,7 +41,7 @@ receiver='yyjqr789@sina.com' #收件人邮箱
 use_database=True;
 pin1=13
 #GPIO.setup(pin1,GPIO.OUT)
-save_news_path="/home/ai/techNews/"
+save_news_path="/home/pi/techNews/"
 # get the sys date and hour,minutes!!
 now_time = datetime.now()
 date=datetime.now().strftime('%Y-%m-%d_%H:%M')
@@ -52,7 +53,14 @@ print(newsFullPath)
 sql = """ INSERT INTO techTB(Id,Rate,title,author,publish_time,content,url,key_word) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) """
 
 kRankLevelValue =0.75   ##judge value
-
+# Define a set of common words to filter out (stop words)
+stop_words = set([
+    "is", "the", "this", "and", "a", "to", "of", "in", "for", "on",
+    "if", "has", "are", "was", "be", "by", "at", "that", "it", "its",
+    "as","about",
+    "an", "or", "but", "not", "from", "with", "which", "there", "when",
+    "so", "all", "any", "some", "one", "two", "three", "four", "five"
+])
 
 
 with open('./tech_key_config_map.json') as j:
@@ -128,27 +136,27 @@ def findValuedInfoRank(str,keyMap):
    return rankValue
 
 # 计算关键词权重
-def calculate_keyword_weightsOld(texts, keywords):
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(texts)
-    feature_names = vectorizer.get_feature_names()
-    print("test feature_names",feature_names)
-    keyword_indices = [feature_names.index(keyword) for keyword in keywords if keyword in feature_names]
-    keyword_weights = tfidf_matrix[:, keyword_indices].toarray()
-    print("test keyword_indices{0},keywords{1},keyword_weights{2}".format(keyword_indices,keyword, keyword_weights))
-    return keyword_weights
-
 def calculate_keyword_weights(texts, keywords):
     vectorizer = TfidfVectorizer()
+
     tfidf_matrix = vectorizer.fit_transform(texts)
-    feature_names = vectorizer.get_feature_names()
+##scikit-learn>1.0.x use this version
+    feature_names = vectorizer.get_feature_names_out()
     print("test feature_names", feature_names)
-    
+    # Define a set of common words to filter out (stop words)
+   # Filter out stop words and numbers from feature names
+    filtered_feature_names = [feature for feature in feature_names if feature not in stop_words and not feature.isdigit()]
+    # Assuming we want to select the top N important feature names
+# For demonstration, let's say we want the top 3 features
+# You can replace this logic with your own importance criteria
+    top_n = 6
+    important_feature_names = filtered_feature_names[:top_n]  # Select top N feature names
+    print("important_feature_names:{0}".format(important_feature_names));
     keyword_indices = []
     keyword_weights_sum = 0
     for keyword in keywords:
-        if keyword in feature_names:
-            index = feature_names.index(keyword)
+        if keyword in filtered_feature_names:
+            index = filtered_feature_names.index(keyword)
             keyword_indices.append(index)
             keyword_weights = tfidf_matrix[:, index].toarray()
             print("Keyword: {0}, Index: {1}, Weight: {2}".format(keyword, index, keyword_weights))
@@ -188,18 +196,30 @@ class GrabNews():
     def __init__(self):
         self.NewsList = []
     def getNews(self):
-        url = 'https://techcrunch.com/'
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, "html.parser")
-        for news in soup.select('.post-block__title  a'):
-            if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
-                tittle=news.text
-                print(news.text) 
-                for string in news.stripped_strings:
-                    newsUrl=news.attrs['href']
-                #article.append(url.strip())
-                    self.NewsList.append({string:newsUrl})
 
+        url = 'https://www.technologyreview.com/'
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        news_titles = []
+        news_links = []
+        kRankLevelValue =0.25 ##use local param to check
+        print("\n,in {0},news_rank set:{1}".format(url, kRankLevelValue))
+        news_elements = soup.find_all(class_='homepageStoryCard__wrapper--5d95dc382241d259dc249996a6e29782')
+        for news_element in news_elements:
+            #print(news_element)
+           ## class h3  header
+            news_title = news_element.find(class_='homepageStoryCard__hed--92c78a74bbc694463e43e32aafbbdfd7').text.strip()
+            news_link = news_element.find('a')['href']
+            #if findValuedInfoInNews(news_title,arrayKEYWORDS_EN):
+            print("MIT titles {0},url:{1}\n".format(news_title, news_link))
+            #curent_news_rank =findValuedInfoRank(news_title,KEYWORDS_RANK_MAP)
+            curent_news_rank =calculate_keyword_weights([news_title],KEYWORDS_RANK_MAP)
+            print("\n,in {0}curent_news_rank:{1}\n".format(url, curent_news_rank))
+            if curent_news_rank > kRankLevelValue :
+         #       tittle=news.text
+                #print("MIT titles {0},url:{1}".format(news_title, news_link))
+                self.NewsList.append({news_title:news_link})
 
 
 class GrabNewsProduct():
@@ -209,7 +229,7 @@ class GrabNewsProduct():
         url = 'https://www.popularmechanics.com/'
         headers = { 'User-Agent':'Mozilla/5.0 (Windows NT 6.3;Win64;x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36'}
         #html = requests.get(url,headers = headers).text
-        kRankLevelValue = 0.2
+        kRankLevelValue = 0.36
         req  = requests.get(url,headers = headers, timeout=8)
         html =req.text      
  # r2.encoding = 'utf-8'
@@ -223,8 +243,8 @@ class GrabNewsProduct():
         for news in soup.select('a.enk2x9t2'):
             #curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP) 
             curent_news_rank =calculate_keyword_weights([news.text],KEYWORDS_RANK_MAP)
-            print("\n,in {0}curent_news_rank:{1}".format(url,curent_news_rank))
-
+            print("\n,in {0}curent_news_rank:{1}".format(url, curent_news_rank))
+            
             if curent_news_rank >kRankLevelValue :
                title=news.text.strip()
  
@@ -301,6 +321,7 @@ class GrabNewsAI():
             #if findValuedInfoInNews(news.text,array):
             #curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
             curent_news_rank =calculate_keyword_weights([news.text],KEYWORDS_RANK_MAP)
+            
             print("\n,curent_news_rank:",curent_news_rank)
             if(value_title>3):
                 kRankLevelValue=0.3
@@ -384,6 +405,7 @@ def writeNewsTechNet():
 #adopt AI from other article
 def writeNews():
     grabNews = GrabNews()
+    print("get mit technology review news+++++\n")
     grabNews.getNews()
     # 加上获取新闻的日期
     fp = codecs.open(newsFullPath , 'a', 'utf-8')
@@ -447,10 +469,15 @@ def mail():
            print (str(e))
 
     try:
-        writeNewsProduct()  
+        #writeNewsProduct()  
         writeNewsSina()
     except Exception as e:
         print (str(e))
+## don't write  other fun in same try condition! 08.04
+    try:
+       writeNews()
+    except Exception as e:
+       print (str(e))
 
     writeNewsTechNet()
     with open(newsFullPath,'rb+') as fp:
@@ -467,9 +494,9 @@ def mail():
        msg.attach(make_img_msg(imgPath))
     else: 
         print("no pic capture!")     
-    msg['From']=formataddr(["Eangel AI Nano",my_sender])  #括号里的对应发件人邮箱昵称
+    msg['From']=formataddr(["Eangel Robot pi4B",my_sender])  #括号里的对应发件人邮箱昵称
     msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱
-    msg['Subject']="EXAID 价值Rank Agent %s" %year_month  #邮件的主题
+    msg['Subject']="EXAID 价值Rank AgentPro %s" %year_month  #邮件的主题
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd.decode("utf-8"))  #括号中对应的是发件人邮箱账号、邮箱密码

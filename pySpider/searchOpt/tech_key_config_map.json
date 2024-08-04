@@ -1,18 +1,21 @@
 {
 "KEYWORDS_RANK_MAP":
-{ 
+{
+"technologies":0.35,"technology":0.3, 
 "chip":1,
 "risc":0.8,
 "5G":1,"6G":1,
 "Robot":1,"robot":1,
-"science":1,
+"science":1,"dataset":0.5,
 "COVID":1,"Digital":0.8,
-"AI":0.9,
+"AI":0.9,"chatGPT":0.85,"openAI":0.4, "bard":0.8,"dall-E":0.8,"transformer":0.7,
+"lama":0.5,"generative":0.4,"claude":0.4,
  "IOT":0.6,
 "ML":0.8,"machine learning":1,
-"Artificial Intelligence (AI)":1,
- "Machine Learning":1, "Deep Learning":1, 
-"AI Ethics":0.6,"prompts":0.5,
+"Artificial Intelligence (AI)":1,"ai":0.2,
+ "Machine Learning":1, "Deep Learning":1,
+"AI Ethics":0.6,"prompts":0.5,"networks":0.3, "neural":0.4,
+ "predicting":0.3,"economic":0.2,  "rebuild":0.2, "security":0.3,
 "IoT (Internet of Things)":0.8, "v2x":1,
 
 "auto":0.6,"autonomous":1.2,
@@ -20,7 +23,7 @@
 "deep learning":1,
 "light":0.8,"sun":0.6,"electric":0.7,"electronic":0.7,
 "big data":0.5,
-"energy":0.8,"clean energy":1.2,
+"energy":0.8,"clean energy":1.2,"green":0.6,
 "carbon":0.8,
 "low carbon":1,
 "Climate Change":0.8,
