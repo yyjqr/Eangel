@@ -22,10 +22,14 @@ void find_cuboid(long long max_length) {
 
             if((a+b) < c) continue;
             if((a+c) < b) continue;
+            if(a==b||a==c||b==c) continue; //add 两边相等，不符合 08.20
               //b+c>a+1>a
             if(searchTimes%10000==0)
              {cout <<"searchTimes:"<<searchTimes<<endl;
-             finCube <<"searchTimes:"<<searchTimes<< "step,try a cube" <<"a|b|c:" <<a<<","<<b <<","<<c<<endl;
+              if(a>20 && b>20 && c>20){
+
+                 finCube <<"searchTimes:"<<searchTimes<< "step,try a cube" <<"a|b|c:" <<a<<","<<b <<","<<c<<endl;
+                 }
                      }
             if(b%2000==0){printf("b is %lld\n",b);}
             if (c * c != c2) continue;  // 剪枝
@@ -40,6 +44,7 @@ void find_cuboid(long long max_length) {
             }
         }
     }
+
 }
 
 int main() 
