@@ -1,0 +1,33 @@
+/*typedef struct ST_RobotSensorData
+{
+    unsigned long index;
+    double velocity;
+    double positionX;
+    double positionY;
+    string message;
+}RobotSensorData;*/
+
+ struct RobotSensorData
+{
+    unsigned long index;
+    unsigned long id;
+    double velocity;
+    double positionX;
+    double positionY;
+    string message;
+};
+
+
+//sequence<RobotSensorData> m_vec_Robot_Info;
+ struct RobotFrameInfoData
+{
+    sequence<RobotSensorData> m_vec_Robot_Info;
+};
+
+
+/*struct ST_FrameInfo
+{
+    RobotSensorData robotData[20];
+    int num;
+    bool state;
+}*/
