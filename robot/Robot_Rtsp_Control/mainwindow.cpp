@@ -15,18 +15,24 @@ MainWindow::MainWindow(QWidget *parent)
       b_grabPic(false)
 {
     ui->setupUi(this);
-    QStringList item_Resolution,item_ipAddrs;
-
+    QStringList item_Resolution,item_urls;
+    QStringList item_ipAddrs;
     p_systemTimer=new QTimer(this);
     p_controlSocket = new QTcpSocket(this);
     startTime();//开启系统定时
     ParseFromJson();
-    if(m_ip_addr1.isNull()!=true){
-        item_ipAddrs<<m_ip_addr1<<m_ip_addr2<<m_ip_addr3<<m_ip_addr4;
+    for (auto i: m_qstr_ips) {
+        item_ipAddrs<<i;
     }
+    for (auto i: m_qstr_urls) {
+        item_urls<<i;
+    }
+
 
     ui->comboBox_ipAddr->addItems(item_ipAddrs);
     ui->comboBox_ipAddr->setCurrentIndex(0);
+    // 增加取流地址
+    ui->urlList->addItems(item_urls);
     connect(p_systemTimer,SIGNAL(timeout()),this,SLOT(systemInfoUpdate()));
     connect(p_controlSocket,SIGNAL(readyRead()),this,SLOT(recvData()));
     connect(p_controlSocket,SIGNAL(disconnected()),this,SLOT(onDisconnect()));
@@ -62,6 +68,7 @@ void MainWindow::on_startButton_clicked()
         //将播放路径传入videoplayer
         mPlayer = new VideoPlayer;
         connect(mPlayer,SIGNAL(sig_GetOneFrame(QImage)),this,SLOT(slotGetOneFrame(QImage)));
+        connect(mPlayer,SIGNAL(sig_StreamError(QString)),this,SLOT(handleStreamError(QString)));
         mPlayer->setFileName(ui->urlList->currentText());
 
         ui->textBrowser_log->append(getCurrentTime()+":open url for stream");
@@ -233,7 +240,7 @@ void MainWindow::writeCmdToSocketBuf(char cmd )
     ret = p_controlSocket->write(&cmd,sizeof(cmd));
     LogInfo("send cmd to robot,cmd:%c, ret:%d",cmd,ret);
     if(ret < 0){
-         ui->textBrowser_log->append(m_timestr+"写入命令:"+cmd+" "+"failed"+" ret:"+QString::number(ret));
+        ui->textBrowser_log->append(m_timestr+"写入命令:"+cmd+" "+"failed"+" ret:"+QString::number(ret));
     }
 }
 
@@ -245,7 +252,7 @@ void MainWindow::writeCmdStringToSocketBuf(char *pCmd )
     ret = p_controlSocket->write(pCmd,strlen(pCmd)+1);
     LogInfo("send long cmd to robot,cmd:%s, ret:%d",pCmd,ret);
     if(ret < 0){
-         ui->textBrowser_log->append(m_timestr+"写入命令:"+pCmd+" "+"failed"+" ret:"+QString::number(ret));
+        ui->textBrowser_log->append(m_timestr+"写入命令:"+pCmd+" "+"failed"+" ret:"+QString::number(ret));
     }
 }
 
@@ -331,20 +338,23 @@ void MainWindow::ParseFromJson()
     {
         std::ifstream ifs(m_ip_config_path);
         json json_flow;
-        ifs >> json_flow;
-        std::string  str_ip1,str_ip2,str_ip3,str_ip4;
+        ifs >>json_flow;
+        json one_dev_json = nlohmann::json::array(); //数组
+        std::string  str_ip1,str_rtsp_url;
 
-        str_ip1       = json_flow["ip_addr1"];
-        m_ip_addr1=QString::fromStdString(str_ip1);
+        for(int i=0;i<json_flow.size();i++){
+            std::string tmp_str="dev"+std::to_string(i);
+            qDebug()<<"test one_dev_json,line:"<<__LINE__<<QString::fromStdString(tmp_str);
+         one_dev_json = json_flow[tmp_str]; // key is a string!!
 
-        str_ip2       = json_flow["ip_addr2"];
-        m_ip_addr2=QString::fromStdString(str_ip2);
-        str_ip3       = json_flow["ip_addr3"];
-        m_ip_addr3=QString::fromStdString(str_ip3);
-        str_ip4       = json_flow["ip_addr4"];
-        m_ip_addr4=QString::fromStdString(str_ip4);
+         str_ip1       = one_dev_json["ip_addr"];
+         str_rtsp_url =  one_dev_json["url"];
+        qDebug()<<"test one_dev_json,line:"<<QString::fromStdString(str_ip1)<<" " <<QString::fromStdString(str_rtsp_url);
+         m_qstr_ips.push_back(QString::fromStdString(str_ip1));
+         m_qstr_urls.push_back(QString::fromStdString(str_rtsp_url));
 
 
+       }
 
     }
 }
@@ -390,10 +400,10 @@ void MainWindow::recvData()
 {
     QByteArray bytes=nullptr;
     long long int bytesNum=0;
-        qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
-//    qDebug()<<"\n fun:"<<__func__<<"size:"<<m_read_image_size;
+    qDebug()<<"\n fun:"<<__func__<<"currentThreadId:"<<QThread::currentThreadId();
+    //    qDebug()<<"\n fun:"<<__func__<<"size:"<<m_read_image_size;
     //    bytes.resize(MAX_LEN);//ADD 0309
-//    mutex.lock();
+    //    mutex.lock();
     qDebug() <<"socket Available bytes:"<<p_controlSocket->bytesAvailable();
     //读到一张图的字节或超时，就退出循环！！  0404
     while(p_controlSocket->waitForReadyRead(300)) //200--->300
@@ -408,12 +418,17 @@ void MainWindow::recvData()
 
         }
 
-//        bytesNum=m_camSocket->bytesAvailable();
-     }
+        //        bytesNum=m_camSocket->bytesAvailable();
+    }
 }
 
 void MainWindow::on_pushButton_clearCommand_clicked()
 {
     cleanCommandBuffer();
+}
+
+void MainWindow::handleStreamError(QString msg)
+{
+    ui->textBrowser_log->append(m_timestr+msg);
 }
 

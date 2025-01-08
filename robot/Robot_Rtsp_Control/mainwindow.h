@@ -75,7 +75,7 @@ private slots:
 
     void on_pushButton_clearCommand_clicked();
 
-    // void on_pushButton_playControl_clicked(bool checked);
+    void handleStreamError(QString);
 
 private:
     Ui::MainWindow *ui;
@@ -89,7 +89,7 @@ private:
     QDateTime m_datetime;
     QString m_timestr, m_sysTimestr;
     QTcpSocket *p_controlSocket;
-    QString m_ip_addr1,m_ip_addr2,m_ip_addr3,m_ip_addr4;
-    const std::string m_ip_config_path="./CONFIG/ipAddr.conf";
+    QVector<QString> m_qstr_ips, m_qstr_urls;
+    const std::string m_ip_config_path="./CONFIG/ipAddr.json";
 };
 #endif // MAINWINDOW_H
