@@ -12,26 +12,31 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。
 
 #include <time.h>
 #include <string> //add 20180904
-
+#include <fstream>
 #include <stdlib.h>
 #include <pthread.h> //pthread create
 #include <unistd.h>	 //getopt 202005
-
+#include "json.hpp"
 #include "log.h"
 
+using json=nlohmann::json ;
 
 #define STR_OK "[\x1b[1;32m OK \x1b[0m]"
 #define STR_FAIL "[\x1b[1;31mFAIL\x1b[0m]"
 #define VIDEO_LOG_FILE "/var/log/video_cap.log"
 
 using namespace cv;
-using namespace std;
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::string;
 
 char buf[50] = {0}; //全局变量，用于获取文件名的时间
 void *record_thread(void *args);
 extern void *monitor_mem_thread_proc(void *arg); //ADD 0427
 static int program_para(int argc, char **argv, int *fps);
 void printHelp(void);
+void ParseFromJson();
 
 bool bCapture = true;
 bool gb_recordFlag = true;
@@ -40,7 +45,10 @@ int MSG_LEVEL_OFF     = 0;
 int MSG_LEVEL_MAX =5;
 int trace_level = MSG_LEVEL_OFF;
 int b_dump = 1;
-const string str_saveDir="/home/pi/Videos/";
+
+string str_saveDir="/home/ai/Videos/";
+const string gConfig_path ="./config/config.json";
+string g_str_url;
 
 bool IsPathExist(const std::string &path) 
 {
@@ -59,11 +67,26 @@ int main(int argc, char **argv)
 	char stop_cmd[30] = {0};
 	double elapsedseconds;
 	VideoCapture videoCapturer(-1); //   Numerical value 0 cv::CAP_ANY
+
 	string str[20] = {" "};
 	//int level = -1;
 	int fps = -1;
 	char imu_module[LOG_MOD_NAME_LEN] = "[video_cap]";
+
 	FILE *log_file = NULL;
+        ParseFromJson();
+        string rtspPath;
+         if(g_str_url!="") rtspPath = g_str_url;
+         else{
+         cout <<"use defalut rtsp url\n"; 
+         rtspPath = "rtsp://127.0.0.1:8554/test";
+        }
+        videoCapturer.open(rtspPath);
+    if (!videoCapturer.isOpened())
+    {
+        cerr << "cannot open video!"<<rtspPath << endl;
+        return -1;
+    }
 	if (argc >= 2)
 	{
 		printHelp();
@@ -326,4 +349,30 @@ void printHelp(void)
 	printf("  -s Num \t\t\t first serial number\n");
 	printf("  -t Num \t\t\t second serial number\n");
 	printf("  -h help \t\t\t Display this information\n");
+}
+
+void ParseFromJson()
+{
+    std::ifstream ifs;
+    ifs.open(gConfig_path, std::ios::binary);
+    if(!ifs){
+        std::cout << "Open json file Error " << std::endl;
+        log_error("Open json file Error,%s \n", gConfig_path.c_str());
+        return ;
+    }
+    else
+    {
+        std::ifstream ifs(gConfig_path);
+        json json_flow;
+        ifs >> json_flow;
+        std::string  str_save_path;
+
+        g_str_url       = json_flow["rtsp_url"];
+
+        str_saveDir       = json_flow["save_path"];
+//        str_ip3       = json_flow["ip_addr3"];
+
+
+
+    }
 }
