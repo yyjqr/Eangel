@@ -1,0 +1,2 @@
+批量工具验证 ： 编码格式转换
+iconv -f ISO-8859-1 -t UTF-8 your_playbook.yml -o your_playbook_utf8.yml
