@@ -1,0 +1,183 @@
+LINUX高级命令  
+
+fping ,对多个ip地址，或网关的ping测试。
+指定范围的ip ping测试  02.23
+fping -g  172.16.4.96 172.16.4.110
+ssh指定端口登录
+ssh  -p 13250  forlinx@powerdi.top
+
+删除文件
+find /tmp -name "*.pyc" | xargs rm -rf
+## nc对某个端口的测试
+如果是测试TCP端口
+nvidia@miivii-tegra:~$ nc -v -z -w2 192.168.72.116 5000-5002
+nc: connect to 192.168.72.116 port 5000 (tcp) failed: Connection refused
+nc: connect to 192.168.72.116 port 5001 (tcp) failed: Connection refused
+
+
+nc -vz -w2 176.16.10.186 8899  （河南凯瑞测试）
+nc: connect to 176.16.10.186 port 8899 (tcp) timed out: Operation now in progress
+如果是测试UDP端口，需指定 -u (-z表示扫描时不发送数据）
+ nc -vuz -w2 10.12.10.60 6000
+
+nvidia@miivii-tegra:~$ nc -vuz -w2 10.12.10.60 6000
+Connection to 10.12.10.60 6000 port [udp/x11] succeeded!
+
+nvidia@nvidianvidia:~$ nc -vuz -w3 172.16.4.97 49152
+Connection to 172.16.4.97 49152 port [udp/*] succeeded!
+nvidia@nvidianvidia:~$ nc -vuz -w3 172.16.4.96 49152
+Connection to 172.16.4.96 49152 port [udp/*] succeeded!
+nvidia@nvidianvidia:~$ nc -vuz -w3 172.16.4.99 49152
+Connection to 172.16.4.99 49152 port [udp/*] succeeded!
+nvidia@nvidianvidia:~$ nc -vuz -w3 172.16.4.98 49152
+Connection to 172.16.4.98 49152 port [udp/*] succeeded!
+
+
+测试ip和端口的访问性：
+mqtt的服务器地址和端口
+curl 10.229.203.6:11883 -v
+* Rebuilt URL to: 10.229.203.6:11883/
+*   Trying 10.229.203.6...
+* TCP_NODELAY set
+* Connected to 10.229.203.6 (10.229.203.6) port 11883 (#0)
+> GET / HTTP/1.1
+> Host: 10.229.203.6:11883
+> User-Agent: curl/7.58.0
+> Accept: */*
+> 
+* Empty reply from server
+* Connection #0 to host 10.229.203.6 left intact
+curl: (52) Empty reply from server
+
+ 
+## 查看端口使用或占用情况
+sudo netstat -atno |grep 2819
+-o：--timers，显示计时器
+ 界面配置网关或地址（ 05.31）
+ sudo nmtui
+nvidia@miivii-tegra:/etc/network$ sudo nmcli connection up eth4
+Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/2)
+
+
+## 抓包
+信号机采用udp协议，如果端口是6000，可在线抓包查看数据（支持tcp和udp协议）。数据主机和从机的流向。
+sudo tcpdump  -i eth0 port 6000 -nnAX
+多个端口抓取  2023.04排查融合 RSM
+sudo ./tcpdump  -i eth3 port "8899 or 18300 or 1883" -w RV_FUSITON_mqtt_0331.pcap
+tcpdump -i eth0 host 192.168. 5.12 -w /hack/ms08067.pcap 
+多个激光雷达设备IP抓包
+sudo tcpdump -i eth0 -s0 -w lidar4-01031805.cap host 172.16.4.96 or host 172.16.4.97 or host 172.16.4.98 or host 172.16.4.99
+##抓取两个程序之间通讯的数据包
+西青一期抓取雷森 8899端口和mec-app的之间通讯的包，网卡选用lo （loop，本地），可看到端口8899和51464之间的通讯。 0703
+sudo ./tcpdump -i lo port 8899 -w  xq86-radar-070304.pcap
+如果您想要直接抓取 MAC 层数据包，可以使用  ether  过滤器。以下是一个示例命令：
+
+bash
+
+
+tcpdump -i <interface> -n -s 0 -e
+在这个命令中， -e  选项用于显示链路层头部信息（包括 MAC 地址）。
+
+3. 抓取特定的以太网帧
+如果您只想抓取特定类型的以太网帧（例如，PTPv2 的以太网帧），您可以使用类似以下命令：
+
+tcpdump -i <interface> -n -s 0 -e 'ether proto 0x88f7'
+这里  0x88f7  是 PTPv2 的以太网协议类型。
+
+
+tcpdump -i eth0  -vvv -nAXX -n -s 0 -e 'ether proto 0x88f7'
+
+tcpdump -i eth0 src net 10.136.143 -nAxx -vvv  这个可以抓这个网段的信号机数据，fefe开头是信号机数据
+
+WIRESHARK: 判断mac地址：
+eth.addr == ee:d6:47:74:fb:63
+
+
+## 取流
+ffmpeg -i rtsp://admin:admin123@10.10.0.9:554/Streaming/Channels/101/1 -c copy -f flv -y output0407-org1.flv
+## scp拷数据
+scp远端拷贝文件到本机
+scp nvidia@10.10.0.81:~/mec/arm64-mec.Xiqing-v1.5-test ./
+上传文件到指定路径
+在需要指定端口时要使用-P(大写的P)，而且要紧跟在scp之后：scp -P 8888 upload_file username@server:~/（正确）
+
+亚讯网络配置，netplan网络管理 1129
+yx@mec:/etc/netplan$sudo vim 01-network-manager-all.yaml
+
+ 362  sudo vi /etc/network/interfaces
+  363  sudo /etc/init.d/network restart
+  364  /etc/init.d/network restart
+  365  /etc/init.d/network-manager restart
+  
+  386  sudo vi /etc/network/interfaces
+  387  sudo vi /etc/systemd/network/interfaces
+  395  sudo ifconfig eth2 192.168.41.178 netmask 255.255.255.0
+  401  sudo ifconfig eth3 192.168.41.179 netmask 255.255.255.0
+
+  417  sudo apt-get install strongswan xl2tpd net-tools
+  421  vi /etc/network/interfaces
+
+
+  495  sudo nmcli connection up Ethernet\ connection\ 1
+  500  sudo nmcli connection reload Ethernet connection 1_
+  501  sudo nmcli connection up Ethernet\ connection\ 1
+                             sudo route del -net 192.168.1.0 netmask 255.255.255.0 gw 192.168.1.254
+  515  cat /etc/networks
+  516  cd /etc/network
+  713  sudo vim /etc/network/interfaces
+ 
+  716  sudo systemctl  restart networking.service
+删除网关
+sudo route del  gw 192.168.1.254
+增加网关
+route add default gw 192.168.1.254
+
+增加一条路由
+route add -net 192.168.48.0 netmask 255.255.255.0 gw 192.168.41.254 dev bridge0
+
+
+tftp服务器，供无ssh的设备（相机）访问传输文件
+sudo apt-get install tftpd-hpa
+修改根目录
+ 2002  sudo vi /etc/default/tftpd-hpa
+ 2003  sudo service tftpd-hpa restart
+
+##  查看网卡的性能，速度，工作模式 07.14
+nvidia@miivii-tegra:~$ ethtool eth1
+Settings for eth1:
+        Supported ports: [ TP ]
+        Supported link modes:   10baseT/Half 10baseT/Full
+                                100baseT/Half 100baseT/Full
+                                1000baseT/Full
+        Supported pause frame use: Symmetric
+        Supports auto-negotiation: Yes
+        Supported FEC modes: Not reported
+        Advertised link modes:  10baseT/Half 10baseT/Full
+                                100baseT/Half 100baseT/Full
+                                1000baseT/Full
+        Advertised pause frame use: Symmetric
+        Advertised auto-negotiation: Yes
+        Advertised FEC modes: Not reported
+        Speed: 100Mb/s
+        Duplex: Full
+        Port: Twisted Pair
+        PHYAD: 1
+        Transceiver: internal
+        Auto-negotiation: on
+        MDI-X: on (auto)
+Cannot get wake-on-lan settings: Operation not permitted
+        Current message level: 0x00000007 (7)
+                               drv probe link
+        Link detected: yes
+
+
+
+nvidia@miivii-tegra:~$ fping -g 192.168.1.0/24 2>/dev/null
+192.168.1.11 is alive
+192.168.1.12 is alive
+192.168.1.13 is alive
+
+
+
+
+
