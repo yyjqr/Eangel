@@ -32,16 +32,16 @@ from pprint import pprint
 #import pandas
 #一些数据写入文件时会有编码不统一的问题，so codecs to assign code type!!
 import codecs # use for write a file 0708
-import mysqlWriteNewsV2  #mysql database
+#import mysqlWriteNewsV2  #mysql database
 import encrypt_and_verify_url
 from sklearn.feature_extraction.text import TfidfVectorizer
 my_sender='840056598@qq.com' #发件人邮箱账号
 receiver='yyjqr789@sina.com' #收件人邮箱
 
-use_database=True;
+use_database=False
 pin1=13
 #GPIO.setup(pin1,GPIO.OUT)
-save_news_path="/home/pi/techNews/"
+save_news_path="/home/nvidia/Documents/techNews/"
 # get the sys date and hour,minutes!!
 now_time = datetime.now()
 date=datetime.now().strftime('%Y-%m-%d_%H:%M')
@@ -215,7 +215,7 @@ class GrabNews():
             print("MIT titles {0},url:{1}\n".format(news_title, news_link))
             #curent_news_rank =findValuedInfoRank(news_title,KEYWORDS_RANK_MAP)
             curent_news_rank =calculate_keyword_weights([news_title],KEYWORDS_RANK_MAP)
-            print("\n,in {0}curent_news_rank:{1}\n".format(url, curent_news_rank))
+            print("\n curent_news_rank:{0}\n".format(curent_news_rank))
             if curent_news_rank > kRankLevelValue :
          #       tittle=news.text
                 #print("MIT titles {0},url:{1}".format(news_title, news_link))
@@ -300,57 +300,50 @@ class GrabNewsSina():
                    print(newsUrl)
                    self.NewsList.append({string:newsUrl})
    
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
     def getNews(self):
         url = 'https://aitopics.org/search'
-        r2 = requests.get(url)
-        r2.encoding = 'utf-8'
-        kRankLevelValue =0.3
-        soup = BeautifulSoup(r2.text, "html.parser")
-        # 解析网页内容并提取文本
-        webContent = soup.get_text()
-        newsIndex =0
-        value_title =0
-        #print(KEYWORDS_RANK_MAP)
-        print("\n")
-        #curent_weights =calculate_keyword_weights([webContent], KEYWORDS_RANK_MAP)
-        #print("\n,res:",curent_weights)
-        for news in soup.select('.searchtitle   a'):
-            #if findValuedInfoInNews(news.text,array):
-            #curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
-            curent_news_rank =calculate_keyword_weights([news.text],KEYWORDS_RANK_MAP)
-            
-            print("\n,curent_news_rank:",curent_news_rank)
-            if(value_title>3):
-                kRankLevelValue=0.3
-            elif(value_title>5):
-                kRankLevelValue=0.5
-            else:
-                kRankLevelValue=0.1
-            if curent_news_rank > kRankLevelValue :
-               tittle=news.text
-
-               print(news.text)
-               value_title+=1
-
-               for string in news.stripped_strings:
-                #article.append(tittle.strip())   #strip去处多余空格
-                    newsUrl=news.attrs['href']
-                #article.append(url.strip())
-                    print(newsUrl)
-                    #if  "techcrunch" not in newsUrl:   validate_url_access can't verify browsing techcrunch !! 11.20--->202308
-                    #if validate_url_access(self,newsUrl)==True and "techcrunch" not in newsUrl: filterYahoo
-                    if validate_url_access(self,newsUrl)==True and filterYahoo(self,newsUrl)==True :
-                        #print("++++test add url:{0}".format(newsUrl))
-                        self.NewsList.append({string:newsUrl})
-                    else :
-                        print("Error,this url:{0} can't browse!!\n".format(newsUrl))
-               ## 写入数据库
-                    newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
-                        newsUrl, '人工智能')
-                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+        try:
+            r2 = requests.get(url)
+            print(r2,"\n\n")
+            r2.encoding = 'utf-8'
+            soup = BeautifulSoup(r2.text, "html.parser")
+            # 解析网页内容并提取文本
+            newsIndex = 0
+            value_title = 0
+            for news in soup.select('.searchtitle a'):
+                curent_news_rank = calculate_keyword_weights([news.text], KEYWORDS_RANK_MAP)
+                
+                # 动态调整 kRankLevelValue
+                kRankLevelValue = 0.1
+                if value_title > 5:
+                    kRankLevelValue = 0.5
+                elif value_title > 3:
+                    kRankLevelValue = 0.3
+                if curent_news_rank > kRankLevelValue:
+                    title = news.text.strip()
+                    newsUrl = news.attrs['href']
+                    
+                    # 验证链接并添加到列表
+                    if validate_url_access(self, newsUrl) and filterYahoo(self, newsUrl):
+                        self.NewsList.append({title: newsUrl})
+                        value_title += 1
+                    else:
+                        print(f"Error: this url: {newsUrl} can't be browsed!!")
+            # 写入数据库（假设 use_database 是一个全局变量）
+            if use_database:
+                for news_item in self.NewsList:
+                    for title, url in news_item.items():
+                        newsOne = (newsIndex, curent_news_rank, title, 'SmartLife', date, 'content', url, '人工智能')
+                        result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+                        newsIndex += 1
+        except requests.exceptions.RequestException as e:
+            print(f"请求发生错误: {e}")
+        except Exception as e:
+            print(f"发生错误: {e}")
 
 
 class GrabNewsTechnet():
@@ -426,9 +419,10 @@ def writeNewsSina():
     fp.close()
 
 def writeNewsAI():
-    print("SEARCH AI news")
+    print("SEARCH AI news ++++++\n\n")
     grabNews = GrabNewsAI()
     grabNews.getNews()
+    print("TEST grabNews+++\n\n")
     fp = codecs.open(newsFullPath, 'w', 'utf-8')  #w---->a  改为追加内容的模式07
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
