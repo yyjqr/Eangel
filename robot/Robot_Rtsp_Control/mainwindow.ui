@@ -248,22 +248,7 @@
           </property>
           <item>
            <property name="text">
-            <string>rtsp://192.168.3.66:8554/test</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>rtsp://192.168.3.88:8554/test</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>rtsp://192.168.3.20:8554/test</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>rtsp://admin:Admin123@192.168.1.246:554/h264/ch1/sub/av_stream</string>
            </property>
           </item>
          </widget>
@@ -339,7 +324,7 @@
      <x>0</x>
      <y>0</y>
      <width>1480</width>
-     <height>17</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
