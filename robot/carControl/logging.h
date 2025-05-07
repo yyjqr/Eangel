@@ -149,7 +149,7 @@ protected:
  * @internal
  */
 //#define LogMessage(level, format, args) (if( level <= Log::GetLevel() ) {Log::writeLogHead(); fprintf(Log::GetFile(), format, ## args)})
-#define LogMessage(level, format, args) if( level <= Log::GetLevel() ) {Log::writeLogHead();fprintf(Log::GetFile(), format, ## args);fflush(Log::GetFile());}
+#define LogMessage(level, format, [args]) if( level <= Log::GetLevel() ) {Log::writeLogHead();fprintf(Log::GetFile(), format,  [args] );fflush(Log::GetFile());}
 /**
  * Log a printf-style error message (Log::ERROR)
  * @ingroup log
