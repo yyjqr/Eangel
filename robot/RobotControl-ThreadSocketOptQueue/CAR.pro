@@ -11,16 +11,16 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = RobotCam
 TEMPLATE = app
 
-win32 {
-  DEFINES += QT_NO_DEBUG_OUTPUT
+#win32 {
+#  DEFINES += QT_NO_DEBUG_OUTPUT
 
-}
-else{
-  DEFINES += QT_NO_DEBUG_OUTPUT
+#}
+#else{
+#  DEFINES += QT_NO_DEBUG_OUTPUT
 
 
-}
-
+#}
+config += console
 INCLUDEPATH +=./include
 
 
