@@ -1,4 +1,5 @@
 {
+ "RANK_THRESHOLD":1.5,
 "KEYWORDS_RANK_MAP":
 {
 "technologies":0.35,"technology":0.3, 
