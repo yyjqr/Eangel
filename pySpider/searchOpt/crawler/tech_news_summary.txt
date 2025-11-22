@@ -1,13 +1,25 @@
-每日科技新闻摘要 - 2025-07-30
-共收集到 3 篇高价值文章
+每日科技新闻摘要 - 2025-08-30
+共收集到 7 篇高价值文章
 ============================================================
 
-1. [0.82] Green steel: 10 Breakthrough Technologies 2025
-   🔗 https://www.technologyreview.com/2025/01/03/1108955/green-hydrogen-steel-greenhouse-gases-carbon-emissions-breakthrough-technologies-2025/
+1. [0.83] AI comes for the job market, security, and prosperity: The Debrief
+   🔗 https://www.technologyreview.com/2025/08/27/1121475/editors-letter-security-issue-mat-honan/
 
 2. [0.67] Four reasons to be optimistic about AI’s energy usage
    🔗 https://www.technologyreview.com/2025/05/20/1116337/ai-energy-use-optimism/
 
-3. [0.58] Everything you need to know about estimating AI’s energy and emissions burden
+3. [0.60] The AI Hype Index: AI-designed antibiotics show promise
+   🔗 https://www.technologyreview.com/2025/08/27/1122356/the-ai-hype-index-ai-designed-antibiotics-show-promise/
+
+4. [0.58] Google’s still not giving us the full picture on AI energy use
+   🔗 https://www.technologyreview.com/2025/08/28/1122685/ai-energy-use-gemini/
+
+5. [0.58] The Security issue
+   🔗 https://www.technologyreview.com/magazines/the-security-issue/
+
+6. [0.58] Everything you need to know about estimating AI’s energy and emissions burden
    🔗 https://www.technologyreview.com/2025/05/20/1116331/ai-energy-demand-methodology/
+
+7. [0.53] In a first, Google has released data on how much energy an AI prompt uses
+   🔗 https://www.technologyreview.com/2025/08/21/1122288/google-gemini-ai-energy/
 
