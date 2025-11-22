@@ -29,19 +29,28 @@ from datetime import datetime
 import re
 import json
 from pprint import pprint
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+from urllib.parse import urlparse
+import difflib
 #import pandas
 #一些数据写入文件时会有编码不统一的问题，so codecs to assign code type!!
 import codecs # use for write a file 0708
 #import mysqlWriteNewsV2  #mysql database
 import encrypt_and_verify_url
 from sklearn.feature_extraction.text import TfidfVectorizer
+import getpass
+
+username = getpass.getuser()
+print(username)
+
 my_sender='840056598@qq.com' #发件人邮箱账号
 receiver='yyjqr789@sina.com' #收件人邮箱
-
-use_database=False
+print("test database")
+use_database=False;
 pin1=13
 #GPIO.setup(pin1,GPIO.OUT)
-save_news_path="/home/nvidia/Documents/techNews/"
+save_news_path="/home/{0}/techNews/".format(username)
 # get the sys date and hour,minutes!!
 now_time = datetime.now()
 date=datetime.now().strftime('%Y-%m-%d_%H:%M')
@@ -50,6 +59,7 @@ year_month=datetime.now().strftime('%Y-%m')
 
 newsFullPath=os.path.join(save_news_path,date+'.html')
 print(newsFullPath)
+
 sql = """ INSERT INTO techTB(Id,Rate,title,author,publish_time,content,url,key_word) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) """
 
 kRankLevelValue =0.75   ##judge value
@@ -64,9 +74,9 @@ stop_words = set([
 
 
 with open('./tech_key_config_map.json') as j:
-     #cfg = json.load(j)
-     #print(cfg)
-     KEYWORDS_RANK_MAP=json.load(j)['KEYWORDS_RANK_MAP']
+    cfg = json.load(j)
+    KEYWORDS_RANK_MAP = cfg.get('KEYWORDS_RANK_MAP', {})
+    BLOCKED_DOMAINS = cfg.get('BLOCKED_DOMAINS', ['medium.com','techcrunch.com','yahoo.com','gadget.com'])
 #print(KEYWORDS_RANK_MAP)
 
 def make_img_msg(fn):
@@ -131,10 +141,9 @@ def findValuedInfoRank(str,keyMap):
               if rankValue>rankOldValue :
                   #print("Add rank: {0} value:{1}".format(i,rankValue))
                   rankOldValue=rankValue
-   if rankValue !=0:
-      print("Final news:{0} rank value:{1}\n\n".format(str,rankValue))
+   if abs(rankValue) > 1e-9:
+       print(f"Final news:{str} rank value:{rankValue:.2f}\n\n")
    return rankValue
-
 # 计算关键词权重
 def calculate_keyword_weights(texts, keywords):
     vectorizer = TfidfVectorizer()
@@ -163,32 +172,89 @@ def calculate_keyword_weights(texts, keywords):
             keyword_weights_sum += keyword_weights.sum()
     return keyword_weights_sum
 
-def validate_url_access(self, url):
-	# 定义响应头文文件
-        headers = {"Content-Type": "application/json"}
-	# 通过requests库
-        try:
-           res = requests.get(url=url, headers=headers,timeout=10)
-           #print("validating the url access,waiting......")
-	# 如果返回值非200 则跳出该函数返回false
-           if res.status_code != 200:
-              print("get url:{0} error:{1}\n".format(url,res))
-              return False
-        except Exception as e:
-           print (str(e))
-           return False
-        return True
+# Robust URL fetching with retries, timeout, headers and optional domain blocking
+def fetch_url(url, headers=None, timeout=10, retries=3, backoff_factor=0.3, blocked_domains=None, allow_redirects=True):
+    if not url:
+        return None
+    # quick domain block check
+    try:
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower()
+    except Exception:
+        domain = ''
+    if blocked_domains is None:
+        blocked_domains = BLOCKED_DOMAINS
+    for bd in blocked_domains:
+        if bd.lower() in domain:
+            # blocked domain
+            print(f"Blocked domain {bd} in url {url}")
+            return None
 
-def filterYahoo(self, url):
-    # 定义一个正则表达式匹配模式
-    pattern = re.compile(r'.*(yahoo|gadget|techcrunch).*')
-# 过滤掉含有"yahoo"或"gadget"关键词
-    #filtered_urls = [url for url in urls if not pattern.match(url) ]
-    if not pattern.match(url):
-       return True
-    else:
-      #print("yahoo website, can't visit:%s" %url)
-      return False
+    session = requests.Session()
+    # Configure retries for transient errors
+    retry = Retry(total=retries, read=retries, connect=retries, backoff_factor=backoff_factor, status_forcelist=(500,502,503,504))
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+    default_headers = {'User-Agent': 'Mozilla/5.0 (compatible; EangelBot/1.0; +https://example.com/bot)'}
+    if headers:
+        default_headers.update(headers)
+
+    try:
+        resp = session.get(url, headers=default_headers, timeout=timeout, allow_redirects=allow_redirects)
+        if resp.status_code == 200:
+            return resp
+        else:
+            print(f"fetch_url: non-200 {resp.status_code} for {url}")
+            return None
+    except Exception as e:
+        print(f"fetch_url exception for {url}: {e}")
+        return None
+
+
+def is_allowed_domain(url, blocked_domains=None):
+    if not url:
+        return False
+    try:
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower()
+    except Exception:
+        return False
+    if blocked_domains is None:
+        blocked_domains = BLOCKED_DOMAINS
+    for bd in blocked_domains:
+        if bd in domain:
+            return False
+    return True
+
+
+def compute_rank_from_map(text, key_map, fuzzy=False, threshold=0.8):
+    if not text or not key_map:
+        return 0
+    text_lower = re.sub(r'\W+', ' ', text).lower()
+    tokens = text_lower.split()
+    rank = 0.0
+    for key, weight in key_map.items():
+        key_l = key.lower()
+        if key_l in text_lower:
+            rank += float(weight)
+        elif fuzzy:
+            # try approximate matching against whole text and tokens
+            seq = difflib.SequenceMatcher(None, key_l, text_lower)
+            #if seq.ratio() > 0.2:
+                #print(f"in fuzzy alg,seq:{seq.ratio()}")
+            if seq.ratio() >= threshold:
+                rank += float(weight) * seq.ratio()
+                print(f"in fuzzy alg,rank:{rank}")
+            else:
+                for t in tokens:
+                    seq2 = difflib.SequenceMatcher(None, key_l, t)
+                    if seq2.ratio() >= threshold:
+                        rank += float(weight) * seq2.ratio()
+                        break
+    return rank
+
 
 
 ### techcrunch,can't visit from 2021.11,because of yahoo info!!!
@@ -198,8 +264,11 @@ class GrabNews():
     def getNews(self):
 
         url = 'https://www.technologyreview.com/'
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, "html.parser")
+        resp = fetch_url(url, timeout=8, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com'])
+        if resp is None:
+            print(f"Failed to fetch {url}")
+            return
+        soup = BeautifulSoup(resp.text, "html.parser")
         
         news_titles = []
         news_links = []
@@ -212,10 +281,10 @@ class GrabNews():
             news_title = news_element.find(class_='homepageStoryCard__hed--92c78a74bbc694463e43e32aafbbdfd7').text.strip()
             news_link = news_element.find('a')['href']
             #if findValuedInfoInNews(news_title,arrayKEYWORDS_EN):
-            print("MIT titles {0},url:{1}\n".format(news_title, news_link))
+            #print("MIT titles {0},url:{1}\n".format(news_title, news_link))
             #curent_news_rank =findValuedInfoRank(news_title,KEYWORDS_RANK_MAP)
-            curent_news_rank =calculate_keyword_weights([news_title],KEYWORDS_RANK_MAP)
-            print("\n curent_news_rank:{0}\n".format(curent_news_rank))
+            curent_news_rank = compute_rank_from_map(news_title, KEYWORDS_RANK_MAP, fuzzy=True, threshold=0.75)
+            print("MIT titles {0},url:{1},rank:{2}\n".format(news_title, news_link,curent_news_rank))
             if curent_news_rank > kRankLevelValue :
          #       tittle=news.text
                 #print("MIT titles {0},url:{1}".format(news_title, news_link))
@@ -230,20 +299,20 @@ class GrabNewsProduct():
         headers = { 'User-Agent':'Mozilla/5.0 (Windows NT 6.3;Win64;x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36'}
         #html = requests.get(url,headers = headers).text
         kRankLevelValue = 0.36
-        req  = requests.get(url,headers = headers, timeout=8)
-        html =req.text      
- # r2.encoding = 'utf-8'
-        print ("\n\n requests.get {} encoding: {} " .format(url, requests.get(url).encoding))
-        
-        soup = BeautifulSoup(html, "html.parser")
+        req = fetch_url(url, headers=headers, timeout=6, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com'])
+        if req is None:
+            print(f"Failed to fetch {url}")
+            return
+        print(f"\n\n fetched {url} encoding: {getattr(req, 'encoding', None)}")
+        soup = BeautifulSoup(req.text, "html.parser")
 
         #print(soup.get_text())
         newsIndex=0
         #for news in soup.select('a.enk2x9t2 css-7v7n8p epl65fo4'):  #更换了class相关字段,class前要加点.  202202 ---->enk2x9t2 css-7v
         for news in soup.select('a.enk2x9t2'):
             #curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP) 
-            curent_news_rank =calculate_keyword_weights([news.text],KEYWORDS_RANK_MAP)
-            print("\n,in {0}curent_news_rank:{1}".format(url, curent_news_rank))
+            curent_news_rank = compute_rank_from_map(news.text, KEYWORDS_RANK_MAP, fuzzy=True, threshold=0.7)
+            print("\n,in {0} curent_news_rank:{1}".format(url, curent_news_rank))
             
             if curent_news_rank >kRankLevelValue :
                title=news.text.strip()
@@ -268,13 +337,14 @@ class GrabNewsProduct():
                     else:
                         print("------- ")
                     
-                    if validate_url_access(self,newsUrl)==False :
+                    # verify reachable and allowed domain
+                    if not is_allowed_domain(newsUrl) or fetch_url(newsUrl, timeout=8, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com']) is None:
                         del self.NewsList[-1]
-                                                 
-                        print("Error,this url {0} can't browse!!\n".format(newsUrl))
-                    newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
+                        print(f"Error,this url {newsUrl} can't browse!!\n")
+                    if use_database:
+                       newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
                         newsUrl, '产品科技')
-                    result = mysqlWriteNewsV2.writeDb(sql, newsOne)
+                       result = mysqlWriteNewsV2.writeDb(sql, newsOne)
 
 
 class GrabNewsSina():
@@ -282,8 +352,11 @@ class GrabNewsSina():
         self.NewsList = []
     def getNews(self):
         url = 'https://tech.sina.com.cn/'
-        r2 = requests.get(url)
-        r2.encoding = 'utf-8'
+        r2 = fetch_url(url, timeout=8, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com'])
+        if r2 is None:
+            print(f"Failed to fetch {url}")
+            return
+        r2.encoding = getattr(r2, 'encoding', 'utf-8')
 
         soup = BeautifulSoup(r2.text, "html.parser")
         
@@ -300,50 +373,61 @@ class GrabNewsSina():
                    print(newsUrl)
                    self.NewsList.append({string:newsUrl})
    
-
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
     def getNews(self):
         url = 'https://aitopics.org/search'
-        try:
-            r2 = requests.get(url)
-            print(r2,"\n\n")
-            r2.encoding = 'utf-8'
-            soup = BeautifulSoup(r2.text, "html.parser")
-            # 解析网页内容并提取文本
-            newsIndex = 0
-            value_title = 0
-            for news in soup.select('.searchtitle a'):
-                curent_news_rank = calculate_keyword_weights([news.text], KEYWORDS_RANK_MAP)
-                
-                # 动态调整 kRankLevelValue
-                kRankLevelValue = 0.1
-                if value_title > 5:
-                    kRankLevelValue = 0.5
-                elif value_title > 3:
-                    kRankLevelValue = 0.3
-                if curent_news_rank > kRankLevelValue:
-                    title = news.text.strip()
-                    newsUrl = news.attrs['href']
-                    
-                    # 验证链接并添加到列表
-                    if validate_url_access(self, newsUrl) and filterYahoo(self, newsUrl):
-                        self.NewsList.append({title: newsUrl})
-                        value_title += 1
+        r2 = fetch_url(url, timeout=8, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com'])
+        if r2 is None:
+            print(f"Failed to fetch {url}")
+            return
+        r2.encoding = getattr(r2, 'encoding', 'utf-8')
+        kRankLevelValue =0.3
+        soup = BeautifulSoup(r2.text, "html.parser")
+        # 解析网页内容并提取文本
+        webContent = soup.get_text()
+        newsIndex =0
+        value_title =0
+        #print(KEYWORDS_RANK_MAP)
+        print("\n")
+        #curent_weights =calculate_keyword_weights([webContent], KEYWORDS_RANK_MAP)
+        #print("\n,res:",curent_weights)
+        for news in soup.select('.searchtitle   a'):
+            #if findValuedInfoInNews(news.text,array):
+            #curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
+            curent_news_rank = compute_rank_from_map(news.text, KEYWORDS_RANK_MAP, fuzzy=True, threshold=0.7)
+            
+            print("\n,curent_news_rank:",curent_news_rank)
+            if(value_title>3):
+                kRankLevelValue=0.3
+            elif(value_title>5):
+                kRankLevelValue=0.5
+            else:
+                kRankLevelValue=0.1
+            if curent_news_rank > kRankLevelValue :
+               tittle=news.text
+
+               print(news.text)
+               value_title+=1
+
+               for string in news.stripped_strings:
+                #article.append(tittle.strip())   #strip去处多余空格
+                    newsUrl=news.attrs['href']
+                #article.append(url.strip())
+                    print(newsUrl)
+                    #if  "techcrunch" not in newsUrl:   validate_url_access can't verify browsing techcrunch !! 11.20--->202308
+                    #if validate_url_access(self,newsUrl)==True and "techcrunch" not in newsUrl: filterYahoo
+                    # allow only permitted domains and reachable
+                    if is_allowed_domain(newsUrl) and fetch_url(newsUrl, timeout=8, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com']) is not None:
+                        self.NewsList.append({string:newsUrl})
                     else:
-                        print(f"Error: this url: {newsUrl} can't be browsed!!")
-            # 写入数据库（假设 use_database 是一个全局变量）
-            if use_database:
-                for news_item in self.NewsList:
-                    for title, url in news_item.items():
-                        newsOne = (newsIndex, curent_news_rank, title, 'SmartLife', date, 'content', url, '人工智能')
-                        result = mysqlWriteNewsV2.writeDb(sql, newsOne)
-                        newsIndex += 1
-        except requests.exceptions.RequestException as e:
-            print(f"请求发生错误: {e}")
-        except Exception as e:
-            print(f"发生错误: {e}")
+                        print(f"Error,this url:{newsUrl} can't browse!!\n")
+               ## 写入数据库
+                    if use_database:
+                       newsOne=(newsIndex,curent_news_rank ,news.text,'SmartLife',date, 'content',
+                        newsUrl, '人工智能')
+                       result = mysqlWriteNewsV2.writeDb(sql, newsOne)
 
 
 class GrabNewsTechnet():
@@ -351,8 +435,11 @@ class GrabNewsTechnet():
         self.NewsList = []
     def getNews(self):
         url = 'http://stdaily.com/'
-        r2 = requests.get(url)
-        r2.encoding = 'utf-8'
+        r2 = fetch_url(url, timeout=8, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com'])
+        if r2 is None:
+            print(f"Failed to fetch {url}")
+            return
+        r2.encoding = getattr(r2, 'encoding', 'utf-8')
 
         soup = BeautifulSoup(r2.text, "html.parser")
         for news in soup.select('div.fp_subtitle   a'):  ##ti_news---->fp_title
@@ -370,10 +457,9 @@ class GrabNewsTechnet():
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
                     print(newsUrl)
-                    if validate_url_access(self,newsUrl)==True :
-                        #print ("test validate")
+                    if is_allowed_domain(newsUrl) and fetch_url(newsUrl, timeout=8, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com']) is not None:
                         self.NewsList.append({string:newsUrl})
-                    else :
+                    else:
                         print("Error,this url can't browse!!\n")
 
                     #self.NewsList.append({string:newsUrl})
@@ -419,10 +505,9 @@ def writeNewsSina():
     fp.close()
 
 def writeNewsAI():
-    print("SEARCH AI news ++++++\n\n")
+    print("SEARCH AI news")
     grabNews = GrabNewsAI()
     grabNews.getNews()
-    print("TEST grabNews+++\n\n")
     fp = codecs.open(newsFullPath, 'w', 'utf-8')  #w---->a  改为追加内容的模式07
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
@@ -463,7 +548,7 @@ def mail():
            print (str(e))
 
     try:
-        #writeNewsProduct()  
+        writeNewsProduct()  
         writeNewsSina()
     except Exception as e:
         print (str(e))
