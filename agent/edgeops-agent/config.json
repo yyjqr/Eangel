@@ -2,7 +2,7 @@
   "interval": 5,
   "device_id": "440113GXX0002000000xx",
   "mqtt": {
-    "host": "210.21.xx.xx",
+    "host": "210.21.52.69",
     "port": 1883,
     "user": "v2x",
     "password": "xxx",
@@ -17,7 +17,8 @@
       "diagnosis": "rsu/{device_id}/om/diagnosis",
       "heal": "rsu/{device_id}/om/heal",
       "opt": "rsu/{device_id}/om/opt",
-      "model_perf": "rsu/{device_id}/om/models/perf"
+      "model_perf": "rsu/{device_id}/om/models/perf",
+      "perception": "rsu/{device_id}/om/perception"
     }
   }
 }
