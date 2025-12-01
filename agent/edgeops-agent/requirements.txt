@@ -1,0 +1,4 @@
+psutil
+paho-mqtt
+PyYAML
+Flask
