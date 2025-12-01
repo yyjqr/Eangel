@@ -1,0 +1,4 @@
+{
+   "rtsp_url":"rtsp://127.0.0.1:8554/test",
+   "save_path":"/home/robot/Videos/"
+}
