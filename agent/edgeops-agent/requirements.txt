@@ -2,3 +2,4 @@ psutil
 paho-mqtt
 PyYAML
 Flask
+pre-commit
