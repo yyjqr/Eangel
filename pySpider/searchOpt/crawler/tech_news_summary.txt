@@ -1,13 +1,117 @@
-每日科技新闻摘要 - 2025-11-22
-共收集到 3 篇高价值文章
+每日科技新闻摘要 - 2026-01-02
+共收集到 38 篇高价值文章
 ============================================================
 
-1. [0.76] Fix damaged art in hours with AI
-   🔗 https://www.technologyreview.com/2025/08/26/1121006/fix-damaged-art-in-hours-with-ai/
+1. [3.25] What is Signal? The messaging app, explained.
+   🔗 https://www.technologyreview.com/2025/03/27/1113919/what-is-signal-the-messaging-app-explained/
 
-2. [0.67] Four reasons to be optimistic about AI’s energy usage
-   🔗 https://www.technologyreview.com/2025/05/20/1116337/ai-energy-use-optimism/
+2. [3.23] AI might not be coming for lawyers’ jobs anytime soon
+   🔗 https://www.technologyreview.com/2025/12/15/1129181/ai-might-not-be-coming-for-lawyers-jobs-anytime-soon/
 
-3. [0.58] Everything you need to know about estimating AI’s energy and emissions burden
-   🔗 https://www.technologyreview.com/2025/05/20/1116331/ai-energy-demand-methodology/
+3. [3.10] Generative AI hype distracts us from AI’s more important breakthroughs
+   🔗 https://www.technologyreview.com/2025/12/15/1129179/generative-ai-hype-distracts-us-from-ais-more-important-breakthroughs/
 
+4. [2.93] What Makes Goose Different From Other AI Coding Agents
+   🔗 https://dev.to/nickytonline/what-makes-goose-different-from-other-ai-coding-agents-2edc
+
+5. [2.88] How aging clocks can help us understand why we age—and if we can reverse it
+   🔗 https://www.technologyreview.com/2025/10/14/1124977/aging-clocks-biology-mortality-longevity/
+
+6. [2.80] Advent of AI 2025 - Day 17: Building a Wishlist App with Goose and MCP-UI
+   🔗 https://dev.to/nickytonline/advent-of-ai-2025-day-17-building-a-wishlist-app-with-goose-and-mcp-ui-330l
+
+7. [2.77] AI coding is now everywhere. But not everyone is convinced.
+   🔗 https://www.technologyreview.com/2025/12/15/1128352/rise-of-ai-coding-developers-2026/
+
+8. [2.77] AI coding is now everywhere. But not everyone is convinced.
+   🔗 https://www.technologyreview.com/topic/business/
+
+9. [2.76] AI chatbots can sway voters better than political advertisements
+   🔗 https://www.technologyreview.com/2025/12/04/1128824/ai-chatbots-can-sway-voters-better-than-political-advertisements/
+
+10. [2.69] OpenAI’s new LLM exposes the secrets of how AI really works
+   🔗 https://www.technologyreview.com/2025/11/13/1127914/openais-new-llm-exposes-the-secrets-of-how-ai-really-works/
+
+11. [2.68] European banks plan to cut 200,000 jobs as AI takes hold
+   🔗 https://techcrunch.com/2026/01/01/european-banks-plan-to-cut-200000-jobs-as-ai-takes-hold/
+
+12. [2.66] Join the New Year, New You Portfolio Challenge: $3,000 in Prizes + Feedback from Google AI Team (For Winners and Runner Ups!)
+   🔗 https://dev.to/devteam/join-the-new-year-new-you-portfolio-challenge-3000-in-prizes-feedback-from-google-ai-team-4e7g
+
+13. [2.64] An AI model trained on prison phone calls now looks for planned crimes in those calls
+   🔗 https://www.technologyreview.com/2025/12/01/1128591/an-ai-model-trained-on-prison-phone-calls-is-now-being-used-to-surveil-inmates/
+
+14. [2.64] Building a high performance data and AI organization (2nd edition)
+   🔗 https://www.technologyreview.com/2025/10/29/1124014/building-a-high-performance-data-and-ai-organization-2nd-edition/
+
+15. [2.51] How Yichao “Peak” Ji became a global AI app hitmaker
+   🔗 https://www.technologyreview.com/2025/09/08/1122642/ji-peak-yichao-innovator-manus-app-ai/
+
+16. [2.42] How do AI models generate videos?
+   🔗 https://www.technologyreview.com/2025/09/12/1123562/how-do-ai-models-generate-videos/
+
+17. [2.38] A short talk at CloudNexus made me rethink how students are using AI
+   🔗 https://dev.to/abdullah_haroon_092cf10d3/a-short-talk-at-cloudnexus-made-me-rethink-how-students-are-using-ai-4o01
+
+18. [2.37] Investors predict AI is coming for labor in 2026
+   🔗 https://techcrunch.com/2025/12/31/investors-predict-ai-is-coming-for-labor-in-2026/
+
+19. [2.26] The State of AI: Welcome to the economic singularity
+   🔗 https://www.technologyreview.com/2025/12/01/1127872/the-state-of-ai-welcome-to-the-economic-singularity/
+
+20. [2.26] One Number I Trust: Plain-Text Accounting for a Multi-Currency Household
+   🔗 https://lalitm.com/post/one-number-i-trust/
+
+21. [2.24] China figured out how to sell EVs. Now it has to deal with their aging batteries.
+   🔗 https://www.technologyreview.com/2025/12/18/1130148/china-ev-battery-recycle/
+
+22. [2.14] How Millie Dresselhaus paid it forward
+   🔗 https://www.technologyreview.com/2025/10/21/1124731/how-millie-dresselhaus-paid-it-forward/
+
+23. [2.08] How AGI became the most consequential conspiracy theory of our time
+   🔗 https://www.technologyreview.com/2025/10/30/1127057/agi-conspiracy-theory-artifcial-general-intelligence/
+
+24. [2.06] The ascent of the AI therapist
+   🔗 https://www.technologyreview.com/2025/12/30/1129392/book-reviews-ai-therapy-mental-health/
+
+25. [2.06] AI materials discovery now needs to move into the real world
+   🔗 https://www.technologyreview.com/2025/12/15/1129210/ai-materials-science-discovery-startups-investment/
+
+26. [2.06] What even is the AI bubble?
+   🔗 https://www.technologyreview.com/2025/12/15/1129183/what-even-is-the-ai-bubble/
+
+27. [2.06] AI materials discovery now needs to move into the real world
+   🔗 https://www.technologyreview.com/2025/12/15/1129210/ai-materials-science-discovery-startups-investment/
+
+28. [2.06] Why does AI hallucinate?
+   🔗 https://www.technologyreview.com/2024/06/18/1093440/what-causes-ai-hallucinate-chatbots/
+
+29. [2.06] The State of AI: Is China about to win the race?
+   🔗 https://www.technologyreview.com/2025/11/03/1126780/the-state-of-ai-is-china-about-to-win-the-race/
+
+30. [1.91] The great AI hype correction of 2025
+   🔗 https://www.technologyreview.com/topic/artificial-intelligence/
+
+31. [1.91] The State of AI: A vision of the world in 2030
+   🔗 https://www.technologyreview.com/2025/12/08/1128922/the-state-of-ai-a-vision-of-the-world-in-2030/
+
+32. [1.91] What’s next for AI in 2025
+   🔗 https://www.technologyreview.com/2025/01/08/1109188/whats-next-for-ai-in-2025/
+
+33. [1.90] Bill Gates: Our best weapon against climate change is ingenuity
+   🔗 https://www.technologyreview.com/2025/10/06/1124265/bill-gates-ingenuity-climate-change-tech-investment/
+
+34. [1.70] Google, Amazon and the problem with Big Tech’s climate claims
+   🔗 https://www.technologyreview.com/2024/07/17/1095019/google-amazon-and-the-problem-with-big-techs-climate-claims/
+
+35. [1.70] What’s next for AlphaFold: A conversation with a Google DeepMind Nobel laureate
+   🔗 https://www.technologyreview.com/2025/11/24/1128322/whats-next-for-alphafold-a-conversation-with-a-google-deepmind-nobel-laureate/
+
+36. [1.66] 10 years of personal finances in plain text files
+   🔗 https://sgoel.dev/posts/10-years-of-personal-finances-in-plain-text-files/
+
+37. [1.52] We’re learning more about what vitamin D does to our bodies
+   🔗 https://www.technologyreview.com/2025/11/21/1128206/vitamin-d-bodies-bone-health-immune/
+
+38. [1.51] Biodiversity: A missing link in combating climate change
+   🔗 https://www.technologyreview.com/2025/10/21/1124746/biodiversity-a-missing-link-in-combating-climate-change/
