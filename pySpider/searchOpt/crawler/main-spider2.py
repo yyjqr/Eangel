@@ -553,7 +553,7 @@ def send_news_email(txt_file, recipient):
     import smtplib
 
     _pwd = encrypt_and_verify_url.decrypt_getKey(
-        "dm1wbmFmYmxsdnR0YmJlaQ==".encode("utf-8")
+        "dm1wbmFmYmxsdnR0YmJlXX==".encode("utf-8")
     )
     # 读取文本文件内容
     with open(txt_file, "r", encoding="utf-8") as f:
@@ -631,3 +631,4 @@ if __name__ == "__main__":
 
     # 可选：清理临时文件
     # os.remove(txt_file)
+
