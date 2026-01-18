@@ -179,7 +179,13 @@ class NewsScraper:
         current_date = datetime.now()
         six_months_ago = current_date - timedelta(days=180)
 
-        for title, url, weight in self.articles:
+        for article_tuple in self.articles:
+            if len(article_tuple) == 3:
+                title, url, weight = article_tuple
+                image_url = ""
+            else:
+                title, url, weight, image_url = article_tuple
+
             if weight > kRankLevelValue:
                 # 检查URL是否已存在
                 db_publish_time_str = mysqlWriteNewsV2.getArticlePublishTime(url)
@@ -195,13 +201,13 @@ class NewsScraper:
                             continue
                         else:
                             print(f"文章已在数据库但未满半年，继续发送: {title[:50]}...")
-                            filtered_articles.append((title, url, weight))
+                            filtered_articles.append((title, url, weight, image_url))
                             continue
                     except Exception as e:
                         print(f"解析数据库时间失败: {e}, 默认跳过")
                         continue
 
-                filtered_articles.append((title, url, weight))
+                filtered_articles.append((title, url, weight, image_url))
 
                 # 确定分类
                 category = self.determine_category(title, keywords)
@@ -217,8 +223,9 @@ class NewsScraper:
                     url,
                     keywords,
                     category,
+                    image_url,
                 )
-                sql = """ INSERT INTO techTB(Rate,title,author,publish_time,content,url,key_word,category) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) """
+                sql = """ INSERT INTO techTB(Rate,title,author,publish_time,content,url,key_word,category,image_url) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) """
                 result = mysqlWriteNewsV2.writeDb(sql, newsOne)
                 if result:
                     print(f"✅ 成功写入数据库 [{category}]: {title[:50]}...")
@@ -308,10 +315,12 @@ class MitScraper(NewsScraper):
                     class_="homepageStoryCard__hed--92c78a74bbc694463e43e32aafbbdfd7"
                 )
                 link_elem = news_element.find("a")
+                img_elem = news_element.find("img")  # 尝试寻找图片
 
                 if title_elem and link_elem:
                     title = title_elem.text.strip()
                     url = link_elem["href"]
+                    image_url = img_elem["src"] if img_elem else ""
 
                     # 确保URL是完整的
                     if not url.startswith("http"):
@@ -321,7 +330,7 @@ class MitScraper(NewsScraper):
                     weight = self.calculate_weight(title)
                     if weight > 0:
                         print(f"weight is {weight}")
-                        self.articles.append((title, url, weight))
+                        self.articles.append((title, url, weight, image_url))
             except Exception as e:
                 print(f"处理文章时出错: {str(e)}")
 
@@ -369,7 +378,9 @@ class HackerNewsScraper(NewsScraper):
                     }
                     # 计算新闻权重
                     weight = self.calculate_weight(article["title"])
-                    self.articles.append((article["title"], article["url"], weight))
+                    self.articles.append(
+                        (article["title"], article["url"], weight, "")
+                    )  # HN no images easy way
 
             print(f"成功爬取 {len(self.articles)} 篇 Hacker News 文章")
             return self.filter_and_store("Hacker News")
@@ -391,7 +402,9 @@ class GitHubTrendingScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (art["title"], art["url"], weight, art.get("image_url", ""))
+                )
             return self.filter_and_store("GitHub")
         except Exception as e:
             print(f"GitHub 爬取失败: {e}")
@@ -410,7 +423,9 @@ class RedditScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (art["title"], art["url"], weight, art.get("image_url", ""))
+                )
             return self.filter_and_store("Reddit")
         except Exception as e:
             print(f"Reddit 爬取失败: {e}")
@@ -429,7 +444,9 @@ class DevToScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (art["title"], art["url"], weight, art.get("image_url", ""))
+                )
             return self.filter_and_store("Dev.to")
         except Exception as e:
             print(f"Dev.to 爬取失败: {e}")
@@ -448,7 +465,9 @@ class AITopicsScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (art["title"], art["url"], weight, art.get("image_url", ""))
+                )
             return self.filter_and_store("人工智能")
         except Exception as e:
             print(f"AI Topics 爬取失败: {e}")
@@ -467,7 +486,9 @@ class MediumScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (art["title"], art["url"], weight, art.get("image_url", ""))
+                )
             return self.filter_and_store("Medium")
         except Exception as e:
             print(f"Medium 爬取失败: {e}")
@@ -486,7 +507,9 @@ class TechCrunchScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (art["title"], art["url"], weight, art.get("image_url", ""))
+                )
             return self.filter_and_store("TechCrunch")
         except Exception as e:
             print(f"TechCrunch 爬取失败: {e}")
@@ -538,9 +561,18 @@ class TechNewsAggregator:
             f.write(f"共收集到 {len(articles)} 篇高价值文章\n")
             f.write("=" * 60 + "\n\n")
 
-            for idx, (title, url, weight) in enumerate(articles, 1):
+            for idx, article in enumerate(articles, 1):
+                if len(article) == 4:
+                    title, url, weight, image_url = article
+                else:
+                    title, url, weight = article
+                    image_url = ""
+
                 f.write(f"{idx}. [{weight:.2f}] {title}\n")
-                f.write(f"   🔗 {url}\n\n")
+                f.write(f"   🔗 {url}\n")
+                if image_url:
+                    f.write(f"   🖼️ {image_url}\n")
+                f.write("\n")
 
         print(f"💾 新闻已保存到 {os.path.abspath(filename)}")
         return filename
@@ -623,10 +655,7 @@ if __name__ == "__main__":
     # 保存到文本文件
     txt_file = aggregator.save_to_txt(articles)
 
-    # 发送邮件（除非 dry-run）
-    # if args.dry_run:
-    # print("--dry-run: 跳过发送邮件")
-    # else:
+    # 发送邮件
     send_news_email(txt_file, "840056598@qq.com")
 
     # 可选：清理临时文件

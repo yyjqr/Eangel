@@ -146,6 +146,204 @@
             background: #e9ecef;
             color: #495057;
         }
+
+        /* Featured News Carousel */
+        .featured-carousel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .featured-carousel h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .carousel-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-height: 400px;
+            overflow: hidden;
+        }
+
+        .carousel-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .carousel-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .carousel-item .item-content {
+            padding: 15px;
+            background: white;
+        }
+
+        .carousel-item .item-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .carousel-item .item-meta {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .show-more-btn {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .show-more-btn a {
+            display: inline-block;
+            padding: 10px 30px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .show-more-btn a:hover {
+            background: #0056b3;
+        }
+
+        /* Comment Section Styles */
+        .comment-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .comment-form {
+            margin-bottom: 30px;
+        }
+
+        .comment-form h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            background: #007bff;
+            color: white;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-submit:hover {
+            background: #0056b3;
+        }
+
+        .comments-list {
+            margin-top: 30px;
+        }
+
+        .comments-list h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .comment-item {
+            padding: 15px;
+            border-left: 3px solid #007bff;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .comment-author {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .comment-date {
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        .comment-text {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 
@@ -163,6 +361,18 @@
                 <h3>平均权重</h3>
                 <p>{{ stats.avg_rate|floatformat:2 }}</p>
             </div>
+            <div class="stat-card">
+                <h3>今日新增</h3>
+                <p>{{ stats.today_count }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>境内可访问</h3>
+                <p>{{ stats.accessible_count }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>境外资讯</h3>
+                <p>{{ stats.blocked_count }}</p>
+            </div>
             {% for cat in stats.category_counts %}
             <div class="stat-card">
                 <h3>{{ cat.category }}</h3>
@@ -170,6 +380,29 @@
             </div>
             {% endfor %}
         </div>
+
+        <!-- Featured News Carousel -->
+        {% if featured_news %}
+        <div class="featured-carousel">
+            <h2>🎯 精选资讯</h2>
+            <div class="carousel-container">
+                {% for news in featured_news %}
+                <div class="carousel-item">
+                    <a href="{{ news.url }}" target="_blank">
+                        <img src="{{ news.image_url }}" alt="{{ news.title }}" onerror="this.src='https://via.placeholder.com/300x180?text=No+Image'">
+                        <div class="item-content">
+                            <div class="item-title">{{ news.title }}</div>
+                            <div class="item-meta">
+                                <span class="category-tag">{{ news.category }}</span>
+                                权重: {{ news.rate|floatformat:2 }}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Word Cloud -->
         <div class="word-cloud">
@@ -195,6 +428,13 @@
             </div>
         </div>
 
+        <!-- 境内可访问新闻 -->
+        <h2 style="margin: 30px 0 15px 0; color: #333;">
+            🌐 境内可访问资讯
+            <span style="font-size: 0.9rem; color: #666; font-weight: normal;">
+                （{% if show_all %}显示全部{% else %}显示前30条{% endif %}）
+            </span>
+        </h2>
         <table>
             <thead>
                 <tr>
@@ -207,8 +447,8 @@
                 </tr>
             </thead>
             <tbody>
-                {% for news in news_list %}
-                <tr>
+                {% for news in accessible_news %}
+                <tr {% if forloop.counter <= stats.today_count %}style="background: #f0f8ff;"{% endif %}>
                     <td class="{% if news.rate > 0.8 %}rank-high{% else %}rank-low{% endif %}">
                         {{ news.rate|floatformat:2 }}
                     </td>
@@ -218,9 +458,107 @@
                     <td>{{ news.publish_time }}</td>
                     <td>{{ news.author }}</td>
                 </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px; color: #999;">暂无可访问的新闻</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Show More Button -->
+        {% if not show_all and accessible_news|length >= 30 %}
+        <div class="show-more-btn">
+            <a href="?show_all=true{% if current_category %}&category={{ current_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">
+                查看更多文章 →
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- 境外资讯 (中国大陆无法直接访问) -->
+        {% if blocked_news %}
+        <h2 style="margin: 30px 0 15px 0; color: #e74c3c;">🚫 境外资讯（中国大陆需要特殊网络访问）</h2>
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <strong>⚠️ 提示：</strong>以下资讯来自境外网站，在中国大陆可能无法直接访问，仅供参考。
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>权重</th>
+                    <th>分类</th>
+                    <th>标题</th>
+                    <th>关键词</th>
+                    <th>发布时间</th>
+                    <th>来源</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for news in blocked_news %}
+                <tr style="background: #f8f9fa;">
+                    <td class="{% if news.rate > 0.8 %}rank-high{% else %}rank-low{% endif %}">
+                        {{ news.rate|floatformat:2 }}
+                    </td>
+                    <td><span class="category-tag" style="background: #ffc107; color: #856404;">{{ news.category }}</span></td>
+                    <td><a href="{{ news.url }}" target="_blank" style="color: #6c757d;">{{ news.title }}</a></td>
+                    <td>{{ news.key_word }}</td>
+                    <td>{{ news.publish_time }}</td>
+                    <td>{{ news.author }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <!-- Comment Section -->
+        <div class="comment-section">
+            <!-- Messages -->
+            {% if messages %}
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Comment Form -->
+            <div class="comment-form">
+                <h2>💬 用户建议与反馈</h2>
+                <form method="post" action="{% url 'submit_comment' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="username">姓名（可选）</label>
+                        <input type="text" id="username" name="username" placeholder="输入您的姓名，留空则为匿名">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">邮箱（可选）</label>
+                        <input type="email" id="email" name="email" placeholder="输入您的邮箱（不会公开显示）">
+                    </div>
+                    <div class="form-group">
+                        <label for="comment">评论内容 *</label>
+                        <textarea id="comment" name="comment" placeholder="请输入您的建议或反馈..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">提交反馈</button>
+                </form>
+            </div>
+
+            <!-- Recent Comments -->
+            <div class="comments-list">
+                <h3>📝 最近评论</h3>
+                {% if recent_comments %}
+                {% for comment in recent_comments %}
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <span class="comment-author">{{ comment.username }}</span>
+                        <span class="comment-date">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
+                    </div>
+                    <div class="comment-text">{{ comment.comment }}</div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="color: #999;">暂无评论，快来发表第一条吧！</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </body>
 
