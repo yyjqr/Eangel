@@ -1,11 +1,7 @@
 ## -*- coding: UTF-8 -*-
-# @author: JACK YANG
-# @date:
-# 2022.09 add rank map
-# 2024.10 scikit-learn
-# 2025.07 scraper类爬虫
-# 2026.01 增加python Django 前端展示数据库内容
-# @Email: yyjqr789@sina.com
+# @author: Copilot
+# @date: 2026.01
+# Description: Economic and Enterprise News Crawler
 
 #!/usr/bin/python3
 
@@ -22,7 +18,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import encrypt_and_verify_url
 import mysqlWriteNewsV2
-import scrapers
+import scrapers_economy as scrapers
 from email.utils import formataddr
 import ssl
 import json
@@ -32,20 +28,20 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 # 读取配置
 with open(
-    os.path.join(os.path.dirname(__file__), ".", "tech_key_config_map.json")
+    os.path.join(os.path.dirname(__file__), ".", "economy_key_config_map.json")
 ) as cfg_f:
     cfg = json.load(cfg_f)
 KEYWORDS_RANK_MAP = cfg.get("KEYWORDS_RANK_MAP", {})
 BLOCKED_DOMAINS = cfg.get("BLOCKED_DOMAINS", [])
 CUSTOM_SITES = cfg.get("CUSTOM_SITES", [])
-# 是否在必要时请求详情页面以提取发布时间（默认 False，避免大量额外请求）
+# 是否在必要时请求详情页面以提取发布时间
 FETCH_DETAILS_FOR_DATE = cfg.get("FETCH_DETAILS_FOR_DATE", False)
 
 # 全局配置
-OUTPUT_FILE = "tech_news_summary.txt"
-# KEYWORDS_RANK_MAP = {...}  # 您的关键词权重映射
+OUTPUT_FILE = "economy_news_summary.txt"
 # 新闻价值阈值
 kRankLevelValue = cfg.get("RANK_THRESHOLD", 0.5)
+
 # Define a set of common words to filter out (stop words)
 stop_words = set(
     [
@@ -98,7 +94,7 @@ class NewsScraper:
 
     def __init__(self, source_name):
         self.source_name = source_name
-        self.session = requests.Session()  # 添加共享的 Session 对象
+        self.session = requests.Session()
         self.session.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -107,7 +103,6 @@ class NewsScraper:
         )
         self.base_url = ""
         self.articles = []
-        self.news_index = 0
 
     def scrape(self):
         """子类需实现的具体爬取逻辑"""
@@ -125,55 +120,59 @@ class NewsScraper:
         """根据标题和关键词确定文章分类"""
         title_lower = title.lower()
 
-        # 定义分类规则
+        # 定义经济分类规则
         categories = {
-            "人工智能": [
-                "ai",
-                "intelligence",
-                "learning",
-                "neural",
-                "gpt",
-                "openai",
-                "transformer",
-                "robot",
+            "宏观经济": [
+                "gdp",
+                "inflation",
+                "fed",
+                "imf",
+                "policy",
+                "rate",
+                "tax",
+                "economy",
+                "macro",
             ],
-            "产品类": [
-                "product",
-                "tesla",
+            "股市投资": [
+                "stock",
+                "market",
+                "nasdaq",
+                "dow",
+                "ipo",
+                "earnings",
+                "fund",
+                "invest",
+            ],
+            "企业动态": [
+                "merger",
+                "acquisition",
+                "ceo",
+                "layoff",
+                "report",
+                "microsoft",
                 "apple",
+                "tesla",
                 "google",
                 "amazon",
-                "chip",
-                "device",
-                "smart",
             ],
-            "军工": [
-                "missile",
-                "warship",
-                "drone",
-                "darpa",
-                "defense",
-                "military",
-                "unmanned",
+            "金融科技": ["fintech", "crypto", "bitcoin", "blockchain", "bank", "payment"],
+            "贸易与供应链": [
+                "trade",
+                "tariff",
+                "supply chain",
+                "freight",
+                "export",
+                "import",
             ],
-            "社会": [
-                "economic",
-                "market",
-                "work",
-                "policy",
-                "social",
-                "climate",
-                "sustainability",
-            ],
-            "科技": [],  # 默认分类
+            "经济评论": ["opinion", "analysis", "forecast", "outlook", "trend"],
         }
 
         for cat, words in categories.items():
             if any(word in title_lower for word in words):
                 return cat
-        return "科技"
+        return "经济综合"
 
-    def filter_and_store(self, keywords="科技"):
+    def filter_and_store(self, keywords="经济"):
         """过滤并存储符合条件的文章"""
         filtered_articles = []
         current_date = datetime.now()
@@ -206,7 +205,7 @@ class NewsScraper:
                 # 确定分类
                 category = self.determine_category(title, keywords)
 
-                # 写入数据库 (移除 Id 字段，让数据库自增)
+                # 写入数据库
                 publish_time = datetime.now().strftime("%Y-%m-%d_%H:%M")
                 newsOne = (
                     weight,
@@ -254,137 +253,23 @@ class NewsScraper:
 
     # 计算关键词权重
     def calculate_keyword_weights(self, texts, keywords):
-        vectorizer = TfidfVectorizer()
+        try:
+            vectorizer = TfidfVectorizer()
+            tfidf_matrix = vectorizer.fit_transform(texts)
+            feature_names = vectorizer.get_feature_names_out()
+        except:
+            # Fallback if TF-IDF fails (e.g. empty texts)
+            text = " ".join(texts)
+            return self.compute_rank_from_map(text, keywords, fuzzy=True, threshold=0.7)
 
-        tfidf_matrix = vectorizer.fit_transform(texts)
-        ##scikit-learn>1.0.x use this version
-        feature_names = vectorizer.get_feature_names_out()
-        print("test feature_names", feature_names)
-        # Define a set of common words to filter out (stop words)
-        # Filter out stop words and numbers from feature names
-        filtered_feature_names = [
-            feature
-            for feature in feature_names
-            if feature not in stop_words and not feature.isdigit()
-        ]
-        # Assuming we want to select the top N important feature names
-        # For demonstration, let's say we want the top 3 features
-        # You can replace this logic with your own importance criteria
         text = " ".join(texts)
         return self.compute_rank_from_map(text, keywords, fuzzy=True, threshold=0.7)
-        # top_n = 6
-        # important_feature_names = filtered_feature_names[:top_n]  # Select top N feature names
-        # print("important_feature_names:{0}".format(important_feature_names));
-        # keyword_indices = []
-        # keyword_weights_sum = 0
-        # for keyword in keywords:
-        #     if keyword in filtered_feature_names:
-        #         index = filtered_feature_names.index(keyword)
-        #         keyword_indices.append(index)
-        #         keyword_weights = tfidf_matrix[:, index].toarray()
-        #         print("Keyword: {0}, Index: {1}, Weight: {2}".format(keyword, index, keyword_weights))
-        #         keyword_weights_sum += keyword_weights.sum()
-        # return keyword_weights_sum
 
 
-class MitScraper(NewsScraper):
-    """MIT Technology Review 爬虫"""
-
+class BloombergWrapper(NewsScraper):
     def __init__(self):
-        super().__init__("MIT Technology Review")
-
-    def scrape(self):
-        url = "https://www.technologyreview.com/"
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        news_elements = soup.find_all(
-            class_="homepageStoryCard__wrapper--5d95dc382241d259dc249996a6e29782"
-        )
-        print(f"weight test")
-        for news_element in news_elements:
-            try:
-                title_elem = news_element.find(
-                    class_="homepageStoryCard__hed--92c78a74bbc694463e43e32aafbbdfd7"
-                )
-                link_elem = news_element.find("a")
-
-                if title_elem and link_elem:
-                    title = title_elem.text.strip()
-                    url = link_elem["href"]
-
-                    # 确保URL是完整的
-                    if not url.startswith("http"):
-                        url = f"https://www.technologyreview.com{url}"
-
-                    # 计算新闻权重
-                    weight = self.calculate_weight(title)
-                    if weight > 0:
-                        print(f"weight is {weight}")
-                        self.articles.append((title, url, weight))
-            except Exception as e:
-                print(f"处理文章时出错: {str(e)}")
-
-        return self.filter_and_store("MIT科技评论")
-
-
-class HackerNewsScraper(NewsScraper):
-    """Hacker News 爬虫"""
-
-    def __init__(self):
-        # super().__init__("Hacker News")
-        super().__init__("Hacker News")
-        self.base_url = "https://hacker-news.firebaseio.com/v0"
-
-    def scrape(self, limit: int = 10) -> List[Dict]:
-        """爬取 Hacker News 热门文章"""
-        articles = []
-        try:
-            # 获取热门文章ID
-            response = self.session.get(f"{self.base_url}/topstories.json")
-            story_ids = response.json()[:limit]
-
-            for story_id in story_ids:
-                self.get_random_delay()
-
-                # 获取文章详情
-                story_response = self.session.get(
-                    f"{self.base_url}/item/{story_id}.json"
-                )
-                story_data = story_response.json()
-
-                if story_data and story_data.get("url"):
-                    article = {
-                        "title": story_data.get("title", ""),
-                        "url": story_data.get("url", ""),
-                        "summary": f"Hacker News热门文章，得分：{story_data.get('score', 0)}",
-                        "source": self.source_name,
-                        "author": story_data.get("by", ""),
-                        "tags": "Tech,News",
-                        "publish_time": datetime.fromtimestamp(
-                            story_data.get("time", 0)
-                        ),
-                        "views": story_data.get("score", 0),
-                        "likes": story_data.get("descendants", 0),
-                    }
-                    # 计算新闻权重
-                    weight = self.calculate_weight(article["title"])
-                    self.articles.append((article["title"], article["url"], weight))
-
-            print(f"成功爬取 {len(self.articles)} 篇 Hacker News 文章")
-            return self.filter_and_store("Hacker News")
-
-        except Exception as e:
-            print(f"爬取 Hacker News 失败: {e}")
-            return []
-
-
-class GitHubTrendingScraper(NewsScraper):
-    """GitHub Trending 爬虫包装器"""
-
-    def __init__(self):
-        super().__init__("GitHub Trending")
-        self.scraper = scrapers.GitHubTrendingScraper()
+        super().__init__("Bloomberg")
+        self.scraper = scrapers.BloombergScraper()
 
     def scrape(self, limit=10):
         try:
@@ -392,18 +277,16 @@ class GitHubTrendingScraper(NewsScraper):
             for art in articles:
                 weight = self.calculate_weight(art["title"])
                 self.articles.append((art["title"], art["url"], weight))
-            return self.filter_and_store("GitHub")
+            return self.filter_and_store("Bloomberg")
         except Exception as e:
-            print(f"GitHub 爬取失败: {e}")
+            print(f"Bloomberg 爬取失败: {e}")
             return []
 
 
-class RedditScraper(NewsScraper):
-    """Reddit 爬虫包装器"""
-
+class CNBCWrapper(NewsScraper):
     def __init__(self):
-        super().__init__("Reddit Programming")
-        self.scraper = scrapers.RedditScraper()
+        super().__init__("CNBC")
+        self.scraper = scrapers.CNBCScraper()
 
     def scrape(self, limit=10):
         try:
@@ -411,18 +294,16 @@ class RedditScraper(NewsScraper):
             for art in articles:
                 weight = self.calculate_weight(art["title"])
                 self.articles.append((art["title"], art["url"], weight))
-            return self.filter_and_store("Reddit")
+            return self.filter_and_store("CNBC")
         except Exception as e:
-            print(f"Reddit 爬取失败: {e}")
+            print(f"CNBC 爬取失败: {e}")
             return []
 
 
-class DevToScraper(NewsScraper):
-    """Dev.to 爬虫包装器"""
-
+class EconomistWrapper(NewsScraper):
     def __init__(self):
-        super().__init__("Dev.to")
-        self.scraper = scrapers.DevToScraper()
+        super().__init__("The Economist")
+        self.scraper = scrapers.EconomistScraper()
 
     def scrape(self, limit=10):
         try:
@@ -430,18 +311,16 @@ class DevToScraper(NewsScraper):
             for art in articles:
                 weight = self.calculate_weight(art["title"])
                 self.articles.append((art["title"], art["url"], weight))
-            return self.filter_and_store("Dev.to")
+            return self.filter_and_store("The Economist")
         except Exception as e:
-            print(f"Dev.to 爬取失败: {e}")
+            print(f"The Economist 爬取失败: {e}")
             return []
 
 
-class AITopicsScraper(NewsScraper):
-    """AI Topics 爬虫包装器"""
-
+class GartnerWrapper(NewsScraper):
     def __init__(self):
-        super().__init__("AI Topics")
-        self.scraper = scrapers.AITopicsScraper()
+        super().__init__("Gartner")
+        self.scraper = scrapers.GartnerScraper()
 
     def scrape(self, limit=10):
         try:
@@ -449,18 +328,16 @@ class AITopicsScraper(NewsScraper):
             for art in articles:
                 weight = self.calculate_weight(art["title"])
                 self.articles.append((art["title"], art["url"], weight))
-            return self.filter_and_store("人工智能")
+            return self.filter_and_store("Gartner")
         except Exception as e:
-            print(f"AI Topics 爬取失败: {e}")
+            print(f"Gartner 爬取失败: {e}")
             return []
 
 
-class MediumScraper(NewsScraper):
-    """Medium 爬虫包装器"""
-
+class SinaWrapper(NewsScraper):
     def __init__(self):
-        super().__init__("Medium Technology")
-        self.scraper = scrapers.MediumScraper()
+        super().__init__("Sina Finance")
+        self.scraper = scrapers.SinaFinanceScraper()
 
     def scrape(self, limit=10):
         try:
@@ -468,18 +345,16 @@ class MediumScraper(NewsScraper):
             for art in articles:
                 weight = self.calculate_weight(art["title"])
                 self.articles.append((art["title"], art["url"], weight))
-            return self.filter_and_store("Medium")
+            return self.filter_and_store("新浪财经")
         except Exception as e:
-            print(f"Medium 爬取失败: {e}")
+            print(f"新浪财经 爬取失败: {e}")
             return []
 
 
-class TechCrunchScraper(NewsScraper):
-    """TechCrunch 爬虫包装器"""
-
+class CaixinWrapper(NewsScraper):
     def __init__(self):
-        super().__init__("TechCrunch")
-        self.scraper = scrapers.TechCrunchScraper()
+        super().__init__("财新网")
+        self.scraper = scrapers.CaixinScraper()
 
     def scrape(self, limit=10):
         try:
@@ -487,34 +362,66 @@ class TechCrunchScraper(NewsScraper):
             for art in articles:
                 weight = self.calculate_weight(art["title"])
                 self.articles.append((art["title"], art["url"], weight))
-            return self.filter_and_store("TechCrunch")
+            return self.filter_and_store("财新网")
         except Exception as e:
-            print(f"TechCrunch 爬取失败: {e}")
+            print(f"财新网 爬取失败: {e}")
             return []
 
 
-class TechNewsAggregator:
-    """科技新闻聚合器"""
+class WallStreetCNWrapper(NewsScraper):
+    def __init__(self):
+        super().__init__("东方财富网")
+        self.scraper = scrapers.WallStreetCNScraper()
+
+    def scrape(self, limit=10):
+        try:
+            articles = self.scraper.scrape_articles(limit=limit)
+            for art in articles:
+                weight = self.calculate_weight(art["title"])
+                self.articles.append((art["title"], art["url"], weight))
+            return self.filter_and_store("东方财富网")
+        except Exception as e:
+            print(f"东方财富网 爬取失败: {e}")
+            return []
+
+
+class TencentStockWrapper(NewsScraper):
+    def __init__(self):
+        super().__init__("新浪财经")
+        self.scraper = scrapers.TencentStockScraper()
+
+    def scrape(self, limit=10):
+        try:
+            articles = self.scraper.scrape_articles(limit=limit)
+            for art in articles:
+                weight = self.calculate_weight(art["title"])
+                self.articles.append((art["title"], art["url"], weight))
+            return self.filter_and_store("新浪财经")
+        except Exception as e:
+            print(f"新浪财经 爬取失败: {e}")
+            return []
+
+
+class EconomyNewsAggregator:
+    """经济新闻聚合器"""
 
     def __init__(self):
         self.scrapers = [
-            MitScraper(),
-            GitHubTrendingScraper(),
-            AITopicsScraper(),
-            DevToScraper(),
-            RedditScraper(),
-            HackerNewsScraper(),
-            MediumScraper() if "MediumScraper" in globals() else None,
-            TechCrunchScraper() if "TechCrunchScraper" in globals() else None,
+            BloombergWrapper(),
+            CNBCWrapper(),
+            EconomistWrapper(),
+            GartnerWrapper(),
+            SinaWrapper(),
+            CaixinWrapper(),
+            WallStreetCNWrapper(),
+            TencentStockWrapper(),
         ]
-        # 过滤掉未定义的爬虫
-        self.scrapers = [s for s in self.scrapers if s is not None]
 
     def collect_news(self):
         """收集所有来源的新闻"""
         all_articles = []
 
-        print(f"📅 开始收集科技新闻 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"📅 开始收集经济新闻 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"🔍 价值阈值: > {kRankLevelValue}")
         print("-" * 60)
 
@@ -534,7 +441,7 @@ class TechNewsAggregator:
     def save_to_txt(self, articles, filename=OUTPUT_FILE):
         """将新闻保存到文本文件"""
         with open(filename, "w", encoding="utf-8") as f:
-            f.write(f"每日科技新闻摘要 - {datetime.now().strftime('%Y-%m-%d')}\n")
+            f.write(f"每日经济新闻摘要 - {datetime.now().strftime('%Y-%m-%d')}\n")
             f.write(f"共收集到 {len(articles)} 篇高价值文章\n")
             f.write("=" * 60 + "\n\n")
 
@@ -552,82 +459,57 @@ def send_news_email(txt_file, recipient):
     from email.mime.text import MIMEText
     import smtplib
 
-    _pwd = encrypt_and_verify_url.decrypt_getKey(
-        "dm1wbmFmYmxsdnR0YmJlaQ==".encode("utf-8")
-    )
+    try:
+        _pwd = encrypt_and_verify_url.decrypt_getKey(
+            "dm1wbmFmYmxsdnR0YmJlaQ==".encode("utf-8")
+        )
+    except:
+        print("Decrypt key failed, skipping email.")
+        return
+
     # 读取文本文件内容
     with open(txt_file, "r", encoding="utf-8") as f:
         news_content = f.read()
 
     # 邮件配置
     sender = "840056598@qq.com"
-    password = _pwd
-    subject = f"每日科技新闻摘要 - {datetime.now().strftime('%Y-%m-%d')}"
+    subject = f"每日经济新闻摘要 - {datetime.now().strftime('%Y-%m-%d')}"
 
     # 创建邮件
     msg = MIMEMultipart()
     msg["From"] = sender
-    receiver = recipient
-    msg["To"] = formataddr(["亲爱的用户", receiver])  # 括号里的对应收件人邮箱
+    msg["To"] = formataddr(["亲爱的用户", recipient])
     msg["Subject"] = subject
 
     # 添加文本内容
     msg.attach(MIMEText(news_content, "plain", "utf-8"))
-    print(f"send subject {subject}")
-    # 创建安全上下文（解决SSL验证问题）
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
+
     # 发送邮件
     try:
-        # with smtplib.SMTP_SSL('smtp.qq.com', 465, context) as server:
-        # server.login(sender, _pwd.decode("utf-8"))
-        # print("login email OK\n")
-        # server.sendmail(sender, [receiver,], msg.as_string())
-        server = smtplib.SMTP_SSL(
-            "smtp.qq.com", 465
-        )  # 发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
-        server.login(sender, _pwd.decode("utf-8"))  # 括号中对应的是发件人邮箱账号、邮箱密码
+        server = smtplib.SMTP_SSL("smtp.qq.com", 465)
+        server.login(sender, _pwd.decode("utf-8"))
         server.sendmail(
             sender,
             [
-                receiver,
+                recipient,
             ],
             msg.as_string(),
-        )  # 括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
+        )
         print(f"📧 邮件已成功发送至 {recipient}")
-        print("SEND NEWS AND IMG OK")
-        server.quit()  # 这句是关闭连接
+        server.quit()
         return True
-    except smtplib.SMTPAuthenticationError:
-        print("❌ 认证失败: 请检查邮箱和授权码是否正确")
-        print("💡 提示: QQ邮箱需要使用授权码而非密码")
-    except smtplib.SMTPException as e:
-        print(f"❌ SMTP协议错误: {str(e)}")
-        print(f"错误代码: {e.smtp_code}")
-        print(f"错误消息: {e.smtp_error.decode('utf-8')}")
     except Exception as e:
         print(f"❌ 发送失败: {str(e)}")
 
 
 # 主执行流程
 if __name__ == "__main__":
-    with open("./tech_key_config_map.json") as j:
-
-        KEYWORDS_RANK_MAP = json.load(j)["KEYWORDS_RANK_MAP"]
-
     # 创建聚合器并收集新闻
-    aggregator = TechNewsAggregator()
+    aggregator = EconomyNewsAggregator()
     articles = aggregator.collect_news()
 
     # 保存到文本文件
     txt_file = aggregator.save_to_txt(articles)
 
-    # 发送邮件（除非 dry-run）
-    # if args.dry_run:
-    # print("--dry-run: 跳过发送邮件")
-    # else:
+    # 发送邮件
     send_news_email(txt_file, "840056598@qq.com")
-
-    # 可选：清理临时文件
-    # os.remove(txt_file)
