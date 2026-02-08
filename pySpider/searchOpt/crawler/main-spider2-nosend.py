@@ -995,7 +995,7 @@ if __name__ == "__main__":
     txt_file = aggregator.save_to_txt(articles)
 
     # 发送邮件
-    send_news_email(txt_file, "840056598@qq.com")
+    # send_news_email(txt_file, "840056598@qq.com")
 
     # 可选：清理临时文件
     # os.remove(txt_file)

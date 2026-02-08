@@ -132,6 +132,10 @@ class NewsScraper:
                 "tax",
                 "economy",
                 "macro",
+                "央行",
+                "通胀",
+                "利率",
+                "政策",
             ],
             "股市投资": [
                 "stock",
@@ -142,6 +146,10 @@ class NewsScraper:
                 "earnings",
                 "fund",
                 "invest",
+                "股市",
+                "上证",
+                "深证",
+                "A股",
             ],
             "企业动态": [
                 "merger",
@@ -154,8 +162,23 @@ class NewsScraper:
                 "tesla",
                 "google",
                 "amazon",
+                "并购",
+                "财报",
+                "企业",
+                "营收",
+                "利润",
             ],
-            "金融科技": ["fintech", "crypto", "bitcoin", "blockchain", "bank", "payment"],
+            "金融科技": [
+                "fintech",
+                "crypto",
+                "bitcoin",
+                "blockchain",
+                "bank",
+                "payment",
+                "金融科技",
+                "区块链",
+                "数字货币",
+            ],
             "贸易与供应链": [
                 "trade",
                 "tariff",
@@ -163,8 +186,34 @@ class NewsScraper:
                 "freight",
                 "export",
                 "import",
+                "贸易",
+                "关税",
+                "供应链",
             ],
-            "经济评论": ["opinion", "analysis", "forecast", "outlook", "trend"],
+            "产业经济": [
+                "industry",
+                "manufacturing",
+                "production",
+                "产业",
+                "制造业",
+                "生产",
+                "chip industry",
+                "ev market",
+                "semiconductor industry",
+                "半导体产业",
+                "汽车产业",
+                "新能源产业",
+            ],
+            "经济评论": [
+                "opinion",
+                "analysis",
+                "forecast",
+                "outlook",
+                "trend",
+                "预测",
+                "趋势",
+                "分析",
+            ],
         }
 
         for cat, words in categories.items():
@@ -178,7 +227,26 @@ class NewsScraper:
         current_date = datetime.now()
         six_months_ago = current_date - timedelta(days=180)
 
-        for title, url, weight in self.articles:
+        for article_tuple in self.articles:
+            # 解包元组，支持不同长度
+            image_url = ""
+            publish_time_obj = datetime.now()
+            created_at_obj = datetime.now()
+
+            if len(article_tuple) == 6:
+                (
+                    title,
+                    url,
+                    weight,
+                    image_url,
+                    publish_time_obj,
+                    created_at_obj,
+                ) = article_tuple
+            elif len(article_tuple) == 4:
+                title, url, weight, image_url = article_tuple
+            elif len(article_tuple) == 3:
+                title, url, weight = article_tuple
+
             if weight > kRankLevelValue:
                 # 检查URL是否已存在
                 db_publish_time_str = mysqlWriteNewsV2.getArticlePublishTime(url)
@@ -194,30 +262,46 @@ class NewsScraper:
                             continue
                         else:
                             print(f"文章已在数据库但未满半年，继续发送: {title[:50]}...")
-                            filtered_articles.append((title, url, weight))
+                            filtered_articles.append(
+                                (
+                                    title,
+                                    url,
+                                    weight,
+                                    image_url,
+                                    publish_time_obj,
+                                    created_at_obj,
+                                )
+                            )
                             continue
                     except Exception as e:
                         print(f"解析数据库时间失败: {e}, 默认跳过")
                         continue
 
-                filtered_articles.append((title, url, weight))
+                filtered_articles.append(
+                    (title, url, weight, image_url, publish_time_obj, created_at_obj)
+                )
 
                 # 确定分类
                 category = self.determine_category(title, keywords)
 
                 # 写入数据库
-                publish_time = datetime.now().strftime("%Y-%m-%d_%H:%M")
+                if not isinstance(publish_time_obj, datetime):
+                    publish_time_obj = datetime.now()
+
+                publish_time_str = publish_time_obj.strftime("%Y-%m-%d_%H:%M")
+
                 newsOne = (
                     weight,
                     title,
                     self.source_name,
-                    publish_time,
+                    publish_time_str,
                     "content",
                     url,
                     keywords,
                     category,
+                    image_url,
                 )
-                sql = """ INSERT INTO techTB(Rate,title,author,publish_time,content,url,key_word,category) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) """
+                sql = """ INSERT INTO techTB(Rate,title,author,publish_time,content,url,key_word,category,image_url) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) """
                 result = mysqlWriteNewsV2.writeDb(sql, newsOne)
                 if result:
                     print(f"✅ 成功写入数据库 [{category}]: {title[:50]}...")
@@ -276,7 +360,16 @@ class BloombergWrapper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
             return self.filter_and_store("Bloomberg")
         except Exception as e:
             print(f"Bloomberg 爬取失败: {e}")
@@ -293,7 +386,16 @@ class CNBCWrapper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
             return self.filter_and_store("CNBC")
         except Exception as e:
             print(f"CNBC 爬取失败: {e}")
@@ -310,7 +412,16 @@ class EconomistWrapper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
             return self.filter_and_store("The Economist")
         except Exception as e:
             print(f"The Economist 爬取失败: {e}")
@@ -327,7 +438,16 @@ class GartnerWrapper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
             return self.filter_and_store("Gartner")
         except Exception as e:
             print(f"Gartner 爬取失败: {e}")
@@ -344,7 +464,16 @@ class SinaWrapper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
             return self.filter_and_store("新浪财经")
         except Exception as e:
             print(f"新浪财经 爬取失败: {e}")
@@ -361,7 +490,16 @@ class CaixinWrapper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
             return self.filter_and_store("财新网")
         except Exception as e:
             print(f"财新网 爬取失败: {e}")
@@ -378,7 +516,16 @@ class WallStreetCNWrapper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
             return self.filter_and_store("东方财富网")
         except Exception as e:
             print(f"东方财富网 爬取失败: {e}")
@@ -387,7 +534,7 @@ class WallStreetCNWrapper(NewsScraper):
 
 class TencentStockWrapper(NewsScraper):
     def __init__(self):
-        super().__init__("新浪财经")
+        super().__init__("腾讯财经")
         self.scraper = scrapers.TencentStockScraper()
 
     def scrape(self, limit=10):
@@ -395,10 +542,97 @@ class TencentStockWrapper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append((art["title"], art["url"], weight))
-            return self.filter_and_store("新浪财经")
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
+            return self.filter_and_store("腾讯财经")
         except Exception as e:
-            print(f"新浪财经 爬取失败: {e}")
+            print(f"腾讯财经 爬取失败: {e}")
+            return []
+
+
+class PhoenixFinanceWrapper(NewsScraper):
+    def __init__(self):
+        super().__init__("凤凰财经")
+        self.scraper = scrapers.PhoenixFinanceScraper()
+
+    def scrape(self, limit=10):
+        try:
+            articles = self.scraper.scrape_articles(limit=limit)
+            for art in articles:
+                weight = self.calculate_weight(art["title"])
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
+            return self.filter_and_store("凤凰财经")
+        except Exception as e:
+            print(f"凤凰财经 爬取失败: {e}")
+            return []
+
+
+class ShanghaiSecuritiesNewsWrapper(NewsScraper):
+    def __init__(self):
+        super().__init__("上海证券报")
+        self.scraper = scrapers.ShanghaiSecuritiesNewsScraper()
+
+    def scrape(self, limit=10):
+        try:
+            articles = self.scraper.scrape_articles(limit=limit)
+            for art in articles:
+                weight = self.calculate_weight(art["title"])
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
+            return self.filter_and_store("上海证券报")
+        except Exception as e:
+            print(f"上海证券报 爬取失败: {e}")
+            return []
+
+
+class FTWrapper(NewsScraper):
+    def __init__(self):
+        super().__init__("Financial Times")
+        self.scraper = scrapers.FinancialTimesScraper()
+
+    def scrape(self, limit=15):
+        try:
+            articles = self.scraper.scrape_articles(limit=limit)
+            for art in articles:
+                weight = self.calculate_weight(art["title"])
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
+            return self.filter_and_store("Financial Times")
+        except Exception as e:
+            print(f"Financial Times 爬取失败: {e}")
             return []
 
 
@@ -407,6 +641,7 @@ class EconomyNewsAggregator:
 
     def __init__(self):
         self.scrapers = [
+            FTWrapper(),
             BloombergWrapper(),
             CNBCWrapper(),
             EconomistWrapper(),
@@ -415,6 +650,8 @@ class EconomyNewsAggregator:
             CaixinWrapper(),
             WallStreetCNWrapper(),
             TencentStockWrapper(),
+            PhoenixFinanceWrapper(),
+            ShanghaiSecuritiesNewsWrapper(),
         ]
 
     def collect_news(self):
@@ -445,9 +682,27 @@ class EconomyNewsAggregator:
             f.write(f"共收集到 {len(articles)} 篇高价值文章\n")
             f.write("=" * 60 + "\n\n")
 
-            for idx, (title, url, weight) in enumerate(articles, 1):
+            for idx, article in enumerate(articles, 1):
+                image_url = ""
+                publish_time = None
+                created_at = None
+
+                if len(article) == 6:
+                    title, url, weight, image_url, publish_time, created_at = article
+                elif len(article) == 4:
+                    title, url, weight, image_url = article
+                else:
+                    title, url, weight = article
+
                 f.write(f"{idx}. [{weight:.2f}] {title}\n")
-                f.write(f"   🔗 {url}\n\n")
+                f.write(f"   🔗 {url}\n")
+                if isinstance(publish_time, datetime):
+                    f.write(f"   📅 发布时间: {publish_time.strftime('%Y-%m-%d %H:%M')}\n")
+                if isinstance(created_at, datetime):
+                    f.write(f"   🕒 采集时间: {created_at.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                if image_url:
+                    f.write(f"   🖼️ {image_url}\n")
+                f.write("\n")
 
         print(f"💾 新闻已保存到 {os.path.abspath(filename)}")
         return filename
