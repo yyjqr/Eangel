@@ -994,12 +994,8 @@ if __name__ == "__main__":
     # 保存到文本文件
     txt_file = aggregator.save_to_txt(articles)
 
-    # 发送邮件（除非 dry-run）
-    if args.dry_run:
-        print("--dry-run: 跳过发送邮件")
-    else:
-        # 发送邮件
-        send_news_email(txt_file, "840056598@qq.com")
+    # 发送邮件
+    # send_news_email(txt_file, "840056598@qq.com")
 
     # 可选：清理临时文件
     # os.remove(txt_file)

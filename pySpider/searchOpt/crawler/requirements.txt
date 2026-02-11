@@ -1,6 +1,9 @@
 requests==2.31.0
 beautifulsoup4==4.12.2
 lxml==4.9.3
+scikit-learn==1.8.0
 feedparser==6.0.10
 python-dateutil==2.8.2
 fake-useragent==1.4.0
+
+django==6.0.1
