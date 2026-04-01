@@ -166,7 +166,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            max-height: 400px;
+            max-height: 800px;
             overflow: hidden;
         }
 
@@ -200,6 +200,7 @@
             color: #333;
             margin-bottom: 5px;
             display: -webkit-box;
+            line-clamp: 2;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
@@ -208,6 +209,177 @@
         .carousel-item .item-meta {
             font-size: 0.8rem;
             color: #666;
+        }
+
+        .carousel-item .item-summary {
+            margin-top: 10px;
+            font-size: 0.88rem;
+            line-height: 1.65;
+            color: #4f5b66;
+            display: -webkit-box;
+            line-clamp: 5;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .featured-mode {
+            margin: -8px 0 18px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* ===== 历史精选 邮件列表风格 ===== */
+        .history-section {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 分页标签栏 */
+        .history-tab-bar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .history-tab-btn {
+            padding: 5px 16px;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            background: #f8f9fa;
+            color: #495057;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .history-tab-btn:hover {
+            background: #e9ecef;
+        }
+
+        .history-tab-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+            font-weight: 600;
+        }
+
+        /* 邮件行列表 */
+        .history-page {
+            display: none;
+        }
+
+        .history-page.active {
+            display: block;
+        }
+
+        .history-email-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .history-email-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 11px 0;
+            border-bottom: 1px solid #f0f2f5;
+            transition: background 0.15s;
+        }
+
+        .history-email-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-email-item:hover {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding-left: 8px;
+        }
+
+        .history-email-rate {
+            flex-shrink: 0;
+            width: 42px;
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-top: 2px;
+        }
+
+        .history-email-rate.rate-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .history-email-rate.rate-mid {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .history-email-rate.rate-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .history-email-cat {
+            flex-shrink: 0;
+            font-size: 0.78rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #e8f4fd;
+            color: #0366d6;
+            margin-top: 3px;
+            white-space: nowrap;
+        }
+
+        .history-email-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-email-title {
+            font-size: 0.93rem;
+            font-weight: 600;
+            color: #1a1a2e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-email-title a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .history-email-title a:hover {
+            color: #007bff;
+        }
+
+        .history-email-summary {
+            font-size: 0.82rem;
+            color: #6c757d;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-email-date {
+            flex-shrink: 0;
+            font-size: 0.78rem;
+            color: #adb5bd;
+            white-space: nowrap;
+            margin-top: 3px;
         }
 
         .show-more-btn {
@@ -344,12 +516,800 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        /* New Side Column Layout */
+        .columns-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .column-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .column-card h2 {
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .column-card h2 span {
+            margin-right: 10px;
+        }
+
+        .column-content-item {
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .column-content-item:last-child {
+            border-bottom: none;
+        }
+
+        .column-content-item a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .column-content-item .meta {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .bottom-stats {
+            margin-top: 50px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f1f3f5;
+            border-radius: 12px;
+        }
+
+        /* ===== AI 全网搜索面板 ===== */
+        .ai-search-panel {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+            color: white;
+        }
+
+        .ai-search-panel h2 {
+            margin: 0 0 6px;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        .ai-search-panel .ai-desc {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 18px;
+        }
+
+        .ai-cat-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .ai-cat-btn {
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .ai-cat-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .ai-cat-btn.active {
+            background: #00b4d8;
+            border-color: #00b4d8;
+            color: white;
+            font-weight: 600;
+        }
+
+        .ai-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .ai-input-row input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .ai-input-row input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .ai-input-row input[type="text"]:focus {
+            border-color: #00b4d8;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .ai-url-toggle {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.45);
+            cursor: pointer;
+            margin-top: 8px;
+            display: inline-block;
+            text-decoration: underline dotted;
+        }
+
+        .ai-url-row {
+            display: none;
+            margin-top: 8px;
+        }
+
+        .ai-url-row.show {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-url-row input[type="url"] {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.07);
+            color: white;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .ai-url-row input[type="url"]::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-submit-btn {
+            padding: 10px 22px;
+            background: #00b4d8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .ai-submit-btn:hover {
+            background: #0096c7;
+        }
+
+        .ai-submit-btn:disabled {
+            background: #5a6a72;
+            cursor: not-allowed;
+        }
+
+        .ai-result-box {
+            margin-top: 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            display: none;
+        }
+
+        .ai-result-box.show {
+            display: block;
+        }
+
+        .ai-status-bar {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #00b4d8;
+            border-radius: 50%;
+            animation: ai-spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes ai-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ai-result-content {
+            white-space: pre-wrap;
+            font-size: 0.84rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.75;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .ai-error-msg {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <h1>Tech News Rank Agent</h1>
+
+        <!-- ===== AI 全网搜索面板 ===== -->
+        <div class="ai-search-panel">
+            <h2>🤖 AI 全网搜索</h2>
+            <div class="ai-desc">基于智能体抓取并提炼指定网站内容，支持科技 / AI / 经济 / 产品 / 军事等多领域</div>
+
+            <!-- 分类选择 -->
+            <div class="ai-cat-bar" id="aiCatBar">
+                <button class="ai-cat-btn active" data-cat="all">全部</button>
+                <button class="ai-cat-btn" data-cat="tech">科技</button>
+                <button class="ai-cat-btn" data-cat="ai">🤖 AI/大模型</button>
+                <button class="ai-cat-btn" data-cat="economy">经济</button>
+                <button class="ai-cat-btn" data-cat="product">产品</button>
+                <button class="ai-cat-btn" data-cat="military">军事</button>
+                <button class="ai-cat-btn" data-cat="design">设计</button>
+                <button class="ai-cat-btn" data-cat="science">科学</button>
+            </div>
+
+            <!-- 关键词输入行 -->
+            <div class="ai-input-row">
+                <input type="text" id="aiQuery" placeholder="输入关键词，如：AI芯片 / 联储利率 / 红点奖 …" maxlength="200">
+                <button class="ai-submit-btn" id="aiSubmitBtn" onclick="aiSearchSubmit()">搜索</button>
+            </div>
+
+            <!-- 可展开的自定义 URL -->
+            <span class="ai-url-toggle"
+                onclick="document.getElementById('aiUrlRow').classList.toggle('show'); this.textContent = this.textContent.includes('指定') ? '▲ 收起自定义网址' : '▼ 指定目标网址（可选）'">
+                ▼ 指定目标网址（可选）
+            </span>
+            <div class="ai-url-row" id="aiUrlRow">
+                <input type="url" id="aiTargetUrl" placeholder="https://36kr.com  （留空则使用分类默认入口）" maxlength="500">
+            </div>
+
+            <!-- 结果区 -->
+            <div class="ai-result-box" id="aiResultBox">
+                <div class="ai-status-bar" id="aiStatusBar"></div>
+                <pre class="ai-result-content" id="aiResultContent"></pre>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                // 分类切换
+                document.getElementById('aiCatBar').addEventListener('click', function (e) {
+                    const btn = e.target.closest('.ai-cat-btn');
+                    if (!btn) return;
+                    document.querySelectorAll('.ai-cat-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+
+                let _pollTimer = null;
+
+                window.aiSearchSubmit = function () {
+                    const query = document.getElementById('aiQuery').value.trim();
+                    if (!query) { document.getElementById('aiQuery').focus(); return; }
+
+                    const category = document.querySelector('.ai-cat-btn.active')?.dataset.cat || 'all';
+                    const url = document.getElementById('aiTargetUrl').value.trim();
+
+                    const submitBtn = document.getElementById('aiSubmitBtn');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '搜索中…';
+
+                    const resultBox = document.getElementById('aiResultBox');
+                    const statusBar = document.getElementById('aiStatusBar');
+                    const resultContent = document.getElementById('aiResultContent');
+
+                    resultBox.classList.add('show');
+                    statusBar.innerHTML = '<span class="ai-spinner"></span> 正在提交任务…';
+                    resultContent.textContent = '';
+
+                    clearInterval(_pollTimer);
+
+                    fetch('/ai-search/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                        body: JSON.stringify({ query, url, category })
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.error) {
+                                statusBar.innerHTML = '<span class="ai-error-msg">❌ ' + data.error + '</span>';
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = '搜索';
+                                return;
+                            }
+                            statusBar.innerHTML = '<span class="ai-spinner"></span> 抓取中（任务 #' + data.task_id + '）…';
+                            _pollTimer = setInterval(() => pollStatus(data.task_id), 2000);
+                        })
+                        .catch(err => {
+                            statusBar.innerHTML = '<span class="ai-error-msg">❌ 网络错误：' + err + '</span>';
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '搜索';
+                        });
+                };
+
+                function pollStatus(taskId) {
+                    fetch('/ai-search/status/' + taskId + '/')
+                        .then(r => r.json())
+                        .then(data => {
+                            const statusBar = document.getElementById('aiStatusBar');
+                            const resultContent = document.getElementById('aiResultContent');
+                            const submitBtn = document.getElementById('aiSubmitBtn');
+
+                            if (data.status === 'done') {
+                                clearInterval(_pollTimer);
+                                statusBar.innerHTML = '✅ 完成 &nbsp;·&nbsp; 关键词：<b>' + escHtml(data.query) + '</b>';
+                                resultContent.textContent = data.result_md || '（未抓到相关内容）';
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = '搜索';
+                            } else if (data.status === 'error') {
+                                clearInterval(_pollTimer);
+                                statusBar.innerHTML = '<span class="ai-error-msg">❌ 抓取失败：' + escHtml(data.error_msg) + '</span>';
+                                resultContent.textContent = '';
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = '搜索';
+                            } else {
+                                statusBar.innerHTML = '<span class="ai-spinner"></span> ' +
+                                    (data.status === 'running' ? '抓取中' : '等待中') +
+                                    '（任务 #' + taskId + '）…';
+                            }
+                        })
+                        .catch(() => { });
+                }
+
+                function getCookie(name) {
+                    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                    return m ? m.pop() : '';
+                }
+
+                function escHtml(s) {
+                    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                }
+            })();
+        </script>
+
+        <!-- Featured News Carousel -->
+        {% if featured_news %}
+        <div class="featured-carousel">
+            <h2>🎯 精选资讯</h2>
+            <div class="featured-mode">当前编排：{{ featured_mode_label }}</div>
+            <div class="carousel-container">
+                {% for news in featured_news %}
+                <div class="carousel-item">
+                    <a href="{{ news.url }}" target="_blank">
+                        <img src="{{ news.image_url }}" alt="{{ news.title }}"
+                            onerror="this.src='https://via.placeholder.com/300x180?text=No+Image'">
+                        <div class="item-content">
+                            <div class="item-title">{{ news.title }}</div>
+                            <div class="item-meta">
+                                <span class="category-tag">{{ news.featured_bucket|default:news.category }}</span>
+                                权重: {{ news.rate|floatformat:2 }}
+                            </div>
+                            <div class="item-summary">{{ news.featured_summary }}</div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if featured_history %}
+        <div class="history-section">
+            <h2>🗂️ 历史精选</h2>
+            <!-- 分页标签栏（由JS生成） -->
+            <div class="history-tab-bar" id="historyTabBar"></div>
+            <!-- 分页内容（由JS生成） -->
+            <div id="historyPagesContainer"></div>
+        </div>
+        <!-- 原始数据（隐藏，供JS读取） -->
+        <div id="historyRawData" style="display:none">
+            {% for group in featured_history %}
+            {% for news in group.items %}
+            <div class="h-raw" data-url="{{ news.url|escapejs }}" data-title="{{ news.title|escapejs }}"
+                data-category="{{ news.category|escapejs }}" data-rate="{{ news.rate }}"
+                data-time="{{ news.publish_time|escapejs }}" data-summary="{{ news.featured_summary|escapejs }}"></div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        <script>
+            (function () {
+                const PAGE_SIZE = 8;
+                const rawItems = Array.from(document.querySelectorAll('#historyRawData .h-raw'));
+                if (!rawItems.length) return;
+
+                const items = rawItems.map(el => ({
+                    url: el.dataset.url,
+                    title: el.dataset.title,
+                    category: el.dataset.category,
+                    rate: parseFloat(el.dataset.rate) || 0,
+                    time: el.dataset.time,
+                    summary: el.dataset.summary
+                }));
+
+                const totalPages = Math.ceil(items.length / PAGE_SIZE);
+                const tabBar = document.getElementById('historyTabBar');
+                const container = document.getElementById('historyPagesContainer');
+
+                function rateClass(r) {
+                    if (r >= 1.0) return 'rate-high';
+                    if (r >= 0.6) return 'rate-mid';
+                    return 'rate-low';
+                }
+
+                function buildPage(pageIndex) {
+                    const start = pageIndex * PAGE_SIZE;
+                    const slice = items.slice(start, start + PAGE_SIZE);
+                    const page = document.createElement('div');
+                    page.className = 'history-page';
+                    page.id = 'historyPage' + pageIndex;
+
+                    const ul = document.createElement('ul');
+                    ul.className = 'history-email-list';
+
+                    slice.forEach(it => {
+                        const li = document.createElement('li');
+                        li.className = 'history-email-item';
+                        const rc = rateClass(it.rate);
+                        li.innerHTML = `
+                        <span class="history-email-rate ${rc}">${it.rate.toFixed(2)}</span>
+                        <span class="history-email-cat">${it.category}</span>
+                        <div class="history-email-body">
+                            <div class="history-email-title">
+                                <a href="${it.url}" target="_blank">${it.title}</a>
+                            </div>
+                            <div class="history-email-summary">${it.summary || ''}</div>
+                        </div>
+                        <span class="history-email-date">${it.time}</span>
+                    `;
+                        ul.appendChild(li);
+                    });
+
+                    page.appendChild(ul);
+                    container.appendChild(page);
+                }
+
+                function switchPage(index) {
+                    document.querySelectorAll('.history-tab-btn').forEach((btn, i) => {
+                        btn.classList.toggle('active', i === index);
+                    });
+                    document.querySelectorAll('.history-page').forEach((pg, i) => {
+                        pg.classList.toggle('active', i === index);
+                    });
+                }
+
+                for (let p = 0; p < totalPages; p++) {
+                    buildPage(p);
+
+                    const btn = document.createElement('button');
+                    btn.className = 'history-tab-btn' + (p === 0 ? ' active' : '');
+                    btn.textContent = '第' + (p + 1) + '页';
+                    const idx = p;
+                    btn.addEventListener('click', () => switchPage(idx));
+                    tabBar.appendChild(btn);
+                }
+
+                // 默认显示第1页
+                if (container.firstChild) container.firstChild.classList.add('active');
+            })();
+        </script>
+        {% endif %}
+
+        <!-- Word Cloud -->
+        <div class="word-cloud">
+            <h3>热词云图</h3>
+            {% for word, count in word_cloud %}
+            <span style="font-size: {{ count|add:10 }}px; opacity: {{ count|add:50 }}%;">{{ word }}</span>
+            {% endfor %}
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="search-box">
+                <form method="get" action="/">
+                    <input type="text" name="q" placeholder="搜索标题或关键词..." value="{{ query }}">
+                    <button type="submit">搜索</button>
+                </form>
+            </div>
+            <div class="category-filter">
+                <a href="/" class="{% if not current_category %}active{% endif %}">全部</a>
+                {% for cat in categories %}
+                <a href="/?category={{ cat }}" class="{% if current_category == cat %}active{% endif %}">{{ cat }}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Weekly Specials & Fun Math -->
+        <div class="columns-container">
+            <!-- 原创专栏 -->
+            <div class="column-card">
+                <h2><span>✍️</span> 原创专栏</h2>
+                <div class="column-content">
+                    {% for article in original_articles %}
+                    <div class="column-content-item">
+                        <a href="{% if article.url %}{{ article.url }}{% else %}javascript:void(0){% endif %}" {% if article.url %}target="_blank"{% endif %}>
+                            {{ article.title }}
+                        </a>
+                        {% if article.summary %}
+                        <div style="font-size: 0.85rem; color: #555; margin-top: 4px; line-height: 1.5;">{{ article.summary }}</div>
+                        {% endif %}
+                        <div class="meta">
+                            <span style="color: {% if article.source_type == 'original' %}#28a745{% elif article.source_type == 'wechat' %}#07c160{% else %}#6c757d{% endif %}; font-weight: bold;">
+                                [{% if article.source_type == 'original' %}原创{% elif article.source_type == 'wechat' %}微信{% else %}转载{% endif %}]
+                            </span>
+                            {{ article.author }} · {{ article.created_at|date:"Y-m-d" }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p style="color: #ccc; font-size: 0.85rem;">暂无原创文章，敬请期待</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 每周人物 -->
+            <div class="column-card">
+                <h2><span>👤</span> 每周人物</h2>
+                <div class="column-content">
+                    {% for news in people_news %}
+                    <div class="column-content-item">
+                        <a href="{{ news.url }}" target="_blank">{{ news.title }}</a>
+                        <div class="meta">发布时间: {{ news.publish_time }} | 权重: {{ news.rate|floatformat:2 }}</div>
+                    </div>
+                    {% empty %}
+                    <p style="color: #ccc; font-size: 0.85rem;">暂无人物访谈</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 每周热点产品 -->
+            <div class="column-card">
+                <h2><span>🚀</span> 每周热点产品</h2>
+                <div class="column-content">
+                    {% for news in product_news %}
+                    <div class="column-content-item">
+                        <a href="{{ news.url }}" target="_blank">{{ news.title }}</a>
+                        <div class="meta">发布时间: {{ news.publish_time }} | 权重: {{ news.rate|floatformat:2 }}</div>
+                    </div>
+                    {% empty %}
+                    <p style="color: #ccc; font-size: 0.85rem;">暂无热门产品</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 科学与数学 -->
+            <div class="column-card">
+                <h2><span>🧪</span> 科学与数学</h2>
+                <div class="column-content">
+                    {% for news in science_math_news %}
+                    <div class="column-content-item">
+                        <a href="{{ news.url }}" target="_blank">{{ news.title }}</a>
+                        <div class="meta">
+                            {% if news.category == '趣说数学' %}
+                            <span style="color: #6f42c1; font-weight: bold;">[趣谈]</span>
+                            {% endif %}
+                            {{ news.publish_time }} | {{ news.author }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p style="color: #ccc; font-size: 0.85rem;">暂无科学动态</p>
+                    {% endfor %}
+                    <p style="color: #999; font-size: 0.8rem; padding: 10px; border-top: 1px dashed #eee;">
+                        收录趣味数字、数学之美及全球科学发现。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tech Trend Analysis (ECharts Update) -->
+        {% if trend_data %}
+        <style>
+            #trend-chart {
+                width: 100%;
+                height: 450px;
+            }
+        </style>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+
+        <div
+            style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #2c3e50; font-size: 1.25rem; display: flex; align-items: center;">
+                    <span
+                        style="background: #e74c3c; width: 4px; height: 24px; border-radius: 2px; margin-right: 12px;"></span>
+                    🔥 2024-2026 全球科技&经济趋势追踪 (连续性分析)
+                </h3>
+            </div>
+
+            <div id="trend-chart"></div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var chartDom = document.getElementById('trend-chart');
+                    var myChart = echarts.init(chartDom);
+
+                    // 使用 Django 模板变量注入数据
+                    var rawData = {{ trend_data_json| safe
+                }};
+
+                var option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: function (params) {
+                            var html = '<div style="font-size:12px; font-weight:bold; margin-bottom:5px;">' + params[0].axisValue + '</div>';
+                            params.forEach(function (item) {
+                                // 仅显示有数据的点
+                                if (item.value > 0) {
+                                    var meta = item.data.meta;
+                                    html += '<div style="margin-bottom: 3px;">' +
+                                        '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:' + item.color + ';"></span>' +
+                                        item.seriesName + ': <b>' + item.value + '</b>' +
+                                        '<div style="color: #ccc; padding-left: 15px; font-size: 10px;">关联: ' + meta.events + '</div>' +
+                                        '</div>';
+                                }
+                            });
+                            return html;
+                        }
+                    },
+                    legend: {
+                        data: rawData.series.map(s => s.name),
+                        bottom: 0,
+                        type: 'scroll' /* 支持图例滚动 */
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '10%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: rawData.months
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: '热度指数 (0-100)',
+                        min: 0,
+                        max: 100
+                    },
+                    series: rawData.series
+                };
+
+                option && myChart.setOption(option);
+
+                // 响应式调整
+                window.addEventListener('resize', function () {
+                    myChart.resize();
+                });
+                });
+            </script>
+        </div>
+        {% endif %}
+
+        <!-- 境内可访问新闻 -->
+        <h2 style="margin: 30px 0 15px 0; color: #333;">
+            🌐 境内可访问资讯
+            <span style="font-size: 0.9rem; color: #666; font-weight: normal;">
+                （{% if show_all %}显示全部{% else %}显示前30条{% endif %}）
+            </span>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>权重</th>
+                    <th>分类</th>
+                    <th>标题</th>
+                    <th>关键词</th>
+                    <th>发布时间</th>
+                    <th>来源</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for news in accessible_news %}
+                <tr {% if news.id in today_news_ids %}style="background: #f0f8ff;" {% endif %}>
+                    <td class="{% if news.rate > 0.8 %}rank-high{% else %}rank-low{% endif %}">
+                        {{ news.rate|floatformat:2 }}
+                    </td>
+                    <td><span class="category-tag">{{ news.category }}</span></td>
+                    <td><a href="{{ news.url }}" target="_blank">{{ news.title }}</a></td>
+                    <td>{{ news.key_word }}</td>
+                    <td>{{ news.publish_time }}</td>
+                    <td>{{ news.author }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px; color: #999;">暂无可访问的新闻</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Show More Button -->
+        {% if not show_all and accessible_news|length >= 30 %}
+        <div class="show-more-btn">
+            <a
+                href="?show_all=true{% if current_category %}&category={{ current_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">
+                查看更多文章 →
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Blocked News Segment -->
+        {% if blocked_news %}
+        <h2 style="margin: 30px 0 15px 0; color: #e74c3c;">🚫 境外资讯（中国大陆需要特殊网络访问）</h2>
+        <div
+            style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <strong>⚠️ 提示：</strong>以下资讯来自境外网站，在中国大陆可能无法直接访问，仅供参考。
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>权重</th>
+                    <th>分类</th>
+                    <th>标题</th>
+                    <th>关键词</th>
+                    <th>发布时间</th>
+                    <th>来源</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for news in blocked_news %}
+                <tr style="background: #f8f9fa;">
+                    <td class="{% if news.rate > 0.8 %}rank-high{% else %}rank-low{% endif %}">
+                        {{ news.rate|floatformat:2 }}
+                    </td>
+                    <td><span class="category-tag" style="background: #ffc107; color: #856404;">{{ news.category
+                            }}</span></td>
+                    <td><a href="{{ news.url }}" target="_blank" style="color: #6c757d;">{{ news.title }}</a></td>
+                    <td>{{ news.key_word }}</td>
+                    <td>{{ news.publish_time }}</td>
+                    <td>{{ news.author }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
 
         <!-- Dashboard -->
         <div class="dashboard">
@@ -381,133 +1341,17 @@
             {% endfor %}
         </div>
 
-        <!-- Featured News Carousel -->
-        {% if featured_news %}
-        <div class="featured-carousel">
-            <h2>🎯 精选资讯</h2>
-            <div class="carousel-container">
-                {% for news in featured_news %}
-                <div class="carousel-item">
-                    <a href="{{ news.url }}" target="_blank">
-                        <img src="{{ news.image_url }}" alt="{{ news.title }}" onerror="this.src='https://via.placeholder.com/300x180?text=No+Image'">
-                        <div class="item-content">
-                            <div class="item-title">{{ news.title }}</div>
-                            <div class="item-meta">
-                                <span class="category-tag">{{ news.category }}</span>
-                                权重: {{ news.rate|floatformat:2 }}
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                {% endfor %}
+        <!-- Bottom Stats Section -->
+        <div class="bottom-stats">
+            <div class="stat-card">
+                <h3>总访问人次 (UV)</h3>
+                <p>{{ total_visitors }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>总浏览量 (PV)</h3>
+                <p>{{ total_views }}</p>
             </div>
         </div>
-        {% endif %}
-
-        <!-- Word Cloud -->
-        <div class="word-cloud">
-            <h3>热词云图</h3>
-            {% for word, count in word_cloud %}
-            <span style="font-size: {{ count|add:10 }}px; opacity: {{ count|add:50 }}%;">{{ word }}</span>
-            {% endfor %}
-        </div>
-
-        <!-- Controls -->
-        <div class="controls">
-            <div class="search-box">
-                <form method="get" action="/">
-                    <input type="text" name="q" placeholder="搜索标题或关键词..." value="{{ query }}">
-                    <button type="submit">搜索</button>
-                </form>
-            </div>
-            <div class="category-filter">
-                <a href="/" class="{% if not current_category %}active{% endif %}">全部</a>
-                {% for cat in categories %}
-                <a href="/?category={{ cat }}" class="{% if current_category == cat %}active{% endif %}">{{ cat }}</a>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- 境内可访问新闻 -->
-        <h2 style="margin: 30px 0 15px 0; color: #333;">
-            🌐 境内可访问资讯
-            <span style="font-size: 0.9rem; color: #666; font-weight: normal;">
-                （{% if show_all %}显示全部{% else %}显示前30条{% endif %}）
-            </span>
-        </h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>权重</th>
-                    <th>分类</th>
-                    <th>标题</th>
-                    <th>关键词</th>
-                    <th>发布时间</th>
-                    <th>来源</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for news in accessible_news %}
-                <tr {% if forloop.counter <= stats.today_count %}style="background: #f0f8ff;"{% endif %}>
-                    <td class="{% if news.rate > 0.8 %}rank-high{% else %}rank-low{% endif %}">
-                        {{ news.rate|floatformat:2 }}
-                    </td>
-                    <td><span class="category-tag">{{ news.category }}</span></td>
-                    <td><a href="{{ news.url }}" target="_blank">{{ news.title }}</a></td>
-                    <td>{{ news.key_word }}</td>
-                    <td>{{ news.publish_time }}</td>
-                    <td>{{ news.author }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 20px; color: #999;">暂无可访问的新闻</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Show More Button -->
-        {% if not show_all and accessible_news|length >= 30 %}
-        <div class="show-more-btn">
-            <a href="?show_all=true{% if current_category %}&category={{ current_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">
-                查看更多文章 →
-            </a>
-        </div>
-        {% endif %}
-
-        <!-- 境外资讯 (中国大陆无法直接访问) -->
-        {% if blocked_news %}
-        <h2 style="margin: 30px 0 15px 0; color: #e74c3c;">🚫 境外资讯（中国大陆需要特殊网络访问）</h2>
-        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-            <strong>⚠️ 提示：</strong>以下资讯来自境外网站，在中国大陆可能无法直接访问，仅供参考。
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>权重</th>
-                    <th>分类</th>
-                    <th>标题</th>
-                    <th>关键词</th>
-                    <th>发布时间</th>
-                    <th>来源</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for news in blocked_news %}
-                <tr style="background: #f8f9fa;">
-                    <td class="{% if news.rate > 0.8 %}rank-high{% else %}rank-low{% endif %}">
-                        {{ news.rate|floatformat:2 }}
-                    </td>
-                    <td><span class="category-tag" style="background: #ffc107; color: #856404;">{{ news.category }}</span></td>
-                    <td><a href="{{ news.url }}" target="_blank" style="color: #6c757d;">{{ news.title }}</a></td>
-                    <td>{{ news.key_word }}</td>
-                    <td>{{ news.publish_time }}</td>
-                    <td>{{ news.author }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
 
         <!-- Comment Section -->
         <div class="comment-section">

@@ -222,168 +222,227 @@ class NewsScraper:
         title_lower = title.lower()
 
         # 定义分类规则
-        categories = {
-            "人工智能": [
-                "ai",
-                "intelligence",
-                "learning",
-                "neural",
-                "gpt",
-                "openai",
-                "transformer",
-                "chatgpt",
-                "gemini",
-                "claude",
-                "agi",
-                "deepmind",
-            ],
-            "机器人": ["robot", "机器人", "humanoid", "人形机器人", "工业机器人", "服务机器人", "robotaxi"],
-            "智能硬件": [
-                "smart hardware",
+        categories = [
+            (
+                "人工智能",
+                [
+                    "ai",
+                    "intelligence",
+                    "learning",
+                    "neural",
+                    "gpt",
+                    "openai",
+                    "transformer",
+                    "chatgpt",
+                    "gemini",
+                    "claude",
+                    "agi",
+                    "deepmind",
+                ],
+            ),
+            (
+                "机器人",
+                ["robot", "机器人", "humanoid", "人形机器人", "工业机器人", "服务机器人", "robotaxi"],
+            ),
+            (
                 "智能硬件",
-                "iot",
-                "物联网",
-                "wearable",
-                "可穿戴",
-                "smartwatch",
-                "智能手表",
-                "智能家居",
-                "smart home",
-            ],
-            "汽车与自动驾驶": [
-                "ev",
-                "electric vehicle",
-                "电动汽车",
-                "新能源汽车",
-                "autonomous",
-                "self-driving",
-                "自动驾驶",
-                "无人驾驶",
-                "vehicle",
-                "汽车",
-                "automotive",
-                "tesla",
-            ],
-            "VR/AR/XR": [
-                "vr",
-                "ar",
-                "xr",
-                "virtual reality",
-                "augmented reality",
-                "虚拟现实",
-                "增强现实",
-                "混合现实",
-                "vision pro",
-                "quest",
-                "metaverse",
-                "元宇宙",
-                "headset",
-            ],
-            "军工与航天": [
-                "missile",
-                "warship",
-                "drone",
-                "无人机",
-                "darpa",
-                "defense",
-                "military",
+                [
+                    "smart hardware",
+                    "智能硬件",
+                    "iot",
+                    "物联网",
+                    "wearable",
+                    "可穿戴",
+                    "smartwatch",
+                    "智能手表",
+                    "智能家居",
+                    "smart home",
+                ],
+            ),
+            (
+                "汽车与自动驾驶",
+                [
+                    "ev",
+                    "electric vehicle",
+                    "电动汽车",
+                    "新能源汽车",
+                    "autonomous",
+                    "self-driving",
+                    "自动驾驶",
+                    "无人驾驶",
+                    "vehicle",
+                    "汽车",
+                    "automotive",
+                    "tesla",
+                ],
+            ),
+            (
+                "VR/AR/XR",
+                [
+                    "vr",
+                    "ar",
+                    "xr",
+                    "virtual reality",
+                    "augmented reality",
+                    "虚拟现实",
+                    "增强现实",
+                    "混合现实",
+                    "vision pro",
+                    "quest",
+                    "metaverse",
+                    "元宇宙",
+                    "headset",
+                ],
+            ),
+            (
+                "航空航天",
+                [
+                    "satellite",
+                    "卫星",
+                    "space",
+                    "航天",
+                    "aerospace",
+                    "nasa",
+                    "spacex",
+                    "rocket",
+                    "火箭",
+                    "spacecraft",
+                    "space station",
+                    "orbit",
+                    "轨道",
+                    "lunar",
+                    "moon mission",
+                ],
+            ),
+            (
                 "军事",
-                "国防",
-                "weapon",
-                "武器",
-                "uav",
-                "fighter",
-                "战斗机",
-                "radar",
-                "雷达",
-                "satellite",
-                "卫星",
-                "space",
-                "航天",
-                "aerospace",
-                "nasa",
-            ],
-            "芯片与半导体": [
-                "chip",
-                "芯片",
-                "semiconductor",
-                "半导体",
-                "processor",
-                "处理器",
-                "gpu",
-                "nvidia",
-                "tsmc",
-                "ai chip",
-                "risc",
-            ],
-            "新能源": [
-                "battery",
-                "电池",
-                "energy storage",
-                "储能",
-                "solar",
-                "太阳能",
-                "renewable energy",
-                "clean energy",
-                "清洁能源",
+                [
+                    "missile",
+                    "warship",
+                    "drone",
+                    "无人机",
+                    "darpa",
+                    "defense",
+                    "military",
+                    "军事",
+                    "国防",
+                    "weapon",
+                    "武器",
+                    "uav",
+                    "fighter",
+                    "战斗机",
+                    "radar",
+                    "雷达",
+                    "navy",
+                    "海军",
+                    "army",
+                    "陆军",
+                    "air force",
+                    "空军",
+                ],
+            ),
+            (
+                "芯片与半导体",
+                [
+                    "chip",
+                    "芯片",
+                    "semiconductor",
+                    "半导体",
+                    "processor",
+                    "处理器",
+                    "gpu",
+                    "nvidia",
+                    "tsmc",
+                    "ai chip",
+                    "risc",
+                ],
+            ),
+            (
                 "新能源",
-            ],
-            "产品发布": [
-                "product",
-                "launch",
-                "release",
-                "unveil",
-                "announce",
-                "发布",
-                "apple",
-                "google",
-                "amazon",
-                "device",
-                "smart",
-            ],
-            "科学与数学": [
-                "math",
-                "mathematics",
-                "physics",
-                "quantum",
-                "science",
-                "theory",
-                "equation",
-                "biology",
-            ],
-            "人物": [
-                "who is",
-                "biography",
-                "profile",
-                "founder",
-                "ceo",
-                "visionary",
-                "pioneer",
-                "interview",
-            ],
-            "趣说数学": [
-                "fun math",
-                "math puzzle",
-                "recreational math",
-                "number theory",
-                "geometry fun",
-                "interesting number",
-                "趣味数字",
-                "数学之美",
-            ],
-            "社会": [
-                "economic",
-                "market",
-                "work",
-                "policy",
-                "social",
-                "climate",
-                "sustainability",
-            ],
-            "科技": ["technology", "tech", "innovation", "science", "network"],  # 默认分类
-        }
+                [
+                    "battery",
+                    "电池",
+                    "energy storage",
+                    "储能",
+                    "solar",
+                    "太阳能",
+                    "renewable energy",
+                    "clean energy",
+                    "清洁能源",
+                    "新能源",
+                ],
+            ),
+            (
+                "产品发布",
+                [
+                    "product",
+                    "launch",
+                    "release",
+                    "unveil",
+                    "announce",
+                    "发布",
+                    "apple",
+                    "google",
+                    "amazon",
+                    "device",
+                    "smart",
+                ],
+            ),
+            (
+                "科学与数学",
+                [
+                    "math",
+                    "mathematics",
+                    "physics",
+                    "quantum",
+                    "science",
+                    "theory",
+                    "equation",
+                    "biology",
+                ],
+            ),
+            (
+                "人物",
+                [
+                    "who is",
+                    "biography",
+                    "profile",
+                    "founder",
+                    "ceo",
+                    "visionary",
+                    "pioneer",
+                    "interview",
+                ],
+            ),
+            (
+                "趣说数学",
+                [
+                    "fun math",
+                    "math puzzle",
+                    "recreational math",
+                    "number theory",
+                    "geometry fun",
+                    "interesting number",
+                    "趣味数字",
+                    "数学之美",
+                ],
+            ),
+            (
+                "社会",
+                [
+                    "economic",
+                    "market",
+                    "work",
+                    "policy",
+                    "social",
+                    "climate",
+                    "sustainability",
+                ],
+            ),
+            ("科技", ["technology", "tech", "innovation", "science", "network"]),  # 默认分类
+        ]
 
-        for cat, words in categories.items():
+        for cat, words in categories:
             if any(word in title_lower for word in words):
                 return cat
         return "科技"
@@ -846,12 +905,41 @@ class TechCrunchScraper(NewsScraper):
             return []
 
 
+class ThirtySixKrScraper(NewsScraper):
+    """36Kr 爬虫包装器"""
+
+    def __init__(self):
+        super().__init__("36Kr")
+        self.scraper = scrapers.ThirtySixKrScraper()
+
+    def scrape(self, limit=10):
+        try:
+            articles = self.scraper.scrape_articles(limit=limit)
+            for art in articles:
+                weight = self.calculate_weight(art["title"])
+                self.articles.append(
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
+                )
+            return self.filter_and_store("36Kr")
+        except Exception as e:
+            print(f"36Kr 爬取失败: {e}")
+            return []
+
+
 class TechNewsAggregator:
     """科技新闻聚合器"""
 
     def __init__(self):
         self.scrapers = [
             MitScraper(),
+            ThirtySixKrScraper(),
             GitHubTrendingScraper(),
             AITopicsScraper(),
             DevToScraper(),

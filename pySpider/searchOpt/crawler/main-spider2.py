@@ -29,6 +29,8 @@ import json
 import re
 import difflib
 from sklearn.feature_extraction.text import TfidfVectorizer
+from news_content_utils import build_article_content, needs_content_enrichment
+from content_enricher import get_enriched_content
 
 # 读取配置
 with open(
@@ -40,6 +42,13 @@ BLOCKED_DOMAINS = cfg.get("BLOCKED_DOMAINS", [])
 CUSTOM_SITES = cfg.get("CUSTOM_SITES", [])
 # 是否在必要时请求详情页面以提取发布时间（默认 False，避免大量额外请求）
 FETCH_DETAILS_FOR_DATE = cfg.get("FETCH_DETAILS_FOR_DATE", False)
+# 写入 DB 时是否调用 content_enricher 补充空白摘要（开启会略微增加每篇文章抓取时间）
+ENRICH_CONTENT_ON_WRITE = cfg.get("ENRICH_CONTENT_ON_WRITE", True)
+# 军事信号降权：避免军事类内容在科技频道权重虚高
+MILITARY_SIGNAL_KEYWORDS = cfg.get("MILITARY_SIGNAL_KEYWORDS", {})
+MILITARY_SIGNAL_THRESHOLD = cfg.get("MILITARY_SIGNAL_THRESHOLD", 1.2)
+MILITARY_DAMPENING_FACTOR = cfg.get("MILITARY_DAMPENING_FACTOR", 0.4)
+MAX_WEIGHT_CAP = cfg.get("MAX_WEIGHT_CAP", 5.0)
 
 # 全局配置
 OUTPUT_FILE = "tech_news_summary.txt"
@@ -214,176 +223,243 @@ class NewsScraper:
         time.sleep(random.uniform(1, 3))
 
     def calculate_weight(self, title):
-        """计算新闻权重"""
-        return self.calculate_keyword_weights([title], KEYWORDS_RANK_MAP)
+        """计算新闻权重（含军事信号降权 + 分数上限）"""
+        raw_score = self.calculate_keyword_weights([title], KEYWORDS_RANK_MAP)
+        # 军事内容在科技爬虫中降权：避免军事新闻权重虚高
+        if MILITARY_SIGNAL_KEYWORDS:
+            mil_score = self.compute_rank_from_map(
+                title, MILITARY_SIGNAL_KEYWORDS, fuzzy=False
+            )
+            if mil_score >= MILITARY_SIGNAL_THRESHOLD:
+                raw_score *= MILITARY_DAMPENING_FACTOR
+        return min(raw_score, MAX_WEIGHT_CAP)
 
     def determine_category(self, title, keywords):
         """根据标题和关键词确定文章分类"""
         title_lower = title.lower()
 
         # 定义分类规则
-        categories = {
-            "人工智能": [
-                "ai",
-                "intelligence",
-                "learning",
-                "neural",
-                "gpt",
-                "openai",
-                "transformer",
-                "chatgpt",
-                "gemini",
-                "claude",
-                "agi",
-                "deepmind",
-            ],
-            "机器人": ["robot", "机器人", "humanoid", "人形机器人", "工业机器人", "服务机器人", "robotaxi"],
-            "智能硬件": [
-                "smart hardware",
+        categories = [
+            (
+                "人工智能",
+                [
+                    "ai",
+                    "intelligence",
+                    "learning",
+                    "neural",
+                    "gpt",
+                    "openai",
+                    "transformer",
+                    "chatgpt",
+                    "gemini",
+                    "claude",
+                    "agi",
+                    "deepmind",
+                ],
+            ),
+            (
+                "机器人",
+                ["robot", "机器人", "humanoid", "人形机器人", "工业机器人", "服务机器人", "robotaxi"],
+            ),
+            (
                 "智能硬件",
-                "iot",
-                "物联网",
-                "wearable",
-                "可穿戴",
-                "smartwatch",
-                "智能手表",
-                "智能家居",
-                "smart home",
-            ],
-            "汽车与自动驾驶": [
-                "ev",
-                "electric vehicle",
-                "电动汽车",
-                "新能源汽车",
-                "autonomous",
-                "self-driving",
-                "自动驾驶",
-                "无人驾驶",
-                "vehicle",
-                "汽车",
-                "automotive",
-                "tesla",
-            ],
-            "VR/AR/XR": [
-                "vr",
-                "ar",
-                "xr",
-                "virtual reality",
-                "augmented reality",
-                "虚拟现实",
-                "增强现实",
-                "混合现实",
-                "vision pro",
-                "quest",
-                "metaverse",
-                "元宇宙",
-                "headset",
-            ],
-            "军工与航天": [
-                "missile",
-                "warship",
-                "drone",
-                "无人机",
-                "darpa",
-                "defense",
-                "military",
+                [
+                    "smart hardware",
+                    "智能硬件",
+                    "iot",
+                    "物联网",
+                    "wearable",
+                    "可穿戴",
+                    "smartwatch",
+                    "智能手表",
+                    "智能家居",
+                    "smart home",
+                ],
+            ),
+            (
+                "汽车与自动驾驶",
+                [
+                    "ev",
+                    "electric vehicle",
+                    "电动汽车",
+                    "新能源汽车",
+                    "autonomous",
+                    "self-driving",
+                    "自动驾驶",
+                    "无人驾驶",
+                    "vehicle",
+                    "汽车",
+                    "automotive",
+                    "tesla",
+                ],
+            ),
+            (
+                "VR/AR/XR",
+                [
+                    "vr",
+                    "ar",
+                    "xr",
+                    "virtual reality",
+                    "augmented reality",
+                    "虚拟现实",
+                    "增强现实",
+                    "混合现实",
+                    "vision pro",
+                    "quest",
+                    "metaverse",
+                    "元宇宙",
+                    "headset",
+                ],
+            ),
+            (
+                "航空航天",
+                [
+                    "satellite",
+                    "卫星",
+                    "space",
+                    "航天",
+                    "aerospace",
+                    "nasa",
+                    "spacex",
+                    "rocket",
+                    "火箭",
+                    "spacecraft",
+                    "space station",
+                    "orbit",
+                    "轨道",
+                    "lunar",
+                    "moon mission",
+                ],
+            ),
+            (
                 "军事",
-                "国防",
-                "weapon",
-                "武器",
-                "uav",
-                "fighter",
-                "战斗机",
-                "radar",
-                "雷达",
-                "satellite",
-                "卫星",
-                "space",
-                "航天",
-                "aerospace",
-                "nasa",
-            ],
-            "芯片与半导体": [
-                "chip",
-                "芯片",
-                "semiconductor",
-                "半导体",
-                "processor",
-                "处理器",
-                "gpu",
-                "nvidia",
-                "tsmc",
-                "ai chip",
-                "risc",
-            ],
-            "新能源": [
-                "battery",
-                "电池",
-                "energy storage",
-                "储能",
-                "solar",
-                "太阳能",
-                "renewable energy",
-                "clean energy",
-                "清洁能源",
+                [
+                    "missile",
+                    "warship",
+                    "drone",
+                    "无人机",
+                    "darpa",
+                    "defense",
+                    "military",
+                    "军事",
+                    "国防",
+                    "weapon",
+                    "武器",
+                    "uav",
+                    "fighter",
+                    "战斗机",
+                    "radar",
+                    "雷达",
+                    "navy",
+                    "海军",
+                    "army",
+                    "陆军",
+                    "air force",
+                    "空军",
+                ],
+            ),
+            (
+                "芯片与半导体",
+                [
+                    "chip",
+                    "芯片",
+                    "semiconductor",
+                    "半导体",
+                    "processor",
+                    "处理器",
+                    "gpu",
+                    "nvidia",
+                    "tsmc",
+                    "ai chip",
+                    "risc",
+                ],
+            ),
+            (
                 "新能源",
-            ],
-            "产品发布": [
-                "product",
-                "launch",
-                "release",
-                "unveil",
-                "announce",
-                "发布",
-                "apple",
-                "google",
-                "amazon",
-                "device",
-                "smart",
-            ],
-            "科学与数学": [
-                "math",
-                "mathematics",
-                "physics",
-                "quantum",
-                "science",
-                "theory",
-                "equation",
-                "biology",
-            ],
-            "人物": [
-                "who is",
-                "biography",
-                "profile",
-                "founder",
-                "ceo",
-                "visionary",
-                "pioneer",
-                "interview",
-            ],
-            "趣说数学": [
-                "fun math",
-                "math puzzle",
-                "recreational math",
-                "number theory",
-                "geometry fun",
-                "interesting number",
-                "趣味数字",
-                "数学之美",
-            ],
-            "社会": [
-                "economic",
-                "market",
-                "work",
-                "policy",
-                "social",
-                "climate",
-                "sustainability",
-            ],
-            "科技": ["technology", "tech", "innovation", "science", "network"],  # 默认分类
-        }
+                [
+                    "battery",
+                    "电池",
+                    "energy storage",
+                    "储能",
+                    "solar",
+                    "太阳能",
+                    "renewable energy",
+                    "clean energy",
+                    "清洁能源",
+                    "新能源",
+                ],
+            ),
+            (
+                "产品发布",
+                [
+                    "product",
+                    "launch",
+                    "release",
+                    "unveil",
+                    "announce",
+                    "发布",
+                    "apple",
+                    "google",
+                    "amazon",
+                    "device",
+                    "smart",
+                ],
+            ),
+            (
+                "科学与数学",
+                [
+                    "math",
+                    "mathematics",
+                    "physics",
+                    "quantum",
+                    "science",
+                    "theory",
+                    "equation",
+                    "biology",
+                ],
+            ),
+            (
+                "人物",
+                [
+                    "who is",
+                    "biography",
+                    "profile",
+                    "founder",
+                    "ceo",
+                    "visionary",
+                    "pioneer",
+                    "interview",
+                ],
+            ),
+            (
+                "趣说数学",
+                [
+                    "fun math",
+                    "math puzzle",
+                    "recreational math",
+                    "number theory",
+                    "geometry fun",
+                    "interesting number",
+                    "趣味数字",
+                    "数学之美",
+                ],
+            ),
+            (
+                "社会",
+                [
+                    "economic",
+                    "market",
+                    "work",
+                    "policy",
+                    "social",
+                    "climate",
+                    "sustainability",
+                ],
+            ),
+            ("科技", ["technology", "tech", "innovation", "science", "network"]),  # 默认分类
+        ]
 
-        for cat, words in categories.items():
+        for cat, words in categories:
             if any(word in title_lower for word in words):
                 return cat
         return "科技"
@@ -399,8 +475,21 @@ class NewsScraper:
             image_url = ""
             publish_time_obj = datetime.now()
             created_at_obj = datetime.now()
+            summary_text = ""
+            tags_text = ""
 
-            if len(article_tuple) == 6:
+            if len(article_tuple) >= 8:
+                (
+                    title,
+                    url,
+                    weight,
+                    image_url,
+                    publish_time_obj,
+                    created_at_obj,
+                    summary_text,
+                    tags_text,
+                ) = article_tuple[:8]
+            elif len(article_tuple) == 6:
                 (
                     title,
                     url,
@@ -457,13 +546,37 @@ class NewsScraper:
                     publish_time_obj = datetime.now()
 
                 publish_time_str = publish_time_obj.strftime("%Y-%m-%d_%H:%M")
+                content = build_article_content(
+                    title=title,
+                    category=category,
+                    source=self.source_name,
+                    summary=summary_text,
+                    tags=tags_text,
+                    keywords=keywords,
+                )
+
+                # 若摘要仍然空白/过短，尝试从文章原页面提取前3句
+                if (
+                    ENRICH_CONTENT_ON_WRITE
+                    and needs_content_enrichment(content)
+                    and url
+                ):
+                    enriched = get_enriched_content(
+                        url,
+                        title=title,
+                        category=category,
+                        timeout=8,
+                    )
+                    if enriched and len(enriched) > 30:
+                        content = enriched
+                        print(f"  ↳ content 已增强 ({len(enriched)}字)")
 
                 newsOne = (
                     weight,
                     title,
                     self.source_name,
                     publish_time_str,
-                    "content",
+                    content,
                     url,
                     keywords,
                     category,
@@ -523,6 +636,20 @@ class NewsScraper:
         # You can replace this logic with your own importance criteria
         text = " ".join(texts)
         return self.compute_rank_from_map(text, keywords, fuzzy=True, threshold=0.7)
+
+    def append_article(self, article, weight):
+        self.articles.append(
+            (
+                article["title"],
+                article["url"],
+                weight,
+                article.get("image_url", ""),
+                article.get("publish_time", datetime.now()),
+                article.get("created_at", datetime.now()),
+                article.get("summary", ""),
+                article.get("tags", ""),
+            )
+        )
         # top_n = 6
         # important_feature_names = filtered_feature_names[:top_n]  # Select top N feature names
         # print("important_feature_names:{0}".format(important_feature_names));
@@ -659,16 +786,7 @@ class HackerNewsScraper(NewsScraper):
                     }
                     # 计算新闻权重
                     weight = self.calculate_weight(article["title"])
-                    self.articles.append(
-                        (
-                            article["title"],
-                            article["url"],
-                            weight,
-                            "",
-                            article["publish_time"],
-                            datetime.now(),
-                        )
-                    )  # HN no images easy way
+                    self.append_article(article, weight)
 
             print(f"成功爬取 {len(self.articles)} 篇 Hacker News 文章")
             return self.filter_and_store("Hacker News")
@@ -690,16 +808,7 @@ class GitHubTrendingScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append(
-                    (
-                        art["title"],
-                        art["url"],
-                        weight,
-                        art.get("image_url", ""),
-                        art.get("publish_time", datetime.now()),
-                        art.get("created_at", datetime.now()),
-                    )
-                )
+                self.append_article(art, weight)
             return self.filter_and_store("GitHub")
         except Exception as e:
             print(f"GitHub 爬取失败: {e}")
@@ -718,16 +827,7 @@ class RedditScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append(
-                    (
-                        art["title"],
-                        art["url"],
-                        weight,
-                        art.get("image_url", ""),
-                        art.get("publish_time", datetime.now()),
-                        art.get("created_at", datetime.now()),
-                    )
-                )
+                self.append_article(art, weight)
             return self.filter_and_store("Reddit")
         except Exception as e:
             print(f"Reddit 爬取失败: {e}")
@@ -746,16 +846,7 @@ class DevToScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append(
-                    (
-                        art["title"],
-                        art["url"],
-                        weight,
-                        art.get("image_url", ""),
-                        art.get("publish_time", datetime.now()),
-                        art.get("created_at", datetime.now()),
-                    )
-                )
+                self.append_article(art, weight)
             return self.filter_and_store("Dev.to")
         except Exception as e:
             print(f"Dev.to 爬取失败: {e}")
@@ -774,16 +865,7 @@ class AITopicsScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append(
-                    (
-                        art["title"],
-                        art["url"],
-                        weight,
-                        art.get("image_url", ""),
-                        art.get("publish_time", datetime.now()),
-                        art.get("created_at", datetime.now()),
-                    )
-                )
+                self.append_article(art, weight)
             return self.filter_and_store("人工智能")
         except Exception as e:
             print(f"AI Topics 爬取失败: {e}")
@@ -802,16 +884,7 @@ class MediumScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append(
-                    (
-                        art["title"],
-                        art["url"],
-                        weight,
-                        art.get("image_url", ""),
-                        art.get("publish_time", datetime.now()),
-                        art.get("created_at", datetime.now()),
-                    )
-                )
+                self.append_article(art, weight)
             return self.filter_and_store("Medium")
         except Exception as e:
             print(f"Medium 爬取失败: {e}")
@@ -830,19 +903,29 @@ class TechCrunchScraper(NewsScraper):
             articles = self.scraper.scrape_articles(limit=limit)
             for art in articles:
                 weight = self.calculate_weight(art["title"])
-                self.articles.append(
-                    (
-                        art["title"],
-                        art["url"],
-                        weight,
-                        art.get("image_url", ""),
-                        art.get("publish_time", datetime.now()),
-                        art.get("created_at", datetime.now()),
-                    )
-                )
+                self.append_article(art, weight)
             return self.filter_and_store("TechCrunch")
         except Exception as e:
             print(f"TechCrunch 爬取失败: {e}")
+            return []
+
+
+class ThirtySixKrScraper(NewsScraper):
+    """36Kr 爬虫包装器"""
+
+    def __init__(self):
+        super().__init__("36Kr")
+        self.scraper = scrapers.ThirtySixKrScraper()
+
+    def scrape(self, limit=10):
+        try:
+            articles = self.scraper.scrape_articles(limit=limit)
+            for art in articles:
+                weight = self.calculate_weight(art["title"])
+                self.append_article(art, weight)
+            return self.filter_and_store("36Kr")
+        except Exception as e:
+            print(f"36Kr 爬取失败: {e}")
             return []
 
 
@@ -852,12 +935,13 @@ class TechNewsAggregator:
     def __init__(self):
         self.scrapers = [
             MitScraper(),
+            ThirtySixKrScraper(),
             GitHubTrendingScraper(),
             AITopicsScraper(),
             DevToScraper(),
             RedditScraper(),
             HackerNewsScraper(),
-            MediumScraper() if "MediumScraper" in globals() else None,
+            # MediumScraper() if 'MediumScraper' in globals() else None,
             TechCrunchScraper() if "TechCrunchScraper" in globals() else None,
         ]
         # 过滤掉未定义的爬虫
@@ -896,7 +980,11 @@ class TechNewsAggregator:
                 publish_time = None
                 created_at = None
 
-                if len(article) == 6:
+                if len(article) >= 8:
+                    title, url, weight, image_url, publish_time, created_at = article[
+                        :6
+                    ]
+                elif len(article) == 6:
                     title, url, weight, image_url, publish_time, created_at = article
                 elif len(article) == 4:
                     title, url, weight, image_url = article
@@ -932,7 +1020,6 @@ def send_news_email(txt_file, recipient):
 
     # 邮件配置
     sender = "840056598@qq.com"
-    password = _pwd
     subject = f"每日科技新闻摘要 - {datetime.now().strftime('%Y-%m-%d')}"
 
     # 创建邮件
@@ -951,10 +1038,6 @@ def send_news_email(txt_file, recipient):
     context.verify_mode = ssl.CERT_NONE
     # 发送邮件
     try:
-        # with smtplib.SMTP_SSL('smtp.qq.com', 465, context) as server:
-        # server.login(sender, _pwd.decode("utf-8"))
-        # print("login email OK\n")
-        # server.sendmail(sender, [receiver,], msg.as_string())
         server = smtplib.SMTP_SSL(
             "smtp.qq.com", 465
         )  # 发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
@@ -994,12 +1077,8 @@ if __name__ == "__main__":
     # 保存到文本文件
     txt_file = aggregator.save_to_txt(articles)
 
-    # 发送邮件（除非 dry-run）
-    if args.dry_run:
-        print("--dry-run: 跳过发送邮件")
-    else:
-        # 发送邮件
-        send_news_email(txt_file, "840056598@qq.com")
+    # 发送邮件
+    send_news_email(txt_file, "840056598@qq.com")
 
     # 可选：清理临时文件
     # os.remove(txt_file)

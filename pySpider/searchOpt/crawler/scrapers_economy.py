@@ -400,13 +400,90 @@ class SinaFinanceScraper(EconomyScraper):
         return articles
 
 
+class LatePostScraper(EconomyScraper):
+    """晚点 LatePost 爬虫 - 商业与公司深度报道"""
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = "https://www.latepost.com"
+        self.index_url = "https://www.latepost.com/site/index"
+        self.source = "晚点Post"
+
+    def scrape_articles(self, limit: int = 10) -> List[Dict]:
+        articles = []
+        try:
+            response = self.session.get(self.index_url, timeout=15)
+            response.encoding = "utf-8"
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            news_items = soup.select('a[href*="/news/dj_detail?id="]')[:80]
+            seen_urls = set()
+
+            for item in news_items:
+                try:
+                    raw_text = self.clean_text(item.get_text(" ", strip=True))
+                    if not raw_text:
+                        continue
+
+                    title = re.sub(r"\s+(昨天|前天|\d{2}月\d{2}日)$", "", raw_text).strip()
+                    url = item.get("href", "").strip()
+
+                    if not title or len(title) < 12:
+                        continue
+
+                    if url and not url.startswith("http"):
+                        url = f"{self.base_url}{url}"
+
+                    if not url or url in seen_urls or "/news/dj_detail?id=" not in url:
+                        continue
+
+                    seen_urls.add(url)
+
+                    image_url = ""
+                    parent = item.find_parent()
+                    if parent:
+                        img_tag = parent.find("img")
+                        if img_tag:
+                            image_url = (
+                                img_tag.get("src", "")
+                                or img_tag.get("data-src", "")
+                                or ""
+                            )
+                            if image_url.startswith("//"):
+                                image_url = f"https:{image_url}"
+                            elif image_url.startswith("/"):
+                                image_url = f"{self.base_url}{image_url}"
+
+                    articles.append(
+                        {
+                            "title": title,
+                            "url": url,
+                            "summary": f"晚点Post深度报道: {title[:80]}",
+                            "source": self.source,
+                            "publish_time": datetime.now(),
+                            "created_at": datetime.now(),
+                            "image_url": image_url,
+                        }
+                    )
+
+                    if len(articles) >= limit:
+                        break
+                except Exception:
+                    continue
+
+            print(f"晚点Post获取 {len(articles)} 篇文章")
+        except Exception as e:
+            print(f"晚点Post scrape error: {e}")
+        return articles
+
+
 class CaixinScraper(EconomyScraper):
     """财新网爬虫 - 高质量深度调查报道"""
 
     def __init__(self):
         super().__init__()
         self.base_url = "https://www.caixin.com"
-        self.source = "财新网"
+        self.source = "财新"
 
     def scrape_articles(self, limit: int = 10) -> List[Dict]:
         articles = []
@@ -415,8 +492,13 @@ class CaixinScraper(EconomyScraper):
             response.encoding = "utf-8"
             soup = BeautifulSoup(response.content, "html.parser")
 
-            # 更精确的选择器
-            news_items = soup.select(".item_title a, .newslist a, h3 a, h2 a")[:50]
+            # 优先抓取经济、金融、公司相关栏目
+            news_items = soup.select(
+                'a[href*="economy.caixin.com/"]'
+                ', a[href*="finance.caixin.com/"]'
+                ', a[href*="companies.caixin.com/"]'
+                ', a[href*="wenews.caixin.com/"]'
+            )[:120]
 
             seen_urls = set()
             for item in news_items:
@@ -442,8 +524,18 @@ class CaixinScraper(EconomyScraper):
                     ):
                         # 过滤非文章链接
                         if any(
-                            x in url for x in ["/video/", "/photo/", "/tag/", "/search"]
+                            x in url
+                            for x in [
+                                "/video/",
+                                "/photo/",
+                                "/tag/",
+                                "/search",
+                                "#gocomment",
+                            ]
                         ):
+                            continue
+
+                        if not re.search(r"/20\d{2}-\d{2}-\d{2}/\d+\.html", url):
                             continue
 
                         seen_urls.add(url)
@@ -465,7 +557,7 @@ class CaixinScraper(EconomyScraper):
                             {
                                 "title": title,
                                 "url": url,
-                                "summary": f"财新网深度报道: {title[:80]}",
+                                "summary": f"财新深度报道: {title[:80]}",
                                 "source": self.source,
                                 "publish_time": self.extract_publish_time(title)
                                 or datetime.now(),
@@ -479,9 +571,9 @@ class CaixinScraper(EconomyScraper):
                 except Exception as e:
                     continue
 
-            print(f"财新网获取 {len(articles)} 篇文章")
+            print(f"财新获取 {len(articles)} 篇文章")
         except Exception as e:
-            print(f"财新网 scrape error: {e}")
+            print(f"财新 scrape error: {e}")
         return articles
 
 

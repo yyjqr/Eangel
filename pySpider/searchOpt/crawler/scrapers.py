@@ -32,8 +32,17 @@ class TechScraper:
         try:
             if not time_str:
                 return None
-            # 这里可以根据不同网站的时间格式进行解析
-            return datetime.now()  # 简化处理
+
+            # 尝试提取日期 (simple regex for YYYY-MM-DD or similar)
+            match = re.search(r"(\d{4})[-/年.](\d{1,2})[-/月.](\d{1,2})", time_str)
+            if match:
+                try:
+                    return datetime(
+                        int(match.group(1)), int(match.group(2)), int(match.group(3))
+                    )
+                except ValueError:
+                    pass
+            return None
         except:
             return None
 
@@ -74,8 +83,10 @@ class HackerNewsScraper(TechScraper):
                         "publish_time": datetime.fromtimestamp(
                             story_data.get("time", 0)
                         ),
+                        "created_at": datetime.now(),
                         "views": story_data.get("score", 0),
                         "likes": story_data.get("descendants", 0),
+                        "image_url": "",  # HN usually doesn't have images
                     }
                     articles.append(article)
 
@@ -107,6 +118,20 @@ class RedditScraper(TechScraper):
                 post_data = post["data"]
 
                 if not post_data.get("is_self") and post_data.get("url"):
+                    # 提取图片链接
+                    image_url = ""
+                    if post_data.get("thumbnail") and post_data.get(
+                        "thumbnail"
+                    ).startswith("http"):
+                        image_url = post_data.get("thumbnail")
+                    elif post_data.get("preview") and "images" in post_data["preview"]:
+                        try:
+                            image_url = post_data["preview"]["images"][0]["source"][
+                                "url"
+                            ].replace("&amp;", "&")
+                        except:
+                            pass
+
                     article = {
                         "title": post_data.get("title", ""),
                         "url": post_data.get("url", ""),
@@ -118,8 +143,10 @@ class RedditScraper(TechScraper):
                         "publish_time": datetime.fromtimestamp(
                             post_data.get("created_utc", 0)
                         ),
+                        "created_at": datetime.now(),
                         "views": post_data.get("ups", 0),
                         "likes": post_data.get("num_comments", 0),
+                        "image_url": image_url,
                     }
                     articles.append(article)
 
@@ -181,6 +208,12 @@ class GitHubTrendingScraper(TechScraper):
                     stars_text = self.clean_text(stars_elem.text) if stars_elem else "0"
                     stars_count = int(re.sub(r"[^\d]", "", stars_text) or 0)
 
+                    # 提取 GitHub 头像作为预览图
+                    image_url = ""
+                    img_elem = repo.select_one("img.avatar")
+                    if img_elem:
+                        image_url = img_elem.get("src", "")
+
                     article = {
                         "title": f"{repo_name} - GitHub Trending项目",
                         "url": repo_url,
@@ -190,8 +223,10 @@ class GitHubTrendingScraper(TechScraper):
                         "author": repo_name.split("/")[0] if "/" in repo_name else "",
                         "tags": f"GitHub,{language},OpenSource",
                         "publish_time": datetime.now(),
+                        "created_at": datetime.now(),
                         "views": stars_count,
                         "likes": 0,
+                        "image_url": image_url,
                     }
                     articles.append(article)
 
@@ -234,6 +269,14 @@ class AITopicsScraper(TechScraper):
                     url = urljoin("https://aitopics.org", url)
 
                 if title and url:
+                    # 尝试从所属容器中寻找图片
+                    image_url = ""
+                    parent = news.find_parent("div")
+                    if parent:
+                        img = parent.find("img")
+                        if img:
+                            image_url = img.get("src", "")
+
                     article = {
                         "title": title,
                         "url": url,
@@ -241,9 +284,12 @@ class AITopicsScraper(TechScraper):
                         "source": self.source,
                         "author": "AI Topics",
                         "tags": "AI,Machine Learning",
-                        "publish_time": datetime.now(),
+                        "publish_time": self.extract_publish_time(title)
+                        or datetime.now(),
+                        "created_at": datetime.now(),
                         "views": 0,
                         "likes": 0,
+                        "image_url": image_url,
                     }
                     articles.append(article)
 
@@ -278,6 +324,13 @@ class DevToScraper(TechScraper):
             for article_data in data:
                 if not isinstance(article_data, dict):
                     continue
+
+                image_url = (
+                    article_data.get("cover_image")
+                    or article_data.get("social_image")
+                    or ""
+                )
+
                 article = {
                     "title": article_data.get("title", ""),
                     "url": article_data.get("url", ""),
@@ -294,8 +347,10 @@ class DevToScraper(TechScraper):
                     )
                     if article_data.get("published_at")
                     else datetime.now(),
+                    "created_at": datetime.now(),
                     "views": article_data.get("page_views_count", 0),
                     "likes": article_data.get("public_reactions_count", 0),
+                    "image_url": image_url,
                 }
                 articles.append(article)
 
@@ -324,6 +379,16 @@ class MediumScraper(TechScraper):
             feed = feedparser.parse(url)
 
             for entry in feed.entries[:limit]:
+                # 尝试从 RSS 中提取图片
+                image_url = ""
+                if "media_content" in entry:
+                    image_url = entry["media_content"][0]["url"]
+                elif "links" in entry:
+                    for link in entry["links"]:
+                        if link.get("type", "").startswith("image/"):
+                            image_url = link.get("href", "")
+                            break
+
                 article = {
                     "title": entry.get("title", ""),
                     "url": entry.get("link", ""),
@@ -334,8 +399,10 @@ class MediumScraper(TechScraper):
                     "publish_time": datetime(*entry.published_parsed[:6])
                     if entry.get("published_parsed")
                     else datetime.now(),
+                    "created_at": datetime.now(),
                     "views": random.randint(100, 1000),  # Medium不提供具体数据
                     "likes": random.randint(10, 100),
+                    "image_url": image_url,
                 }
                 articles.append(article)
 
@@ -364,6 +431,16 @@ class TechCrunchScraper(TechScraper):
             feed = feedparser.parse(url)
 
             for entry in feed.entries[:limit]:
+                # 尝试提取图片逻辑同 Medium
+                image_url = ""
+                if "media_content" in entry:
+                    image_url = entry["media_content"][0]["url"]
+                elif "links" in entry:
+                    for link in entry["links"]:
+                        if link.get("type", "").startswith("image/"):
+                            image_url = link.get("href", "")
+                            break
+
                 article = {
                     "title": entry.get("title", ""),
                     "url": entry.get("link", ""),
@@ -374,8 +451,10 @@ class TechCrunchScraper(TechScraper):
                     "publish_time": datetime(*entry.published_parsed[:6])
                     if entry.get("published_parsed")
                     else datetime.now(),
+                    "created_at": datetime.now(),
                     "views": random.randint(500, 5000),
                     "likes": random.randint(20, 200),
+                    "image_url": image_url,
                 }
                 articles.append(article)
 
@@ -384,4 +463,57 @@ class TechCrunchScraper(TechScraper):
 
         except Exception as e:
             print(f"爬取 TechCrunch 失败: {e}")
+            return []
+
+
+class ThirtySixKrScraper(TechScraper):
+    """36Kr RSS 爬虫"""
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = "https://36kr.com"
+        self.rss_url = "https://www.36kr.com/feed"
+        self.source = "36Kr"
+
+    def scrape_articles(self, limit: int = 10) -> List[Dict]:
+        """爬取 36Kr 文章"""
+        articles = []
+        try:
+            feed = feedparser.parse(self.rss_url)
+
+            for entry in feed.entries[:limit]:
+                image_url = ""
+                if "media_content" in entry and entry["media_content"]:
+                    image_url = entry["media_content"][0].get("url", "")
+                elif "links" in entry:
+                    for link in entry["links"]:
+                        if link.get("type", "").startswith("image/"):
+                            image_url = link.get("href", "")
+                            break
+
+                articles.append(
+                    {
+                        "title": entry.get("title", ""),
+                        "url": entry.get("link", ""),
+                        "summary": self.clean_text(
+                            entry.get("summary", "") or entry.get("description", "")
+                        ),
+                        "source": self.source,
+                        "author": entry.get("author", "36Kr"),
+                        "tags": "科技,创业,36Kr",
+                        "publish_time": datetime(*entry.published_parsed[:6])
+                        if entry.get("published_parsed")
+                        else datetime.now(),
+                        "created_at": datetime.now(),
+                        "views": random.randint(300, 3000),
+                        "likes": random.randint(20, 300),
+                        "image_url": image_url,
+                    }
+                )
+
+            print(f"成功爬取 {len(articles)} 篇 36Kr 文章")
+            return articles
+
+        except Exception as e:
+            print(f"爬取 36Kr 失败: {e}")
             return []

@@ -194,9 +194,23 @@ class NewsScraper:
         current_date = datetime.now()
         six_months_ago = current_date - timedelta(days=180)
 
-        for title, url, weight, image_url in self.articles:
+        for item in self.articles:
+            # 兼容不同长度的元组
+            image_url = ""
+            publish_time_obj = datetime.now()
+            created_at_obj = datetime.now()
+
+            if len(item) == 6:
+                title, url, weight, image_url, publish_time_obj, created_at_obj = item
+            elif len(item) == 4:
+                title, url, weight, image_url = item
+            elif len(item) == 3:
+                title, url, weight = item
+            else:
+                continue
+
             if weight > kRankLevelValue:
-                # 过滤过长的URL和标题，防止数据库报错 (数据库字段限制为255)
+                # 过滤过长的URL和标题，防止数据库报错
                 if len(url) > 250:
                     print(f"⚠️ URL过长 ({len(url)})，跳过: {url[:50]}...")
                     continue
@@ -208,21 +222,45 @@ class NewsScraper:
                 db_publish_time_str = mysqlWriteNewsV2.getArticlePublishTime(url)
 
                 if db_publish_time_str:
-                    print(f"文章已存在于数据库: {title[:30]}...")
-                    continue
+                    try:
+                        # 尝试解析数据库中的时间格式 %Y-%m-%d_%H:%M
+                        db_publish_time = datetime.strptime(
+                            db_publish_time_str, "%Y-%m-%d_%H:%M"
+                        )
+                        if db_publish_time < six_months_ago:
+                            print(f"文章已超过半年，不再发送: {url}")
+                            continue
+                        else:
+                            print(f"文章已在数据库但未满半年，继续发送: {title[:30]}...")
+                            filtered_articles.append(
+                                (
+                                    title,
+                                    url,
+                                    weight,
+                                    image_url,
+                                    publish_time_obj,
+                                    created_at_obj,
+                                )
+                            )
+                            continue
+                    except Exception:
+                        pass
 
                 # 确定分类
                 category = self.determine_category(title, self.source_name)
 
                 # 写入数据库 (包含 image_url)
-                publish_time = datetime.now().strftime("%Y-%m-%d_%H:%M")
+                if not isinstance(publish_time_obj, datetime):
+                    publish_time_obj = datetime.now()
+
+                publish_time_str = publish_time_obj.strftime("%Y-%m-%d_%H:%M")
                 content = f"来自 {self.source_name} 的{category}内容"
 
                 newsOne = (
                     weight,
                     title,
                     self.source_name,
-                    publish_time,
+                    publish_time_str,
                     content,
                     url,
                     keywords,
@@ -236,7 +274,16 @@ class NewsScraper:
                 result = mysqlWriteNewsV2.writeDb(sql, newsOne)
                 if result:
                     print(f"✅ 成功写入 [{category}]: {title[:50]}...")
-                    filtered_articles.append((title, url, weight))
+                    filtered_articles.append(
+                        (
+                            title,
+                            url,
+                            weight,
+                            image_url,
+                            publish_time_obj,
+                            created_at_obj,
+                        )
+                    )
                 else:
                     print(f"❌ 写入失败: {title[:50]}...")
 
@@ -270,13 +317,19 @@ class GenericDesignWrapper(NewsScraper):
         try:
             print(f"\n开始抓取 {self.source_name}...")
             articles = self.scraper.scrape_articles(limit=limit)
-            new_stored_articles = []
             for art in articles:
                 weight = self.calculate_weight(art["title"])
                 # 给设计类来源一定的基础分
                 weight += 0.5
                 self.articles.append(
-                    (art["title"], art["url"], weight, art.get("image_url", ""))
+                    (
+                        art["title"],
+                        art["url"],
+                        weight,
+                        art.get("image_url", ""),
+                        art.get("publish_time", datetime.now()),
+                        art.get("created_at", datetime.now()),
+                    )
                 )
 
             # 返回过滤后的文章列表，用于汇总
@@ -299,9 +352,27 @@ class DesignNewsAggregator:
             f.write(f"共收集到 {len(articles)} 篇高价值文章\n")
             f.write("=" * 60 + "\n\n")
 
-            for idx, (title, url, weight) in enumerate(articles, 1):
+            for idx, article in enumerate(articles, 1):
+                image_url = ""
+                publish_time = None
+                created_at = None
+
+                if len(article) == 6:
+                    title, url, weight, image_url, publish_time, created_at = article
+                elif len(article) == 4:
+                    title, url, weight, image_url = article
+                else:
+                    title, url, weight = article
+
                 f.write(f"{idx}. [{weight:.2f}] {title}\n")
-                f.write(f"   🔗 {url}\n\n")
+                f.write(f"   🔗 {url}\n")
+                if isinstance(publish_time, datetime):
+                    f.write(f"   📅 发布时间: {publish_time.strftime('%Y-%m-%d %H:%M')}\n")
+                if isinstance(created_at, datetime):
+                    f.write(f"   🕒 采集时间: {created_at.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                if image_url:
+                    f.write(f"   🖼️ {image_url}\n")
+                f.write("\n")
 
         print(f"💾 新闻已保存到 {os.path.abspath(self.filename)}")
         return self.filename
@@ -348,6 +419,9 @@ def main():
     print(f"=== 设计与创意新闻采集任务开始: {datetime.now()} ===")
 
     scrapers_to_run = [
+        (scrapers.YankoDesignScraper, "Yanko Design"),
+        (scrapers.IDEAScraper, "IDEA Awards"),
+        (scrapers.CoreDesignScraper, "Core77"),
         (scrapers.RedDotScraper, "Red Dot Award"),
         (scrapers.IFDesignScraper, "iF Design Award"),
         (scrapers.DesignboomScraper, "Designboom"),
@@ -356,9 +430,9 @@ def main():
         (scrapers.MakezineScraper, "Makezine"),
         (scrapers.InfoQProductScraper, "InfoQ Product"),
         (scrapers.ProductHuntScraper, "Product Hunt"),
-        (scrapers.YankoDesignScraper, "Yanko Design"),
-        (scrapers.CoreDesignScraper, "Core77"),
         (scrapers.CarDesignNewsScraper, "Car Design News"),
+        (scrapers.LeManooshScraper, "leManoosh"),
+        (scrapers.BehanceScraper, "Behance"),
         (scrapers.LVMHScraper, "LVMH"),
         (scrapers.KeringScraper, "Kering"),
         (scrapers.CarBuzzScraper, "CarBuzz"),
