@@ -1,0 +1,80 @@
+(yolov5envPY3.10) nvidia@ubuntu:~/Documents/yolov5$ pip install onnx onnxruntime
+Looking in indexes: https://pypi.org/simple, https://pypi.ngc.nvidia.com
+Collecting onnx
+  Downloading onnx-1.19.0-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (7.0 kB)
+Collecting onnxruntime
+  Downloading onnxruntime-1.22.1-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl.metadata (4.6 kB)
+Requirement already satisfied: numpy>=1.22 in /home/nvidia/.local/lib/python3.10/site-packages (from onnx) (1.26.4)
+Requirement already satisfied: protobuf>=4.25.1 in /home/nvidia/archiconda3/envs/yolov5envPY3.10/lib/python3.10/site-packages (from onnx) (6.30.2)
+Requirement already satisfied: typing_extensions>=4.7.1 in /home/nvidia/archiconda3/envs/yolov5envPY3.10/lib/python3.10/site-packages (from onnx) (4.13.0)
+Collecting ml_dtypes (from onnx)
+  Downloading ml_dtypes-0.5.3-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl.metadata (8.9 kB)
+Collecting coloredlogs (from onnxruntime)
+  Downloading coloredlogs-15.0.1-py2.py3-none-any.whl.metadata (12 kB)
+Collecting flatbuffers (from onnxruntime)
+  Downloading flatbuffers-25.2.10-py2.py3-none-any.whl.metadata (875 bytes)
+Requirement already satisfied: packaging in /home/nvidia/archiconda3/envs/yolov5envPY3.10/lib/python3.10/site-packages (from onnxruntime) (24.2)
+Requirement already satisfied: sympy in /home/nvidia/.local/lib/python3.10/site-packages (from onnxruntime) (1.13.1)
+Collecting humanfriendly>=9.1 (from coloredlogs->onnxruntime)
+  Downloading humanfriendly-10.0-py2.py3-none-any.whl.metadata (9.2 kB)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /home/nvidia/.local/lib/python3.10/site-packages (from sympy->onnxruntime) (1.3.0)
+Downloading onnx-1.19.0-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (18.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.0/18.0 MB 9.6 MB/s  0:00:02
+Downloading onnxruntime-1.22.1-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (14.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.5/14.5 MB 7.9 MB/s  0:00:01
+Downloading coloredlogs-15.0.1-py2.py3-none-any.whl (46 kB)
+Downloading humanfriendly-10.0-py2.py3-none-any.whl (86 kB)
+Downloading flatbuffers-25.2.10-py2.py3-none-any.whl (30 kB)
+Downloading ml_dtypes-0.5.3-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (5.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.0/5.0 MB 9.4 MB/s  0:00:00
+Installing collected packages: flatbuffers, ml_dtypes, humanfriendly, onnx, coloredlogs, onnxruntime
+Successfully installed coloredlogs-15.0.1 flatbuffers-25.2.10 humanfriendly-10.0 ml_dtypes-0.5.3 onnx-1.19.0 onnxruntime-1.22.1
+(yolov5envPY3.10) nvidia@ubuntu:~/Documents/yolov5$ python export.py --weights yolov5s.pt --include engine --device 0
+export: data=data/coco128.yaml, weights=['yolov5s.pt'], imgsz=[640, 640], batch_size=1, device=0, half=False, inplace=False, keras=False, optimize=False, int8=False, per_tensor=False, dynamic=False, cache=, simplify=False, mlmodel=False, opset=17, verbose=False, workspace=4, nms=False, agnostic_nms=False, topk_per_class=100, topk_all=100, iou_thres=0.45, conf_thres=0.25, include=['engine']
+YOLOv5 🚀 v7.0-432-g554ddfd6 Python-3.10.6 torch-2.5.0 CUDA:0 (Orin, 7620MiB)
+
+Fusing layers...
+YOLOv5s summary: 213 layers, 7225885 parameters, 0 gradients, 16.4 GFLOPs
+
+PyTorch: starting from yolov5s.pt with output shape (1, 25200, 85) (14.1 MB)
+
+ONNX: starting export with onnx 1.19.0...
+ONNX: export success ✅ 1.4s, saved as yolov5s.onnx (28.0 MB)
+
+TensorRT: starting export with TensorRT 10.3.0...
+[09/20/2025-17:49:18] [TRT] [I] [MemUsageChange] Init CUDA: CPU +2, GPU +0, now: CPU 610, GPU 2993 (MiB)
+[09/20/2025-17:49:20] [TRT] [I] [MemUsageChange] Init builder kernel library: CPU +927, GPU +1235, now: CPU 1580, GPU 4230 (MiB)
+[09/20/2025-17:49:20] [TRT] [I] ----------------------------------------------------------------
+[09/20/2025-17:49:20] [TRT] [I] Input filename:   yolov5s.onnx
+[09/20/2025-17:49:20] [TRT] [I] ONNX IR version:  0.0.7
+[09/20/2025-17:49:20] [TRT] [I] Opset version:    12
+[09/20/2025-17:49:20] [TRT] [I] Producer name:    pytorch
+[09/20/2025-17:49:20] [TRT] [I] Producer version: 2.5.0
+[09/20/2025-17:49:20] [TRT] [I] Domain:
+[09/20/2025-17:49:20] [TRT] [I] Model version:    0
+[09/20/2025-17:49:20] [TRT] [I] Doc string:
+[09/20/2025-17:49:20] [TRT] [I] ----------------------------------------------------------------
+TensorRT: input "images" with shape(1, 3, 640, 640) DataType.FLOAT
+TensorRT: output "output0" with shape(1, 25200, 85) DataType.FLOAT
+TensorRT: building FP32 engine as yolov5s.engine
+[09/20/2025-17:49:20] [TRT] [I] Local timing cache in use. Profiling results in this builder pass will not be stored.
+[09/20/2025-17:51:47] [TRT] [I] [GraphReduction] The approximate region cut reduction algorithm is called.
+[09/20/2025-17:51:47] [TRT] [I] Detected 1 inputs and 4 output network tensors.
+[09/20/2025-17:51:48] [TRT] [I] Total Host Persistent Memory: 379488
+[09/20/2025-17:51:48] [TRT] [I] Total Device Persistent Memory: 0
+[09/20/2025-17:51:48] [TRT] [I] Total Scratch Memory: 0
+[09/20/2025-17:51:48] [TRT] [I] [BlockAssignment] Started assigning block shifts. This will take 156 steps to complete.
+[09/20/2025-17:51:48] [TRT] [I] [BlockAssignment] Algorithm ShiftNTopDown took 10.8067ms to assign 9 blocks to 156 nodes requiring 34151424 bytes.
+[09/20/2025-17:51:48] [TRT] [I] Total Activation Memory: 34150400
+[09/20/2025-17:51:48] [TRT] [I] Total Weights Memory: 29323264
+[09/20/2025-17:51:48] [TRT] [I] Engine generation completed in 147.371 seconds.
+[09/20/2025-17:51:48] [TRT] [I] [MemUsageStats] Peak memory usage of TRT CPU/GPU memory allocators: CPU 4 MiB, GPU 212 MiB
+[09/20/2025-17:51:48] [TRT] [I] [MemUsageStats] Peak memory usage during Engine building and serialization: CPU: 2550 MiB
+TensorRT: export success ✅ 152.1s, saved as yolov5s.engine (29.1 MB)
+
+Export complete (153.3s)
+Results saved to /home/nvidia/Documents/yolov5
+Detect:          python detect.py --weights yolov5s.engine
+Validate:        python val.py --weights yolov5s.engine
+PyTorch Hub:     model = torch.hub.load('ultralytics/yolov5', 'custom', 'yolov5s.engine')
+Visualize:       https://netron.app

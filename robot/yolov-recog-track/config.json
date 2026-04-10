@@ -1,0 +1,18 @@
+{
+    "camera": {
+        "device": "/dev/video0",
+        "width": 640,
+        "height": 480,
+        "fps": 20
+    },
+    "rtsp": {
+        "port": "8554",
+        "mount_point": "/test",
+        "latency": 200
+    },
+    "model": {
+        "path": "yolov8m-seg.pt",
+        "device": "0",
+        "conf_thresh": 0.5
+    }
+}
