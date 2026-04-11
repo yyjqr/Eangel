@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q, Count, Avg, Sum
 from django.db import transaction
+from django.db.utils import OperationalError, ProgrammingError
 from .models import (
     TechNews,
     UserComment,
@@ -11,12 +12,15 @@ from .models import (
     OriginalArticle,
 )
 from django.contrib import messages
+import logging
 import re
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 import json
 import os
 from news_content_utils import build_article_content, needs_content_enrichment
+
+logger = logging.getLogger(__name__)
 
 # 中国大陆无法直接访问的域名列表
 BLOCKED_DOMAINS = [
@@ -86,6 +90,117 @@ FEATURED_MODE_LABELS = {
     "tech4-mil4": "4篇科技 · 4篇军事",
     "fallback-history": "最近历史精选",
 }
+FEATURED_SELECTION_TABLE_NAME = FeaturedSelection._meta.db_table
+HOT_PRODUCTS_TABLE_NAME = HotProduct._meta.db_table
+ORIGINAL_ARTICLES_TABLE_NAME = OriginalArticle._meta.db_table
+USER_COMMENTS_TABLE_NAME = UserComment._meta.db_table
+DAILY_STATS_TABLE_NAME = DailyStats._meta.db_table
+USER_IP_LOG_TABLE_NAME = UserIPLog._meta.db_table
+OPTIONAL_TABLE_AVAILABILITY = {
+    FEATURED_SELECTION_TABLE_NAME: True,
+    HOT_PRODUCTS_TABLE_NAME: True,
+    ORIGINAL_ARTICLES_TABLE_NAME: True,
+    USER_COMMENTS_TABLE_NAME: True,
+    DAILY_STATS_TABLE_NAME: True,
+    USER_IP_LOG_TABLE_NAME: True,
+}
+
+
+def is_optional_table_available(table_name):
+    return OPTIONAL_TABLE_AVAILABILITY.get(table_name, True)
+
+
+def handle_missing_optional_table(exc, table_name, feature_label):
+    if not table_name:
+        return False
+
+    error_text = " ".join(
+        str(part) for part in getattr(exc, "args", ()) if part is not None
+    ).lower()
+    if table_name.lower() in error_text and "doesn't exist" in error_text:
+        if OPTIONAL_TABLE_AVAILABILITY.get(table_name, True):
+            logger.warning(
+                "Skipping %s because table '%s' is missing. Run Django migrations to enable this feature.",
+                feature_label,
+                table_name,
+            )
+        OPTIONAL_TABLE_AVAILABILITY[table_name] = False
+        return True
+    return False
+
+
+def handle_missing_featured_selection_table(exc):
+    return handle_missing_optional_table(
+        exc,
+        FEATURED_SELECTION_TABLE_NAME,
+        "featured selection history",
+    )
+
+
+def get_total_visit_stats():
+    if not is_optional_table_available(DAILY_STATS_TABLE_NAME):
+        return 0, 0
+
+    try:
+        total_stats = DailyStats.objects.aggregate(
+            total_uv=Sum("unique_visitors"), total_pv=Sum("total_views")
+        )
+        return total_stats["total_uv"] or 0, total_stats["total_pv"] or 0
+    except (ProgrammingError, OperationalError) as exc:
+        if handle_missing_optional_table(exc, DAILY_STATS_TABLE_NAME, "visit statistics"):
+            return 0, 0
+        raise
+
+
+def get_recent_comments(limit=10):
+    if not is_optional_table_available(USER_COMMENTS_TABLE_NAME):
+        return []
+
+    try:
+        return list(
+            UserComment.objects.filter(is_approved=True).order_by("-created_at")[:limit]
+        )
+    except (ProgrammingError, OperationalError) as exc:
+        if handle_missing_optional_table(exc, USER_COMMENTS_TABLE_NAME, "recent comments"):
+            return []
+        raise
+
+
+def get_recent_hot_products(limit=5):
+    if not is_optional_table_available(HOT_PRODUCTS_TABLE_NAME):
+        return []
+
+    recent_date = datetime.now().date() - timedelta(days=2)
+    try:
+        hot_products = list(
+            HotProduct.objects.filter(
+                period_type="weekly", period_start__gte=recent_date
+            ).order_by("rank")[:limit]
+        )
+    except (ProgrammingError, OperationalError) as exc:
+        if handle_missing_optional_table(
+            exc, HOT_PRODUCTS_TABLE_NAME, "hot product rankings"
+        ):
+            return []
+        raise
+
+    for hot_product in hot_products:
+        hot_product.category = normalize_category_label(hot_product.category)
+    return hot_products
+
+
+def get_original_articles(limit=10):
+    if not is_optional_table_available(ORIGINAL_ARTICLES_TABLE_NAME):
+        return []
+
+    try:
+        return list(OriginalArticle.objects.filter(is_published=True)[:limit])
+    except (ProgrammingError, OperationalError) as exc:
+        if handle_missing_optional_table(
+            exc, ORIGINAL_ARTICLES_TABLE_NAME, "original articles"
+        ):
+            return []
+        raise
 
 
 def normalize_category_label(category):
@@ -249,44 +364,57 @@ def pick_featured_news(candidate_news):
 
 
 def save_featured_snapshot(featured_news, mode_key):
-    if not featured_news:
+    if not featured_news or not is_optional_table_available(FEATURED_SELECTION_TABLE_NAME):
         return
-    today = datetime.now().date()
-    if FeaturedSelection.objects.filter(selection_date=today).exists():
-        return
+    try:
+        today = datetime.now().date()
+        if FeaturedSelection.objects.filter(selection_date=today).exists():
+            return
 
-    snapshot_rows = []
-    for index, news_item in enumerate(featured_news, start=1):
-        snapshot_rows.append(
-            FeaturedSelection(
-                selection_date=today,
-                slot_order=index,
-                selection_mode=mode_key,
-                news_id=getattr(news_item, "id", None),
-                title=getattr(news_item, "title", ""),
-                url=getattr(news_item, "url", ""),
-                category=getattr(
-                    news_item, "featured_bucket", get_featured_bucket(news_item)
-                ),
-                rate=float(getattr(news_item, "rate", 0) or 0),
-                selection_score=float(getattr(news_item, "selection_score", 0) or 0),
-                image_url=getattr(news_item, "image_url", ""),
-                content=getattr(news_item, "featured_summary", "")
-                or getattr(news_item, "content", ""),
+        snapshot_rows = []
+        for index, news_item in enumerate(featured_news, start=1):
+            snapshot_rows.append(
+                FeaturedSelection(
+                    selection_date=today,
+                    slot_order=index,
+                    selection_mode=mode_key,
+                    news_id=getattr(news_item, "id", None),
+                    title=getattr(news_item, "title", ""),
+                    url=getattr(news_item, "url", ""),
+                    category=getattr(
+                        news_item, "featured_bucket", get_featured_bucket(news_item)
+                    ),
+                    rate=float(getattr(news_item, "rate", 0) or 0),
+                    selection_score=float(
+                        getattr(news_item, "selection_score", 0) or 0
+                    ),
+                    image_url=getattr(news_item, "image_url", ""),
+                    content=getattr(news_item, "featured_summary", "")
+                    or getattr(news_item, "content", ""),
+                )
             )
-        )
 
-    with transaction.atomic():
-        FeaturedSelection.objects.bulk_create(snapshot_rows, ignore_conflicts=True)
+        with transaction.atomic():
+            FeaturedSelection.objects.bulk_create(snapshot_rows, ignore_conflicts=True)
+    except (ProgrammingError, OperationalError) as exc:
+        if handle_missing_featured_selection_table(exc):
+            return
+        raise
 
 
 def load_featured_history(current_featured, candidate_news, limit_groups=4):
     today = datetime.now().date()
-    rows = list(
-        FeaturedSelection.objects.exclude(selection_date=today).order_by(
-            "-selection_date", "slot_order"
-        )[: limit_groups * 8]
-    )
+    rows = []
+    if is_optional_table_available(FEATURED_SELECTION_TABLE_NAME):
+        try:
+            rows = list(
+                FeaturedSelection.objects.exclude(selection_date=today).order_by(
+                    "-selection_date", "slot_order"
+                )[: limit_groups * 8]
+            )
+        except (ProgrammingError, OperationalError) as exc:
+            if not handle_missing_featured_selection_table(exc):
+                raise
 
     history_groups = []
     current_group = None
@@ -355,18 +483,30 @@ def record_visit(request):
     ip = get_client_ip(request)
     today = datetime.now().date()
 
-    # 获取或创建今日统计
-    daily_stats, created = DailyStats.objects.get_or_create(date=today)
+    if not is_optional_table_available(DAILY_STATS_TABLE_NAME):
+        return
+    if not is_optional_table_available(USER_IP_LOG_TABLE_NAME):
+        return
 
-    # 增加页面浏览量 (PV)
-    daily_stats.total_views += 1
+    try:
+        # 获取或创建今日统计
+        daily_stats, created = DailyStats.objects.get_or_create(date=today)
 
-    # 检查IP是否已记录 (UV)
-    if not UserIPLog.objects.filter(ip_address=ip, visit_date=today).exists():
-        UserIPLog.objects.create(ip_address=ip)
-        daily_stats.unique_visitors += 1
+        # 增加页面浏览量 (PV)
+        daily_stats.total_views += 1
 
-    daily_stats.save()
+        # 检查IP是否已记录 (UV)
+        if not UserIPLog.objects.filter(ip_address=ip, visit_date=today).exists():
+            UserIPLog.objects.create(ip_address=ip)
+            daily_stats.unique_visitors += 1
+
+        daily_stats.save()
+    except (ProgrammingError, OperationalError) as exc:
+        if handle_missing_optional_table(exc, DAILY_STATS_TABLE_NAME, "visit statistics"):
+            return
+        if handle_missing_optional_table(exc, USER_IP_LOG_TABLE_NAME, "visit statistics"):
+            return
+        raise
 
 
 def is_blocked_in_china(url):
@@ -387,11 +527,7 @@ def news_list(request):
     show_all = request.GET.get("show_all", "") == "true"
 
     # 获取总访问统计
-    total_stats = DailyStats.objects.aggregate(
-        total_uv=Sum("unique_visitors"), total_pv=Sum("total_views")
-    )
-    total_visitors = total_stats["total_uv"] or 0
-    total_views = total_stats["total_pv"] or 0
+    total_visitors, total_views = get_total_visit_stats()
 
     # 基础查询
     news_queryset = TechNews.objects.all()
@@ -535,9 +671,7 @@ def news_list(request):
     word_cloud = Counter(keywords).most_common(20)
 
     # 4. 获取最新的评论
-    recent_comments = UserComment.objects.filter(is_approved=True).order_by(
-        "-created_at"
-    )[:10]
+    recent_comments = get_recent_comments(limit=10)
 
     # 5. 读取趋势分析数据
     trend_data = {}
@@ -620,25 +754,10 @@ def news_list(request):
             if len(product_news) >= 5:
                 break
 
-    # 如果product_news不足5条，从hot_products补充
-    if len(product_news) < 5:
-        # 获取最新的热点产品排名（从HotProduct表）
-        recent_date = datetime.now().date() - timedelta(days=2)  # 最近2天的数据
-        hot_products = HotProduct.objects.filter(
-            period_type="weekly", period_start__gte=recent_date
-        ).order_by("rank")[:5]
-    else:
-        # 如果已有足够的product_news，也获取hot_products作为补充信息
-        recent_date = datetime.now().date() - timedelta(days=2)
-        hot_products = HotProduct.objects.filter(
-            period_type="weekly", period_start__gte=recent_date
-        ).order_by("rank")[:5]
-
-    for hot_product in hot_products:
-        hot_product.category = normalize_category_label(hot_product.category)
+    hot_products = get_recent_hot_products(limit=5)
 
     # 原创专栏
-    original_articles = list(OriginalArticle.objects.filter(is_published=True)[:10])
+    original_articles = get_original_articles(limit=10)
 
     context = {
         "accessible_news": accessible_news,
