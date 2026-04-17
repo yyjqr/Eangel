@@ -1,0 +1,32 @@
+name: reviewdog-multi-lang
+on: [pull_request]
+jobs:
+  # Python 部分
+  python-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: reviewdog/action-flake8@v3
+        with:
+          github_token: ${{ secrets.github_token }}
+
+  # C++/Qt 部分
+  cpp-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: cpplint-reviewdog
+        # 也可以使用专门的 cpplint 插件
+        uses: reviewdog/action-cpplint@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+
+  # Shell/其它 (可选)
+  shell-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.github_token }}
