@@ -1,5 +1,5 @@
 ## -*- coding: UTF-8 -*-
-#@author: JACK YANG 
+#@author: JACK YANG
 #@date:201902-->10 --->
       #202006-->202101--->202110
       # 2022.09 add rank map
@@ -81,7 +81,7 @@ with open('./tech_key_config_map.json') as j:
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -106,7 +106,7 @@ def get_file_list(file_path):
 
 def findKeyWordInNews(str):
 
-   for i in range(14):       
+   for i in range(14):
        if array[i] in str:
            #print("test")
            return True
@@ -116,7 +116,7 @@ def findValuedInfoInNews(str,keyWords):
    #print(str)
    #print(len(keyWords))
    for i in range(len(keyWords)):
-       
+
        if keyWords[i] in str:
            #print("test")
            return True
@@ -129,7 +129,7 @@ def findValuedInfoRank(str,keyMap):
    rankOldValue=0
    print_flag=True
    for i in keyMap:
-       #print(i)   
+       #print(i)
        if  i in str:
            rankValue += keyMap[i]
        if rankValue != 0 :
@@ -269,7 +269,7 @@ class GrabNews():
             print(f"Failed to fetch {url}")
             return
         soup = BeautifulSoup(resp.text, "html.parser")
-        
+
         news_titles = []
         news_links = []
         kRankLevelValue =0.25 ##use local param to check
@@ -310,33 +310,33 @@ class GrabNewsProduct():
         newsIndex=0
         #for news in soup.select('a.enk2x9t2 css-7v7n8p epl65fo4'):  #更换了class相关字段,class前要加点.  202202 ---->enk2x9t2 css-7v
         for news in soup.select('a.enk2x9t2'):
-            #curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP) 
+            #curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
             curent_news_rank = compute_rank_from_map(news.text, KEYWORDS_RANK_MAP, fuzzy=True, threshold=0.7)
             print("\n,in {0} curent_news_rank:{1}".format(url, curent_news_rank))
-            
+
             if curent_news_rank >kRankLevelValue :
                title=news.text.strip()
- 
+
                if len(title) > 30:  # Filter out overly long titles
                     print('######title is long:',title)
                     continue
-                
+
                if not title or 'advertisement' in title.lower():  # Filter out empty or advertisement titles
                     continue
                for string in news.stripped_strings:
-                    
+
                     if news.attrs['href'].startswith('http'):
                         newsUrl=news.attrs['href']
                     else:
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
-                    
+
                     if {string:newsUrl} not in self.NewsList:
                         #print('newsUrl', newsUrl)
                         self.NewsList.append({string:newsUrl})
                     else:
                         print("------- ")
-                    
+
                     # verify reachable and allowed domain
                     if not is_allowed_domain(newsUrl) or fetch_url(newsUrl, timeout=8, blocked_domains=['medium.com','techcrunch.com','yahoo.com','gadget.com']) is None:
                         del self.NewsList[-1]
@@ -359,7 +359,7 @@ class GrabNewsSina():
         r2.encoding = getattr(r2, 'encoding', 'utf-8')
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.tech-news li  a'):
            #if findValuedInfoInNews(news.text,arrayKEYWORDS_CN):
             curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
@@ -372,7 +372,7 @@ class GrabNewsSina():
                 #article.append(url.strip())
                    print(newsUrl)
                    self.NewsList.append({string:newsUrl})
-   
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
@@ -397,7 +397,7 @@ class GrabNewsAI():
             #if findValuedInfoInNews(news.text,array):
             #curent_news_rank =findValuedInfoRank(news.text,KEYWORDS_RANK_MAP)
             curent_news_rank = compute_rank_from_map(news.text, KEYWORDS_RANK_MAP, fuzzy=True, threshold=0.7)
-            
+
             print("\n,curent_news_rank:",curent_news_rank)
             if(value_title>3):
                 kRankLevelValue=0.3
@@ -471,7 +471,7 @@ class GrabNewsTechnet():
 def writeNewsTechNet():
     grabNews = GrabNewsTechnet()
     grabNews.getNews()
-  
+
     with codecs.open(newsFullPath,'a', 'utf-8') as fp:
         for news in grabNews.NewsList:
             for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
@@ -524,7 +524,7 @@ def writeNewsProduct():
      #w---->a  改为追加内容的模式 202209
     fp = codecs.open(newsFullPath, 'a', 'utf-8')
     for news in grabNews.NewsList:
-        for key in news.keys(): 
+        for key in news.keys():
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
             #print(news[key])
             fp.write('<hr />')
@@ -548,7 +548,7 @@ def mail():
            print (str(e))
 
     try:
-        writeNewsProduct()  
+        writeNewsProduct()
         writeNewsSina()
     except Exception as e:
         print (str(e))
@@ -563,7 +563,7 @@ def mail():
         techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
         msg.attach(techHtml)
     #fp.close
-    
+
     path = '/tmp'         # 替换为你的路径
     listN=get_file_list(path)
     #print (listN)
@@ -571,8 +571,8 @@ def mail():
        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
        print('Send IMG is "%s" ' %imgPath)
        msg.attach(make_img_msg(imgPath))
-    else: 
-        print("no pic capture!")     
+    else:
+        print("no pic capture!")
     msg['From']=formataddr(["Eangel Robot pi4B",my_sender])  #括号里的对应发件人邮箱昵称
     msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱
     msg['Subject']="EXAID 价值Rank AgentPro %s" %year_month  #邮件的主题
@@ -590,4 +590,3 @@ def mail():
 
 if __name__ == '__main__':
   mail()
-        
