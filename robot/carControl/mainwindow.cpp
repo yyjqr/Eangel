@@ -73,7 +73,7 @@ void MainWindow::getpic() {
     ShowImage(oneFrameInfo.imageBuf, imageWidth, imageHeight,
               QImage::Format_BGR888); // Format_RGB888---->Format_BGR888 (imread
                                       // BGR格式）
-    camSaveQueue.pop(); //   弹出对首元素
+    camSaveQueue.pop();               //   弹出对首元素
   }
   //    ShowImage(imagebuffer, imageWidth,imageHeight,QImage::Format_RGB888);
 }

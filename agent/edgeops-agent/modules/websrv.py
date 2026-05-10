@@ -420,4 +420,3 @@ def start_server(data_path, snap_dir='/tmp/perception_snapshots', host='0.0.0.0'
     t = threading.Thread(target=run, daemon=True)
     t.start()
     return t
-

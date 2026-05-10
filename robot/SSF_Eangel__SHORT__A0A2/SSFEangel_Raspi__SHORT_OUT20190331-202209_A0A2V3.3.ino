@@ -83,17 +83,18 @@ void loop() {
   for (pos = startANGLE; pos <= stopANGLE;
        pos += 10) // goes from 0 degrees to 180 degrees 1---->3      04042016
                   // ---->6(20161117扫描更快，范围更大)
-  {                     // in steps of 1 degree
+  {               // in steps of 1 degree
     myservo.write(pos); // tell servo to go to position in variable 'pos'
     // delay(10);                        // Wait 50ms between pings (about 20
     // pings/sec). 29ms should be the shortest delay between pings.
     unsigned int uS =
         sonar.ping(); // Send ping, get ping time in microseconds (μS).
     // Serial.print("Ping: ");
-    delay(30); // Wait 50ms between pings (about 20 pings/sec). 29ms should be
-               // the shortest delay between pings.    20---->50---->40
-               // （20180625）//1210修改，避免超声波传感器处理不过来或没检测到变化------>30
-               // 后续还有延时，1231
+    delay(
+        30); // Wait 50ms between pings (about 20 pings/sec). 29ms should be
+             // the shortest delay between pings.    20---->50---->40
+             // （20180625）//1210修改，避免超声波传感器处理不过来或没检测到变化------>30
+             // 后续还有延时，1231
     Middle = sonar.convert_cm(uS);
 
     /* uS = sonar.ping(); // Send ping, get ping time in microseconds (μS).
@@ -113,8 +114,9 @@ void loop() {
     Serial.print("distance,cm:");
     Serial.println(Middle); // test
     if (Middle < kMaxDetectDistance && Middle > 0) {
-      if (Middle < 40) // >35改为<35,这样不会一直满足减速条件，也避免在室内，减速几次就转弯
-                       // 20181209
+      if (Middle <
+          40) // >35改为<35,这样不会一直满足减速条件，也避免在室内，减速几次就转弯
+              // 20181209
       {
         carSlowdown();
         count += 1;

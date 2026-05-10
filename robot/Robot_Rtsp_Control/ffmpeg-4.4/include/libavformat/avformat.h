@@ -478,8 +478,9 @@ typedef struct AVProbeData {
             read_timestamp */
 #define AVFMT_NOGENSEARCH                                                      \
   0x4000 /**< Format does not allow to fall back on generic search */
-#define AVFMT_NO_BYTE_SEEK 0x8000 /**< Format does not allow seeking by bytes  \
-                                   */
+#define AVFMT_NO_BYTE_SEEK                                                     \
+  0x8000 /**< Format does not allow seeking by bytes                           \
+          */
 #define AVFMT_ALLOW_FLUSH                                                      \
   0x10000 /**< Format allows flushing. If not set, the muxer will not receive  \
              a NULL packet in the write_packet function. */
@@ -823,10 +824,10 @@ enum AVStreamParseType {
   AVSTREAM_PARSE_FULL_ONCE,  /**< full parsing and repack of the first frame
                                 only, only implemented for H.264 currently */
   AVSTREAM_PARSE_FULL_RAW,   /**< full parsing and repack with timestamp and
-                                position generation by parser for raw   this assumes
-                                that each packet in the file contains no demuxer
-                                level headers and   just codec level data, otherwise
-                                position generation would fail */
+                                position generation by parser for raw   this
+                                assumes   that each packet in the file contains no
+                                demuxer   level headers and   just codec level data,
+                                otherwise   position generation would fail */
 };
 
 typedef struct AVIndexEntry {

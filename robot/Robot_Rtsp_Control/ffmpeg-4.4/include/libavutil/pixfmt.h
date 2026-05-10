@@ -458,10 +458,10 @@ enum AVPixelFormat {
   AV_PIX_FMT_GRAY9BE, ///<        Y        , 9bpp, big-endian
   AV_PIX_FMT_GRAY9LE, ///<        Y        , 9bpp, little-endian
 
-  AV_PIX_FMT_GBRPF32BE, ///< IEEE-754 single precision planar GBR 4:4:4, 96bpp,
-                        ///< big-endian
-  AV_PIX_FMT_GBRPF32LE, ///< IEEE-754 single precision planar GBR 4:4:4, 96bpp,
-                        ///< little-endian
+  AV_PIX_FMT_GBRPF32BE,  ///< IEEE-754 single precision planar GBR 4:4:4, 96bpp,
+                         ///< big-endian
+  AV_PIX_FMT_GBRPF32LE,  ///< IEEE-754 single precision planar GBR 4:4:4, 96bpp,
+                         ///< little-endian
   AV_PIX_FMT_GBRAPF32BE, ///< IEEE-754 single precision planar GBRA 4:4:4:4,
                          ///< 128bpp, big-endian
   AV_PIX_FMT_GBRAPF32LE, ///< IEEE-754 single precision planar GBRA 4:4:4:4,

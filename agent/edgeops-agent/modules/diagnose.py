@@ -17,4 +17,3 @@ def diagnose_logs():
                 results.append(f"{key} issue: {w}")
 
     return "; ".join(results) if results else None
-

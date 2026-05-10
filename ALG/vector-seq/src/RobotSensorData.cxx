@@ -389,4 +389,3 @@ std::vector<RobotSensorData>& RobotFrameInfoData::m_vec_Robot_Info()
 
 // Include auxiliary functions like for serializing/deserializing.
 #include "RobotSensorDataCdrAux.ipp"
-

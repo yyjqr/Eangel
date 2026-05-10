@@ -575,7 +575,7 @@ uint8_t *av_packet_new_side_data(AVPacket *pkt, enum AVPacketSideDataType type,
 #if FF_API_BUFFER_SIZE_T
                                  int size);
 #else
-                                  size_t size);
+                                 size_t size);
 #endif
 
 /**
@@ -623,7 +623,7 @@ uint8_t *av_packet_get_side_data(const AVPacket *pkt,
 #if FF_API_BUFFER_SIZE_T
                                  int *size);
 #else
-                                  size_t *size);
+                                 size_t *size);
 #endif
 
 #if FF_API_MERGE_SD_API

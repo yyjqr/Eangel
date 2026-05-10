@@ -21,4 +21,3 @@ def auto_heal(status, diag):
         return "Rebooted EdgeOps due to memory issue"
 
     return None
-

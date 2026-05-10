@@ -88,10 +88,10 @@
 #include "bmi088.h"
 #include "debug.h"
 #include "log.h"
-#include <string.h>
 #include <pthread.h>
+#include <string.h>
 
-pthread_mutex_t readACCMutex;  //避免加计数据和温度读取冲突 1212
+pthread_mutex_t readACCMutex; // 避免加计数据和温度读取冲突 1212
 /***************************************************************************/
 /**\name        Local structures
  ****************************************************************************/
@@ -123,7 +123,8 @@ static uint16_t null_ptr_check(struct bmi088_dev *dev);
  * @retval zero -> Success
  * @retval Any non zero value -> Fail
  */
-static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev);
+static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config,
+                                   struct bmi088_dev *dev);
 
 /*!
  * @brief This API sets the data ready interrupt for accel sensor
@@ -135,7 +136,9 @@ static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config, stru
  * @retval zero -> Success
  * @retval Any non zero value -> Fail
  */
-static uint16_t set_accel_data_ready_int(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev);
+static uint16_t
+set_accel_data_ready_int(const struct bmi088_int_cfg *int_config,
+                         struct bmi088_dev *dev);
 
 /*!
  * @brief This API writes the config stream data in memory using burst mode
@@ -148,7 +151,8 @@ static uint16_t set_accel_data_ready_int(const struct bmi088_int_cfg *int_config
  * @retval 0 -> Success
  * @retval Any non zero value -> Fail
  */
-static uint16_t stream_transfer_write(const uint8_t *stream_data, uint16_t index, struct bmi088_dev *dev);
+static uint16_t stream_transfer_write(const uint8_t *stream_data,
+                                      uint16_t index, struct bmi088_dev *dev);
 
 /*!
  * @brief This function enables and configures the Accel which is needed
@@ -173,13 +177,14 @@ static uint16_t set_accel_selftest_config(struct bmi088_dev *dev);
  * @retval zero -> Success
  * @retval Any non zero value -> Fail
  */
-static uint16_t validate_selftest(const struct bmi088_sensor_data *accel_data_diff);
+static uint16_t
+validate_selftest(const struct bmi088_sensor_data *accel_data_diff);
 
 /*!
  * @brief This API converts lsb value of axes to mg for self-test
  *
- * @param[in] accel_data_diff     : Pointer variable used to pass accel difference
- * values in g
+ * @param[in] accel_data_diff     : Pointer variable used to pass accel
+ * difference values in g
  * @param[out] accel_data_diff_mg : Pointer variable used to store accel
  * difference values in mg
  *
@@ -217,174 +222,151 @@ static struct bmi088_cfg accel_cfg_copy = {0};
 /*!
  *  @brief This API is the entry point for accel sensor.
  *  It performs the selection of I2C/SPI read mechanism according to the
- *  selected interface and reads the chip-id of accel sensor.  读取ACC chip ID 
+ *  selected interface and reads the chip-id of accel sensor.  读取ACC chip ID
  */
-uint16_t bmi088_accel_init(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t data = 0, reg_addr;
-    /* Check for null pointer in the device structure*/
-    // printf("FUNC:%s  TEST TEST line %d\n",__FUNCTION__,__LINE__);
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    // printf("FUNC:%s  line %d，dev is %d \n",__FUNCTION__,__LINE__,rslt);  //test 0823
-    if (rslt == BMI088_OK)
-    {
-        if (dev->interface == BMI088_SPI_INTF)
-        {
-            /* Set dummy byte in case of SPI interface*/
-            dev->dummy_byte = 1;
-        }
-        else
-        {
-            /* Make dummy byte 0 in case of I2C interface*/
-            dev->dummy_byte = 0;
-        }
-
-        reg_addr = BMI088_ACCEL_CHIP_ID_REG;
-        bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);  //TEST
-        printf("bmi 088 accel id 0x%x\n",data);
-        rslt |= bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);  //TEST
-        
-        if( BMI088_ACCEL_CHIP_ID != data)
-        {
-            dev->delay_ms(1);
-            rslt |= bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);  //TEST
-            printf(""STR_FAIL" bmi 088 accel id 0x%x\n",data);
-
-            //add soft reset Test 1212!!
-            rslt |= bmi088_accel_soft_reset(dev);
-            printf(" bmi 088 soft reset ......\n"); 
-        }
-        else
-        {
-            printf(" "STR_OK"bmi 088 accel id 0x%x\n",data);
-        }
-        
-
-        
-
-        if (rslt == BMI088_OK)
-        {
-            /* Assign Chip Id */
-            dev->accel_chip_id = data;
-
-            /* Initializing accel sensor parameters with default values */
-            dev->accel_cfg.bw = BMI088_ACCEL_BW_NORMAL;
-            dev->accel_cfg.power = BMI088_ACCEL_PM_ACTIVE;
-            dev->accel_cfg.range = BMI088_ACCEL_RANGE_3G;
-           
-
-            /* Copying accel_cfg parameters of device structure to
-             * accel_cfg_copy structure to maintain a copy */
-            accel_cfg_copy.bw = dev->accel_cfg.bw;
-            accel_cfg_copy.power = dev->accel_cfg.power;
-            accel_cfg_copy.range = dev->accel_cfg.range;
-            
-
-        }
-        else
-        {
-            rslt = BMI088_E_COM_FAIL;
-        }
-
+uint16_t bmi088_accel_init(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t data = 0, reg_addr;
+  /* Check for null pointer in the device structure*/
+  // printf("FUNC:%s  TEST TEST line %d\n",__FUNCTION__,__LINE__);
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  // printf("FUNC:%s  line %d，dev is %d \n",__FUNCTION__,__LINE__,rslt); //test
+  // 0823
+  if (rslt == BMI088_OK) {
+    if (dev->interface == BMI088_SPI_INTF) {
+      /* Set dummy byte in case of SPI interface*/
+      dev->dummy_byte = 1;
+    } else {
+      /* Make dummy byte 0 in case of I2C interface*/
+      dev->dummy_byte = 0;
     }
 
-    return rslt;
+    reg_addr = BMI088_ACCEL_CHIP_ID_REG;
+    bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev); // TEST
+    printf("bmi 088 accel id 0x%x\n", data);
+    rslt |= bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev); // TEST
+
+    if (BMI088_ACCEL_CHIP_ID != data) {
+      dev->delay_ms(1);
+      rslt |= bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev); // TEST
+      printf("" STR_FAIL " bmi 088 accel id 0x%x\n", data);
+
+      // add soft reset Test 1212!!
+      rslt |= bmi088_accel_soft_reset(dev);
+      printf(" bmi 088 soft reset ......\n");
+    } else {
+      printf(" " STR_OK "bmi 088 accel id 0x%x\n", data);
+    }
+
+    if (rslt == BMI088_OK) {
+      /* Assign Chip Id */
+      dev->accel_chip_id = data;
+
+      /* Initializing accel sensor parameters with default values */
+      dev->accel_cfg.bw = BMI088_ACCEL_BW_NORMAL;
+      dev->accel_cfg.power = BMI088_ACCEL_PM_ACTIVE;
+      dev->accel_cfg.range = BMI088_ACCEL_RANGE_3G;
+
+      /* Copying accel_cfg parameters of device structure to
+       * accel_cfg_copy structure to maintain a copy */
+      accel_cfg_copy.bw = dev->accel_cfg.bw;
+      accel_cfg_copy.power = dev->accel_cfg.power;
+      accel_cfg_copy.range = dev->accel_cfg.range;
+
+    } else {
+      rslt = BMI088_E_COM_FAIL;
+    }
+  }
+
+  return rslt;
 }
 
 /*!
  *  @brief This API is used to write the binary configuration in the sensor.
  */
-uint16_t bmi088_write_config_file(struct bmi088_dev *dev)
-{
-    uint16_t rslt = 0;
-    /* Disable advance power save*/
-    uint8_t adv_power_save = 0, reg_addr;
-    /* Config loading disable*/
-    uint8_t config_load = BMI088_DISABLE;
-    uint16_t index = 0;
-    uint8_t config_stream_status = 0;
+uint16_t bmi088_write_config_file(struct bmi088_dev *dev) {
+  uint16_t rslt = 0;
+  /* Disable advance power save*/
+  uint8_t adv_power_save = 0, reg_addr;
+  /* Config loading disable*/
+  uint8_t config_load = BMI088_DISABLE;
+  uint16_t index = 0;
+  uint8_t config_stream_status = 0;
 
-    reg_addr = BMI088_ACCEL_PWR_CONF_REG;
-    /* Disable advanced power save*/
-    rslt |= bmi088_set_accel_regs(reg_addr, &adv_power_save, BMI088_ONE, dev);
+  reg_addr = BMI088_ACCEL_PWR_CONF_REG;
+  /* Disable advanced power save*/
+  rslt |= bmi088_set_accel_regs(reg_addr, &adv_power_save, BMI088_ONE, dev);
 
-    /* Wait for sensor time synchronization. Refer the data-sheet for
-     more information*/
-    dev->delay_ms(BMI088_ONE);
+  /* Wait for sensor time synchronization. Refer the data-sheet for
+   more information*/
+  dev->delay_ms(BMI088_ONE);
 
-    if (rslt == BMI088_OK)
-    {
-        reg_addr = BMI088_ACCEL_INIT_CTRL_REG;
-        /* Disable config loading*/
-        rslt |= bmi088_set_accel_regs(reg_addr, &config_load, BMI088_ONE, dev);
+  if (rslt == BMI088_OK) {
+    reg_addr = BMI088_ACCEL_INIT_CTRL_REG;
+    /* Disable config loading*/
+    rslt |= bmi088_set_accel_regs(reg_addr, &config_load, BMI088_ONE, dev);
 
-        /* Write the config stream */
-        for (index = 0; index < BMI088_CONFIG_STREAM_SIZE; index += dev->read_write_len)
-        {
-            rslt |= stream_transfer_write((dev->config_file_ptr + index), index, dev);
-        }
-
-        /* Enable config loading and FIFO mode */
-        config_load = BMI088_ENABLE;
-
-        rslt |= bmi088_set_accel_regs(reg_addr, &config_load, BMI088_ONE, dev);
-
-        /* Wait till ASIC is initialized. Refer the data-sheet for
-         more information*/
-        dev->delay_ms(BMI088_ONE_FIFTY);
-
-        reg_addr = BMI088_ACCEL_INTERNAL_STAT_REG;
-        /* Read the status of config stream operation */
-        rslt |= bmi088_get_accel_regs(reg_addr, &config_stream_status, BMI088_ONE, dev);
-
-        if (config_stream_status != BMI088_ASIC_INITIALIZED)
-        {
-            rslt |= BMI088_E_CONFIG_STREAM_ERROR;
-        }
+    /* Write the config stream */
+    for (index = 0; index < BMI088_CONFIG_STREAM_SIZE;
+         index += dev->read_write_len) {
+      rslt |= stream_transfer_write((dev->config_file_ptr + index), index, dev);
     }
 
-    return rslt;
+    /* Enable config loading and FIFO mode */
+    config_load = BMI088_ENABLE;
 
+    rslt |= bmi088_set_accel_regs(reg_addr, &config_load, BMI088_ONE, dev);
+
+    /* Wait till ASIC is initialized. Refer the data-sheet for
+     more information*/
+    dev->delay_ms(BMI088_ONE_FIFTY);
+
+    reg_addr = BMI088_ACCEL_INTERNAL_STAT_REG;
+    /* Read the status of config stream operation */
+    rslt |=
+        bmi088_get_accel_regs(reg_addr, &config_stream_status, BMI088_ONE, dev);
+
+    if (config_stream_status != BMI088_ASIC_INITIALIZED) {
+      rslt |= BMI088_E_CONFIG_STREAM_ERROR;
+    }
+  }
+
+  return rslt;
 }
 
 /*!
- *  @brief This API reads the data from the given register address of accel sensor.
+ *  @brief This API reads the data from the given register address of accel
+ * sensor.
  */
 uint16_t bmi088_get_accel_regs(uint8_t reg_addr, uint8_t *data, uint16_t len,
-                               struct bmi088_dev *dev)
-{
-    /* variable used to return the status of communication result*/
-    uint16_t rslt = BMI088_OK;
-    uint16_t temp_len = len + dev->dummy_byte;
-    uint16_t i;
-    uint8_t temp_buff[temp_len];
-    uint8_t tmp_reg=-1;
-    
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        /* Configuring reg_addr for SPI Interface */
-        if (dev->interface == BMI088_SPI_INTF)
-        {
-            reg_addr = reg_addr | BMI088_SPI_RD_MASK;
-        }
-        
-        /* Read the data from the register */
-        pthread_mutex_lock(&readACCMutex);
-        rslt |= dev->readACC(dev->accel_id, reg_addr, temp_buff, temp_len);
-        pthread_mutex_unlock(&readACCMutex);
-        for (i = 0; i < len; i++)
-        {
-            data[i] = temp_buff[i + dev->dummy_byte];
-        }
+                               struct bmi088_dev *dev) {
+  /* variable used to return the status of communication result*/
+  uint16_t rslt = BMI088_OK;
+  uint16_t temp_len = len + dev->dummy_byte;
+  uint16_t i;
+  uint8_t temp_buff[temp_len];
+  uint8_t tmp_reg = -1;
+
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    /* Configuring reg_addr for SPI Interface */
+    if (dev->interface == BMI088_SPI_INTF) {
+      reg_addr = reg_addr | BMI088_SPI_RD_MASK;
     }
 
-    return rslt;
+    /* Read the data from the register */
+    pthread_mutex_lock(&readACCMutex);
+    rslt |= dev->readACC(dev->accel_id, reg_addr, temp_buff, temp_len);
+    pthread_mutex_unlock(&readACCMutex);
+    for (i = 0; i < len; i++) {
+      data[i] = temp_buff[i + dev->dummy_byte];
+    }
+  }
 
+  return rslt;
 }
 
 /*!
@@ -392,316 +374,280 @@ uint16_t bmi088_get_accel_regs(uint8_t reg_addr, uint8_t *data, uint16_t len,
  *  of accel sensor.
  */
 uint16_t bmi088_set_accel_regs(uint8_t reg_addr, uint8_t *data, uint16_t len,
-                               struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
+                               struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
 
-   
-    // printf("%s:reg 0x%x data 0x%x len %d\n", __FUNCTION__, reg_addr, *data, len);
-    //printf(" ");
-    
-    /* Check for null pointer in the device structure*/
+  // printf("%s:reg 0x%x data 0x%x len %d\n", __FUNCTION__, reg_addr, *data,
+  // len);
+  // printf(" ");
 
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if ((rslt == BMI088_OK) && (data != NULL) && (len != 0))
-    {
-        /* Configuring reg_addr for SPI Interface */
-        if (dev->interface == BMI088_SPI_INTF)
-        {
-            reg_addr = (reg_addr & BMI088_SPI_WR_MASK);
-        }
+  /* Check for null pointer in the device structure*/
 
-        /* write to an accel register */
-
-        rslt = dev->writeACC(dev->accel_id, reg_addr, data, len);
-
-        if (rslt != BMI088_OK)
-        {
-            rslt = BMI088_E_COM_FAIL;
-        }
-
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if ((rslt == BMI088_OK) && (data != NULL) && (len != 0)) {
+    /* Configuring reg_addr for SPI Interface */
+    if (dev->interface == BMI088_SPI_INTF) {
+      reg_addr = (reg_addr & BMI088_SPI_WR_MASK);
     }
 
-  
+    /* write to an accel register */
 
-    return rslt;
+    rslt = dev->writeACC(dev->accel_id, reg_addr, data, len);
+
+    if (rslt != BMI088_OK) {
+      rslt = BMI088_E_COM_FAIL;
+    }
+  }
+
+  return rslt;
 }
 
 /*!
  *  @brief This API reads the error status from the accel sensor.
  */
-uint16_t bmi088_get_accel_error_status(struct bmi088_err_reg *err_reg, struct bmi088_dev *dev)
-{
-    uint16_t rslt = 0;
-    uint8_t data = 0, reg_addr;
+uint16_t bmi088_get_accel_error_status(struct bmi088_err_reg *err_reg,
+                                       struct bmi088_dev *dev) {
+  uint16_t rslt = 0;
+  uint8_t data = 0, reg_addr;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        reg_addr = BMI088_ACCEL_ERR_REG;
-        /* Read the error codes */
-        rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    reg_addr = BMI088_ACCEL_ERR_REG;
+    /* Read the error codes */
+    rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
 
-        if (rslt == BMI088_OK)
-        {
+    if (rslt == BMI088_OK) {
 
-            /* Fatal error */
-            err_reg->fatal_err = BMI088_GET_BITSLICE(data, BMI088_FATAL_ERR);
-            /* Cmd error */
-            err_reg->cmd_err = BMI088_GET_BITSLICE(data, BMI088_CMD_ERR);
-            /* User error */
-            err_reg->err_code = BMI088_GET_BITSLICE(data, BMI088_ERR_CODE);
-        }
+      /* Fatal error */
+      err_reg->fatal_err = BMI088_GET_BITSLICE(data, BMI088_FATAL_ERR);
+      /* Cmd error */
+      err_reg->cmd_err = BMI088_GET_BITSLICE(data, BMI088_CMD_ERR);
+      /* User error */
+      err_reg->err_code = BMI088_GET_BITSLICE(data, BMI088_ERR_CODE);
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  *  @brief This API reads the status of the accel sensor.
  */
-uint16_t bmi088_get_accel_status(uint8_t *status, struct bmi088_dev *dev)
-{
-    uint16_t rslt = 0;
-    uint8_t data = 0, reg_addr;
+uint16_t bmi088_get_accel_status(uint8_t *status, struct bmi088_dev *dev) {
+  uint16_t rslt = 0;
+  uint8_t data = 0, reg_addr;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        reg_addr = BMI088_ACCEL_STATUS_REG;
-        /* Read the status */
-        rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-        if (rslt == BMI088_OK)
-        {
-            *status = data;
-            //status = BMI088_GET_BITSLICE(data,BMI088_ACCEL_STATUS);
-            //printf("status 0x%x data 0x%x\n", *status, data);
-        }
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    reg_addr = BMI088_ACCEL_STATUS_REG;
+    /* Read the status */
+    rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+    if (rslt == BMI088_OK) {
+      *status = data;
+      // status = BMI088_GET_BITSLICE(data,BMI088_ACCEL_STATUS);
+      // printf("status 0x%x data 0x%x\n", *status, data);
     }
+  }
 
-    return rslt;
-
+  return rslt;
 }
 
 /*!
  *  @brief This API resets the accel sensor.
  */
-uint16_t bmi088_accel_soft_reset(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data;
+uint16_t bmi088_accel_soft_reset(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        reg_addr = BMI088_ACCEL_SOFTRESET_REG;
-        data = BMI088_SOFT_RESET_VAL;
-        /* Reset accel device */
-        rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-        if (rslt == BMI088_OK)
-        {
-            /* Delay 1 ms after reset value is written to its register */
-            dev->delay_ms(BMI088_ACCEL_SOFTRESET_DELAY);
-        }
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    reg_addr = BMI088_ACCEL_SOFTRESET_REG;
+    data = BMI088_SOFT_RESET_VAL;
+    /* Reset accel device */
+    rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+    if (rslt == BMI088_OK) {
+      /* Delay 1 ms after reset value is written to its register */
+      dev->delay_ms(BMI088_ACCEL_SOFTRESET_DELAY);
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  * @brief This API sets the output data rate, range and bandwidth
  * of accel sensor.
  */
-uint16_t bmi088_set_accel_meas_conf(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data;
-    uint8_t bw, range, odr;
-    bool is_odr_invalid = false, is_bw_invalid = false, is_range_invalid = false;
+uint16_t bmi088_set_accel_meas_conf(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data;
+  uint8_t bw, range, odr;
+  bool is_odr_invalid = false, is_bw_invalid = false, is_range_invalid = false;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    odr = dev->accel_cfg.odr;
+    bw = dev->accel_cfg.bw;
+    range = dev->accel_cfg.range;
+
+    /* Check if odr and bandwidth are not previously configured odr and
+     * bandwidth */
+    // if ((odr != accel_cfg_copy.odr) || (bw != accel_cfg_copy.bw))
     {
-        odr = dev->accel_cfg.odr;
-        bw = dev->accel_cfg.bw;
-        range = dev->accel_cfg.range;
+      /* Check for valid odr */
+      if ((odr < BMI088_ACCEL_ODR_12_5_HZ) ||
+          (odr > BMI088_ACCEL_ODR_1600_HZ)) {
+        is_odr_invalid = true;
+        /* Since odr and bandwidth are written to the same
+         * register, use previous odr in case of invalid ODR.
+         * This will be helpful if valid bandwidth arrives */
+        odr = accel_cfg_copy.odr;
+      }
 
-        /* Check if odr and bandwidth are not previously configured odr and bandwidth */
-        // if ((odr != accel_cfg_copy.odr) || (bw != accel_cfg_copy.bw))
-        {
-            /* Check for valid odr */
-            if ((odr < BMI088_ACCEL_ODR_12_5_HZ) || (odr > BMI088_ACCEL_ODR_1600_HZ))
-            {
-                is_odr_invalid = true;
-                /* Since odr and bandwidth are written to the same
-                 * register, use previous odr in case of invalid ODR.
-                 * This will be helpful if valid bandwidth arrives */
-                odr = accel_cfg_copy.odr;
-            }
+      /* Check for valid bandwidth */
+      if (bw > BMI088_ACCEL_BW_NORMAL) {
+        is_bw_invalid = true;
+        /* Since bandwidth and odr are written to the same
+         * register, use previous bandwidth in case of
+         * invalid bandwidth.This will be helpful if valid
+         * odr arrives */
+        bw = accel_cfg_copy.bw;
+      }
 
-            /* Check for valid bandwidth */
-            if (bw > BMI088_ACCEL_BW_NORMAL)
-            {
-                is_bw_invalid = true;
-                /* Since bandwidth and odr are written to the same
-                 * register, use previous bandwidth in case of
-                 * invalid bandwidth.This will be helpful if valid
-                 * odr arrives */
-                bw = accel_cfg_copy.bw;
-            }
+      /* If either odr or bw is valid, write it to accel config. registers */
+      if ((!is_odr_invalid) || (!is_bw_invalid)) {
+        reg_addr = BMI088_ACCEL_CONF_REG;
+        /* Read accel config. register */
+        rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+        printf("bw is %d accel_cfg_copy.bw is %d \n", bw, accel_cfg_copy.bw);
+        printf("chip ACC_CONF: 0x%x  ######\n\n", data);
+        if (rslt == BMI088_OK) {
+          /* Update data with new odr and bw values */
+          data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_ODR, odr);
+          data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_BW, bw);
+          /* write to accel config. register */
+          rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
 
-            /* If either odr or bw is valid, write it to accel config. registers */
-            if ((!is_odr_invalid) || (!is_bw_invalid))
-            {
-                reg_addr = BMI088_ACCEL_CONF_REG;
-                /* Read accel config. register */
-                rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-                 printf("bw is %d accel_cfg_copy.bw is %d \n", bw,accel_cfg_copy.bw);
-                 printf("chip ACC_CONF: 0x%x  ######\n\n",data);
-                if (rslt == BMI088_OK)
-                {
-                    /* Update data with new odr and bw values */
-                    data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_ODR, odr);
-                    data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_BW, bw);
-                    /* write to accel config. register */
-                    rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-
-                    /* If rslt is ok, copy the current odr
-                     * and bw to accel_cfg_copy structure to
-                     * maintain a copy */
-                    if (rslt == BMI088_OK)
-                    {
-                        accel_cfg_copy.odr = odr;
-                        accel_cfg_copy.bw = bw;
-                    }
-                }
-            }
+          /* If rslt is ok, copy the current odr
+           * and bw to accel_cfg_copy structure to
+           * maintain a copy */
+          if (rslt == BMI088_OK) {
+            accel_cfg_copy.odr = odr;
+            accel_cfg_copy.bw = bw;
+          }
         }
-
-        /* Check if range is not previously configured range */
-        // if (range != accel_cfg_copy.range)
-        {
-            /* Check if range is valid */
-            if (range <= BMI088_ACCEL_RANGE_24G)
-            {
-                reg_addr = BMI088_ACCEL_RANGE_REG;
-                /* Read range register */
-                rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-                if (rslt == BMI088_OK)
-                {
-                    /* Update data with current range values */
-                    data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_RANGE, range);
-                    /* write to range register */
-                    rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-
-                    /* If rslt is ok, copy the current range
-                     * to accel_cfg_copy structure to
-                     * maintain a copy */
-                    if (rslt == BMI088_OK)
-                    {
-                        accel_cfg_copy.range = range;
-                    }
-                }
-            }
-            else
-            {
-                /* Range is invalid */
-                is_range_invalid = true;
-            }
-        }
+      }
     }
 
-    /* If invalid odr or bw or range arrive, make rslt invalid input */
-    if (is_odr_invalid || is_bw_invalid || is_range_invalid)
+    /* Check if range is not previously configured range */
+    // if (range != accel_cfg_copy.range)
     {
-        rslt = BMI088_E_INVALID_INPUT;
+      /* Check if range is valid */
+      if (range <= BMI088_ACCEL_RANGE_24G) {
+        reg_addr = BMI088_ACCEL_RANGE_REG;
+        /* Read range register */
+        rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+        if (rslt == BMI088_OK) {
+          /* Update data with current range values */
+          data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_RANGE, range);
+          /* write to range register */
+          rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+
+          /* If rslt is ok, copy the current range
+           * to accel_cfg_copy structure to
+           * maintain a copy */
+          if (rslt == BMI088_OK) {
+            accel_cfg_copy.range = range;
+          }
+        }
+      } else {
+        /* Range is invalid */
+        is_range_invalid = true;
+      }
     }
+  }
 
-    //add Test whether ACC is OK ?  
-     reg_addr = BMI088_ACCEL_CONF_REG; //读ACC_RANGE
-    rslt |= bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);  //TEST
-    printf("chip ACC_CONF: 0x%x  ######\n\n",data);
+  /* If invalid odr or bw or range arrive, make rslt invalid input */
+  if (is_odr_invalid || is_bw_invalid || is_range_invalid) {
+    rslt = BMI088_E_INVALID_INPUT;
+  }
 
-    reg_addr = BMI088_ACCEL_RANGE_REG;
-    rslt |= bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);  //TEST
-    printf("ACCEL_RANGE: %d  ######\n\n",data);
-    
-    //add ACC error GET and analysis 1211 
-    struct bmi088_err_reg errAnalysis;
-    memset (&errAnalysis,0,sizeof errAnalysis); //use "&err..." to get the struct addr!!!
-    if(data>3){
-        printf("" STR_FAIL"ACCEL_RANGE: %d  ######\n\n",data);
-        log_error("" STR_FAIL"ACCEL_RANGE: %d  ######\n\n",data);
-        bmi088_get_accel_error_status(&errAnalysis,dev);
-        printf("the ACC error code is %d !!\n",errAnalysis.err_code);
-    }
+  // add Test whether ACC is OK ?
+  reg_addr = BMI088_ACCEL_CONF_REG; // 读ACC_RANGE
+  rslt |= bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev); // TEST
+  printf("chip ACC_CONF: 0x%x  ######\n\n", data);
 
-    return rslt;
+  reg_addr = BMI088_ACCEL_RANGE_REG;
+  rslt |= bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev); // TEST
+  printf("ACCEL_RANGE: %d  ######\n\n", data);
+
+  // add ACC error GET and analysis 1211
+  struct bmi088_err_reg errAnalysis;
+  memset(&errAnalysis, 0,
+         sizeof errAnalysis); // use "&err..." to get the struct addr!!!
+  if (data > 3) {
+    printf("" STR_FAIL "ACCEL_RANGE: %d  ######\n\n", data);
+    log_error("" STR_FAIL "ACCEL_RANGE: %d  ######\n\n", data);
+    bmi088_get_accel_error_status(&errAnalysis, dev);
+    printf("the ACC error code is %d !!\n", errAnalysis.err_code);
+  }
+
+  return rslt;
 }
 
 /*!
  * @brief This API sets the power mode of the accel sensor.
  */
-uint16_t bmi088_set_accel_power_mode(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, power;
-    uint8_t data[2];
+uint16_t bmi088_set_accel_power_mode(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, power;
+  uint8_t data[2];
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    power = dev->accel_cfg.power;
+    /* Check if current power is not previously configured power */
+    // if (power != accel_cfg_copy.power)
     {
-        power = dev->accel_cfg.power;
-        /* Check if current power is not previously configured power */
-        // if (power != accel_cfg_copy.power)
-        {
-            /* Configure data array to write to accel power configuration register */
-            if (power == BMI088_ACCEL_PM_ACTIVE)
-            {
-                data[0] = BMI088_ACCEL_PM_ACTIVE;
-                data[1] = BMI088_ACCEL_POWER_ENABLE;
-            }
-            else if (power == BMI088_ACCEL_PM_SUSPEND)
-            {
-                data[0] = BMI088_ACCEL_PM_SUSPEND;
-                data[1] = BMI088_ACCEL_POWER_DISABLE;
-            }
-            else
-            {
-                /* Invalid power input */
-                rslt = BMI088_E_INVALID_INPUT;
-            }
+      /* Configure data array to write to accel power configuration register */
+      if (power == BMI088_ACCEL_PM_ACTIVE) {
+        data[0] = BMI088_ACCEL_PM_ACTIVE;
+        data[1] = BMI088_ACCEL_POWER_ENABLE;
+      } else if (power == BMI088_ACCEL_PM_SUSPEND) {
+        data[0] = BMI088_ACCEL_PM_SUSPEND;
+        data[1] = BMI088_ACCEL_POWER_DISABLE;
+      } else {
+        /* Invalid power input */
+        rslt = BMI088_E_INVALID_INPUT;
+      }
 
-            if (rslt == BMI088_OK)
-            {
-                reg_addr = BMI088_ACCEL_PWR_CONF_REG;
-                /* write to accel power configuration register */
-                rslt = bmi088_set_accel_regs(reg_addr, data, BMI088_TWO, dev);
+      if (rslt == BMI088_OK) {
+        reg_addr = BMI088_ACCEL_PWR_CONF_REG;
+        /* write to accel power configuration register */
+        rslt = bmi088_set_accel_regs(reg_addr, data, BMI088_TWO, dev);
 
-                /* If rslt is ok, copy the current power
-                 * to accel_cfg_copy structure to maintain
-                 * a copy */
-                if (rslt == BMI088_OK)
-                {
-                    accel_cfg_copy.power = power;
-                }
-            }
-
+        /* If rslt is ok, copy the current power
+         * to accel_cfg_copy structure to maintain
+         * a copy */
+        if (rslt == BMI088_OK) {
+          accel_cfg_copy.power = power;
         }
+      }
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
@@ -710,41 +656,38 @@ uint16_t bmi088_set_accel_power_mode(struct bmi088_dev *dev)
  * passed by the user.
  */
 uint16_t bmi088_get_accel_data(struct bmi088_sensor_data *accel,
-                               struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t index = 0, reg_addr, data[6];
-    uint32_t lsb, msb, msblsb;
+                               struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t index = 0, reg_addr, data[6];
+  uint32_t lsb, msb, msblsb;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if ((rslt == BMI088_OK) && (accel != NULL))
-    {
-        /* Read accel sensor data */
-        reg_addr = BMI088_ACCEL_X_LSB_REG;
-        rslt = bmi088_get_accel_regs(reg_addr, data, BMI088_SIX, dev);
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if ((rslt == BMI088_OK) && (accel != NULL)) {
+    /* Read accel sensor data */
+    reg_addr = BMI088_ACCEL_X_LSB_REG;
+    rslt = bmi088_get_accel_regs(reg_addr, data, BMI088_SIX, dev);
 
-        if (rslt == BMI088_OK)
-        {
-            lsb = (uint32_t)data[index++];
-            msb = (uint32_t)data[index++];
-            msblsb = (msb << BMI088_EIGHT) | lsb;
-            accel->x = ((int16_t)msblsb); /* Data in X axis */
+    if (rslt == BMI088_OK) {
+      lsb = (uint32_t)data[index++];
+      msb = (uint32_t)data[index++];
+      msblsb = (msb << BMI088_EIGHT) | lsb;
+      accel->x = ((int16_t)msblsb); /* Data in X axis */
 
-            lsb = (uint32_t)data[index++];
-            msb = (uint32_t)data[index++];
-            msblsb = (msb << BMI088_EIGHT) | lsb;
-            accel->y = ((int16_t)msblsb); /* Data in Y axis */
+      lsb = (uint32_t)data[index++];
+      msb = (uint32_t)data[index++];
+      msblsb = (msb << BMI088_EIGHT) | lsb;
+      accel->y = ((int16_t)msblsb); /* Data in Y axis */
 
-            lsb = (uint32_t)data[index++];
-            msb = (uint32_t)data[index++];
-            msblsb = (msb << BMI088_EIGHT) | lsb;
-            accel->z = ((int16_t)msblsb); /* Data in Z axis */
-        }
+      lsb = (uint32_t)data[index++];
+      msb = (uint32_t)data[index++];
+      msblsb = (msb << BMI088_EIGHT) | lsb;
+      accel->z = ((int16_t)msblsb); /* Data in Z axis */
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
@@ -752,229 +695,203 @@ uint16_t bmi088_get_accel_data(struct bmi088_sensor_data *accel,
  * based on the user settings in the bmi088_int_cfg
  * structure instance.
  */
-uint16_t bmi088_set_accel_int_config(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
+uint16_t bmi088_set_accel_int_config(const struct bmi088_int_cfg *int_config,
+                                     struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
 
-    switch (int_config->accel_int_type)
-    {
-        case BMI088_ACCEL_DATA_RDY_INT:
-            {
-            /* Data ready interrupt */
-            rslt = set_accel_data_ready_int(int_config, dev);
-        }
-            break;
-        default:
-            break;
-    }
+  switch (int_config->accel_int_type) {
+  case BMI088_ACCEL_DATA_RDY_INT: {
+    /* Data ready interrupt */
+    rslt = set_accel_data_ready_int(int_config, dev);
+  } break;
+  default:
+    break;
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  * @brief This API switches accel sensor on or off.
  */
-uint16_t bmi088_accel_switch_control(struct bmi088_dev *dev, uint8_t switch_input)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data = switch_input;
+uint16_t bmi088_accel_switch_control(struct bmi088_dev *dev,
+                                     uint8_t switch_input) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data = switch_input;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        if (BMI088_ACCEL_POWER_ENABLE == switch_input)
-        {
-            reg_addr = BMI088_ACCEL_PWR_CONF_REG;
-            data = BMI088_ACCEL_PM_ACTIVE;
-            rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-        }
-        else if (BMI088_ACCEL_POWER_DISABLE == switch_input)
-        {
-            reg_addr = BMI088_ACCEL_PWR_CONF_REG;
-            data = BMI088_ACCEL_PM_SUSPEND;
-            rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-        }
-        
-         
-        /* Check if switch input is valid */
-        if ((switch_input == BMI088_ACCEL_POWER_DISABLE) || (switch_input == BMI088_ACCEL_POWER_ENABLE))
-        {
-            data = switch_input;
-            reg_addr = BMI088_ACCEL_PWR_CTRL_REG;
-            /* write to accel power control register  */
-            rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-        }
-        else
-        {
-            rslt = BMI088_E_INVALID_INPUT;
-        }
-
-        dev->delay_ms(1);
-        // reg_addr = BMI088_ACCEL_CHIP_ID_REG;
-        // data = 0x0;
-        // bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);  //TEST
-   
-    
-
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    if (BMI088_ACCEL_POWER_ENABLE == switch_input) {
+      reg_addr = BMI088_ACCEL_PWR_CONF_REG;
+      data = BMI088_ACCEL_PM_ACTIVE;
+      rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+    } else if (BMI088_ACCEL_POWER_DISABLE == switch_input) {
+      reg_addr = BMI088_ACCEL_PWR_CONF_REG;
+      data = BMI088_ACCEL_PM_SUSPEND;
+      rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
     }
 
-    return rslt;
+    /* Check if switch input is valid */
+    if ((switch_input == BMI088_ACCEL_POWER_DISABLE) ||
+        (switch_input == BMI088_ACCEL_POWER_ENABLE)) {
+      data = switch_input;
+      reg_addr = BMI088_ACCEL_PWR_CTRL_REG;
+      /* write to accel power control register  */
+      rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+    } else {
+      rslt = BMI088_E_INVALID_INPUT;
+    }
+
+    dev->delay_ms(1);
+    // reg_addr = BMI088_ACCEL_CHIP_ID_REG;
+    // data = 0x0;
+    // bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);  //TEST
+  }
+
+  return rslt;
 }
 
 /*!
  * @brief This API reads the temperature of the sensor in � Celcius.
  */
-uint16_t bmi088_get_sensor_temperature(struct bmi088_dev *dev, float *sensor_temp)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data[2] = { 0 };
-    uint16_t msb, lsb;
-    int16_t msblsb;
+uint16_t bmi088_get_sensor_temperature(struct bmi088_dev *dev,
+                                       float *sensor_temp) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data[2] = {0};
+  uint16_t msb, lsb;
+  int16_t msblsb;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        reg_addr = BMI088_TEMP_MSB_REG;
-        /* Read sensor temperature */
-        rslt = bmi088_get_accel_regs(reg_addr, data, BMI088_TWO, dev);
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    reg_addr = BMI088_TEMP_MSB_REG;
+    /* Read sensor temperature */
+    rslt = bmi088_get_accel_regs(reg_addr, data, BMI088_TWO, dev);
 
-        if (rslt == BMI088_OK)
-        {
-            msb = (data[0] << BMI088_THREE); /* MSB data */
-            lsb = (data[1] >> BMI088_FIVE); /* LSB data */
-            msblsb = (int16_t)(msb + lsb);
+    if (rslt == BMI088_OK) {
+      msb = (data[0] << BMI088_THREE); /* MSB data */
+      lsb = (data[1] >> BMI088_FIVE);  /* LSB data */
+      msblsb = (int16_t)(msb + lsb);
 
-            if (msblsb > 1023)
-            {
-                msblsb = msblsb - 2048;
-            }
-            /* sensor temperature */
-            *sensor_temp = (msblsb * 0.125) + 23;
-        }
+      if (msblsb > 1023) {
+        msblsb = msblsb - 2048;
+      }
+      /* sensor temperature */
+      *sensor_temp = (msblsb * 0.125) + 23;
     }
+  }
 
-    return rslt;
-
+  return rslt;
 }
 
 /*!
  *  @brief This API reads the sensor time of the sensor.
  */
-uint16_t bmi088_get_sensor_time(struct bmi088_dev *dev, uint32_t *sensor_time)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data[3] = { 0 };
-    uint32_t byte2, byte1, byte0;
+uint16_t bmi088_get_sensor_time(struct bmi088_dev *dev, uint32_t *sensor_time) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data[3] = {0};
+  uint32_t byte2, byte1, byte0;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        reg_addr = BMI088_ACCEL_SENSORTIME_0_REG;
-        /* Read 3-byte sensor time */
-        rslt = bmi088_get_accel_regs(reg_addr, data, BMI088_THREE, dev);
-        if (rslt == BMI088_OK)
-        {
-            byte0 = data[0]; 						/* Lower byte */
-            byte1 = (data[1] << BMI088_EIGHT); 		/* Middle byte */
-            byte2 = (data[2] << BMI088_SIXTEEN); 	/* Higher byte */
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    reg_addr = BMI088_ACCEL_SENSORTIME_0_REG;
+    /* Read 3-byte sensor time */
+    rslt = bmi088_get_accel_regs(reg_addr, data, BMI088_THREE, dev);
+    if (rslt == BMI088_OK) {
+      byte0 = data[0];                     /* Lower byte */
+      byte1 = (data[1] << BMI088_EIGHT);   /* Middle byte */
+      byte2 = (data[2] << BMI088_SIXTEEN); /* Higher byte */
 
-            /* Sensor time */
-            *sensor_time = (byte2 | byte1 | byte0);
-        }
+      /* Sensor time */
+      *sensor_time = (byte2 | byte1 | byte0);
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  *  @brief This API checks whether the self test functionality of the sensor
  *  is working or not.
  */
-uint16_t bmi088_perform_accel_selftest(int8_t *result, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    struct bmi088_sensor_data positive = { 0 };
-    struct bmi088_sensor_data negative = { 0 };
-    /*! Structure for difference of accel values in g*/
-    struct bmi088_sensor_data accel_data_diff = { 0 };
-    /*! Structure for difference of accel values in mg*/
-    struct bmi088_sensor_data accel_data_diff_mg = { 0 };
-    uint8_t status;
-    *result = BMI088_SELFTEST_FAIL;
+uint16_t bmi088_perform_accel_selftest(int8_t *result, struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  struct bmi088_sensor_data positive = {0};
+  struct bmi088_sensor_data negative = {0};
+  /*! Structure for difference of accel values in g*/
+  struct bmi088_sensor_data accel_data_diff = {0};
+  /*! Structure for difference of accel values in mg*/
+  struct bmi088_sensor_data accel_data_diff_mg = {0};
+  uint8_t status;
+  *result = BMI088_SELFTEST_FAIL;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        rslt |= set_accel_selftest_config(dev);
-        dev->delay_ms(20);
-        rslt |= bmi088_set_accel_selftest(BMI088_ACCEL_POSITIVE_SELF_TEST, dev);
-        if (rslt == BMI088_OK)
-        {
-            dev->delay_ms(BMI088_HUNDRED);            
-            rslt |= bmi088_get_accel_data(&positive, dev);
-            rslt |= bmi088_set_accel_selftest(BMI088_ACCEL_NEGATIVE_SELF_TEST, dev);
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    rslt |= set_accel_selftest_config(dev);
+    dev->delay_ms(20);
+    rslt |= bmi088_set_accel_selftest(BMI088_ACCEL_POSITIVE_SELF_TEST, dev);
+    if (rslt == BMI088_OK) {
+      dev->delay_ms(BMI088_HUNDRED);
+      rslt |= bmi088_get_accel_data(&positive, dev);
+      rslt |= bmi088_set_accel_selftest(BMI088_ACCEL_NEGATIVE_SELF_TEST, dev);
 
-            if (rslt == BMI088_OK)
-            {
-                dev->delay_ms(100);
-                rslt |= bmi088_get_accel_data(&negative, dev);
-                rslt |= bmi088_set_accel_selftest(BMI088_ACCEL_SWITCH_OFF_SELF_TEST, dev);
+      if (rslt == BMI088_OK) {
+        dev->delay_ms(100);
+        rslt |= bmi088_get_accel_data(&negative, dev);
+        rslt |=
+            bmi088_set_accel_selftest(BMI088_ACCEL_SWITCH_OFF_SELF_TEST, dev);
 
-                accel_data_diff.x = ABS(positive.x) + ABS(negative.x);
-                accel_data_diff.y = ABS(positive.y) + ABS(negative.y);
-                accel_data_diff.z = ABS(positive.z) + ABS(negative.z);
+        accel_data_diff.x = ABS(positive.x) + ABS(negative.x);
+        accel_data_diff.y = ABS(positive.y) + ABS(negative.y);
+        accel_data_diff.z = ABS(positive.z) + ABS(negative.z);
 
-                /*! Converting LSB of the differences of
-                 accel values to mg */
-                convert_lsb_g(&accel_data_diff, &accel_data_diff_mg);
-                /*! Validating self test for
-                 accel values in mg */
-                rslt |= validate_selftest(&accel_data_diff_mg);
+        /*! Converting LSB of the differences of
+         accel values to mg */
+        convert_lsb_g(&accel_data_diff, &accel_data_diff_mg);
+        /*! Validating self test for
+         accel values in mg */
+        rslt |= validate_selftest(&accel_data_diff_mg);
 
-                if (rslt == BMI088_OK)
-                {
-                    *result = BMI088_SELFTEST_PASS;
-                    dev->delay_ms(BMI088_HUNDRED);
-                }
-
-                /* Triggers a soft reset */
-                rslt |= bmi088_accel_soft_reset(dev);
-            }
+        if (rslt == BMI088_OK) {
+          *result = BMI088_SELFTEST_PASS;
+          dev->delay_ms(BMI088_HUNDRED);
         }
-    }
 
-    return rslt;
+        /* Triggers a soft reset */
+        rslt |= bmi088_accel_soft_reset(dev);
+      }
+    }
+  }
+
+  return rslt;
 }
 
 /*!
  *  @brief This API enables or disables the Accel Self test feature in the
  *  sensor.
  */
-uint16_t bmi088_set_accel_selftest(uint8_t selftest, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data = 0;
+uint16_t bmi088_set_accel_selftest(uint8_t selftest, struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data = 0;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        reg_addr = BMI088_ACCEL_SELF_TEST_REG;
-        data = selftest;
-        /* Write to accel selftest register */
-        rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-    }
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    reg_addr = BMI088_ACCEL_SELF_TEST_REG;
+    data = selftest;
+    /* Write to accel selftest register */
+    rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*****************************************************************************/
@@ -983,221 +900,204 @@ uint16_t bmi088_set_accel_selftest(uint8_t selftest, struct bmi088_dev *dev)
  * @brief This API is used to validate the device structure pointer for
  * null conditions.
  */
-static uint16_t null_ptr_check(struct bmi088_dev *dev)
-{
-    uint16_t rslt;
+static uint16_t null_ptr_check(struct bmi088_dev *dev) {
+  uint16_t rslt;
 
-    if ((dev == NULL) || (dev->readACC == NULL) || (dev->write == NULL) || (dev->delay_ms == NULL))
-    {
-        /* Device structure pointer is not valid */
-        rslt = BMI088_E_NULL_PTR;
-    }
-    else
-    {
-        /* Device structure is fine */
-        rslt = BMI088_OK;
-    }
+  if ((dev == NULL) || (dev->readACC == NULL) || (dev->write == NULL) ||
+      (dev->delay_ms == NULL)) {
+    /* Device structure pointer is not valid */
+    rslt = BMI088_E_NULL_PTR;
+  } else {
+    /* Device structure is fine */
+    rslt = BMI088_OK;
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  * @brief This API configures the pins which fire the
  * interrupt signal when any interrupt occurs.
  */
-static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data;
+static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config,
+                                   struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if ((rslt == BMI088_OK) && (int_config != NULL))
-    {
-        /* update reg_addr based on channel inputs */
-        if (int_config->accel_int_channel == BMI088_INT_CHANNEL_1)
-        {
-            reg_addr = BMI088_ACCEL_INT1_IO_CONF_REG;
-        }
-
-        if (int_config->accel_int_channel == BMI088_INT_CHANNEL_2)
-        {
-            reg_addr = BMI088_ACCEL_INT2_IO_CONF_REG;
-        }
-
-        /* Read interrupt pin configuration register */
-        rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-
-        if (rslt == BMI088_OK)
-        {
-            /* Update data with user configured bmi088_int_cfg structure */
-            data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT2_LVL, int_config->accel_int_pin_cfg.lvl);
-            data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT2_OD, int_config->accel_int_pin_cfg.output_mode);
-            data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT2_IO, int_config->accel_int_pin_cfg.enable_int_pin);
-
-            /* Write to interrupt pin configuration register */
-            rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-        }
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if ((rslt == BMI088_OK) && (int_config != NULL)) {
+    /* update reg_addr based on channel inputs */
+    if (int_config->accel_int_channel == BMI088_INT_CHANNEL_1) {
+      reg_addr = BMI088_ACCEL_INT1_IO_CONF_REG;
     }
 
-    return rslt;
+    if (int_config->accel_int_channel == BMI088_INT_CHANNEL_2) {
+      reg_addr = BMI088_ACCEL_INT2_IO_CONF_REG;
+    }
 
+    /* Read interrupt pin configuration register */
+    rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+
+    if (rslt == BMI088_OK) {
+      /* Update data with user configured bmi088_int_cfg structure */
+      data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT2_LVL,
+                                 int_config->accel_int_pin_cfg.lvl);
+      data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT2_OD,
+                                 int_config->accel_int_pin_cfg.output_mode);
+      data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT2_IO,
+                                 int_config->accel_int_pin_cfg.enable_int_pin);
+
+      /* Write to interrupt pin configuration register */
+      rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+    }
+  }
+
+  return rslt;
 }
 
 /*!
  * @brief This API sets the data ready interrupt for accel sensor.
  */
-static uint16_t set_accel_data_ready_int(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data;
+static uint16_t
+set_accel_data_ready_int(const struct bmi088_int_cfg *int_config,
+                         struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if ((rslt == BMI088_OK) && (int_config != NULL))
-    {
-        reg_addr = BMI088_ACCEL_INT1_INT2_MAP_DATA_REG;
-        /* Read interrupt map register */
-        rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if ((rslt == BMI088_OK) && (int_config != NULL)) {
+    reg_addr = BMI088_ACCEL_INT1_INT2_MAP_DATA_REG;
+    /* Read interrupt map register */
+    rslt = bmi088_get_accel_regs(reg_addr, &data, BMI088_ONE, dev);
 
-        if (rslt == BMI088_OK)
-        {
-            /* Update data to map data ready interrupt to appropriate interrupt pins */
-            if (int_config->accel_int_channel == BMI088_INT_CHANNEL_1)
-            {
-                data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT1_DRDY, BMI088_ENABLE);
-            }
+    if (rslt == BMI088_OK) {
+      /* Update data to map data ready interrupt to appropriate interrupt pins
+       */
+      if (int_config->accel_int_channel == BMI088_INT_CHANNEL_1) {
+        data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT1_DRDY, BMI088_ENABLE);
+      }
 
-            if (int_config->accel_int_channel == BMI088_INT_CHANNEL_2)
-            {
-                data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT2_DRDY, BMI088_ENABLE);
-            }
+      if (int_config->accel_int_channel == BMI088_INT_CHANNEL_2) {
+        data = BMI088_SET_BITSLICE(data, BMI088_ACCEL_INT2_DRDY, BMI088_ENABLE);
+      }
 
-            /* Write to interrupt map register */
-            rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
-            /* Configure interrupt pins */
-            rslt |= set_int_pin_config(int_config, dev);
-        }
+      /* Write to interrupt map register */
+      rslt = bmi088_set_accel_regs(reg_addr, &data, BMI088_ONE, dev);
+      /* Configure interrupt pins */
+      rslt |= set_int_pin_config(int_config, dev);
     }
+  }
 
-    return rslt;
-
+  return rslt;
 }
 
 /*!
  *  @brief This API writes the config stream data in memory using burst mode.
  */
-static uint16_t stream_transfer_write(const uint8_t *stream_data, uint16_t index, struct bmi088_dev *dev)
-{
-    uint16_t rslt = 0;
-    uint8_t asic_msb = (uint8_t)((index / 2) >> 4);
-    uint8_t asic_lsb = ((index / 2) & 0x0F);
-    uint8_t reg_addr;
+static uint16_t stream_transfer_write(const uint8_t *stream_data,
+                                      uint16_t index, struct bmi088_dev *dev) {
+  uint16_t rslt = 0;
+  uint8_t asic_msb = (uint8_t)((index / 2) >> 4);
+  uint8_t asic_lsb = ((index / 2) & 0x0F);
+  uint8_t reg_addr;
 
+  /* Write to feature config register */
+  reg_addr = BMI088_ACCEL_RESERVED_5B_REG;
+  rslt |= bmi088_set_accel_regs(reg_addr, &asic_lsb, BMI088_ONE, dev);
+
+  if (rslt == BMI088_OK) {
     /* Write to feature config register */
-    reg_addr = BMI088_ACCEL_RESERVED_5B_REG;
-    rslt |= bmi088_set_accel_regs(reg_addr, &asic_lsb, BMI088_ONE, dev);
+    reg_addr = BMI088_ACCEL_RESERVED_5C_REG;
+    rslt |= bmi088_set_accel_regs(reg_addr, &asic_msb, BMI088_ONE, dev);
 
-    if (rslt == BMI088_OK)
-    {
-        /* Write to feature config register */
-        reg_addr = BMI088_ACCEL_RESERVED_5C_REG;
-        rslt |= bmi088_set_accel_regs(reg_addr, &asic_msb, BMI088_ONE, dev);
-
-        if (rslt == BMI088_OK)
-        {
-            /* Write to feature config registers */
-            reg_addr = BMI088_ACCEL_FEATURE_CFG_REG;
-            rslt |= bmi088_set_accel_regs(reg_addr, (uint8_t *)stream_data, dev->read_write_len, dev);
-        }
+    if (rslt == BMI088_OK) {
+      /* Write to feature config registers */
+      reg_addr = BMI088_ACCEL_FEATURE_CFG_REG;
+      rslt |= bmi088_set_accel_regs(reg_addr, (uint8_t *)stream_data,
+                                    dev->read_write_len, dev);
     }
+  }
 
-    return rslt;
-
+  return rslt;
 }
 
 /*!
  *  @brief This function enables and configures the Accel which is needed
  *  for Self test operation.
  */
-static uint16_t set_accel_selftest_config(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
+static uint16_t set_accel_selftest_config(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
 
-    /* Configuring sensors to perform accel self test */
-    dev->accel_cfg.odr = BMI088_ACCEL_ODR_1600_HZ;
-    dev->accel_cfg.bw = BMI088_ACCEL_BW_NORMAL;
-    dev->accel_cfg.range = BMI088_ACCEL_RANGE_24G;
+  /* Configuring sensors to perform accel self test */
+  dev->accel_cfg.odr = BMI088_ACCEL_ODR_1600_HZ;
+  dev->accel_cfg.bw = BMI088_ACCEL_BW_NORMAL;
+  dev->accel_cfg.range = BMI088_ACCEL_RANGE_24G;
 
-    /* Enable Accel sensor */
-    rslt = bmi088_accel_switch_control(dev, BMI088_ACCEL_POWER_ENABLE);
-    /* Configure sensors with above configured settings */
-    rslt |= bmi088_set_accel_meas_conf(dev);
+  /* Enable Accel sensor */
+  rslt = bmi088_accel_switch_control(dev, BMI088_ACCEL_POWER_ENABLE);
+  /* Configure sensors with above configured settings */
+  rslt |= bmi088_set_accel_meas_conf(dev);
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  *  @brief This function validates the Accel Self test data and decides the
  *  result of Self test operation.
  */
-static uint16_t validate_selftest(const struct bmi088_sensor_data *accel_data_diff)
-{
-    uint16_t rslt;
+static uint16_t
+validate_selftest(const struct bmi088_sensor_data *accel_data_diff) {
+  uint16_t rslt;
 
-    /* Validating accel data by comparing with minimum value of the axes in mg */
-    /* x axis limit 1000mg, y axis limit 1000mg and z axis limit 500mg */
-    if (accel_data_diff->x >= 1000 && accel_data_diff->y >= 1000 && accel_data_diff->z >= 500)
-    {
-        rslt = BMI088_OK;
-    }
-    else
-    {
-        rslt = BMI088_E_SELF_TEST_FAIL;
-    }
+  /* Validating accel data by comparing with minimum value of the axes in mg */
+  /* x axis limit 1000mg, y axis limit 1000mg and z axis limit 500mg */
+  if (accel_data_diff->x >= 1000 && accel_data_diff->y >= 1000 &&
+      accel_data_diff->z >= 500) {
+    rslt = BMI088_OK;
+  } else {
+    rslt = BMI088_E_SELF_TEST_FAIL;
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  *  @brief This API converts lsb value of axes to mg for self-test.
  */
 static void convert_lsb_g(const struct bmi088_sensor_data *accel_data_diff,
-                          struct bmi088_sensor_data *accel_data_diff_mg)
-{
-    uint32_t lsb_per_g;
-    /* Range considered for self-test is 24g */
-    uint8_t range = 16;
+                          struct bmi088_sensor_data *accel_data_diff_mg) {
+  uint32_t lsb_per_g;
+  /* Range considered for self-test is 24g */
+  uint8_t range = 16;
 
-    /* lsb_per_g for the 16-bit resolution and 24g range*/
-    lsb_per_g = (uint32_t)(power(2, BMI088_16_BIT_RESOLUTION) / (2 * range));
-    /* accel x value in mg */
-    accel_data_diff_mg->x = (accel_data_diff->x / (int32_t)lsb_per_g) * 1000;
-    /* accel y value in mg */
-    accel_data_diff_mg->y = (accel_data_diff->y / (int32_t)lsb_per_g) * 1000;
-    /* accel z value in mg */
-    accel_data_diff_mg->z = (accel_data_diff->z / (int32_t)lsb_per_g) * 1000;
+  /* lsb_per_g for the 16-bit resolution and 24g range*/
+  lsb_per_g = (uint32_t)(power(2, BMI088_16_BIT_RESOLUTION) / (2 * range));
+  /* accel x value in mg */
+  accel_data_diff_mg->x = (accel_data_diff->x / (int32_t)lsb_per_g) * 1000;
+  /* accel y value in mg */
+  accel_data_diff_mg->y = (accel_data_diff->y / (int32_t)lsb_per_g) * 1000;
+  /* accel z value in mg */
+  accel_data_diff_mg->z = (accel_data_diff->z / (int32_t)lsb_per_g) * 1000;
 }
 
 /*!
  * @brief This API is used to calculate the power of given
  * base value.
  */
-static int32_t power(int16_t base, uint8_t resolution)
-{
-    uint8_t i = 1;
-    /* Initialize variable to store the power of 2 value */
-    int32_t value = 1;
+static int32_t power(int16_t base, uint8_t resolution) {
+  uint8_t i = 1;
+  /* Initialize variable to store the power of 2 value */
+  int32_t value = 1;
 
-    for (; i <= resolution; i++)
-    {
-        value = (int32_t)(value * base);
-    }
+  for (; i <= resolution; i++) {
+    value = (int32_t)(value * base);
+  }
 
-    return value;
+  return value;
 }
 
 /** @}*/
-

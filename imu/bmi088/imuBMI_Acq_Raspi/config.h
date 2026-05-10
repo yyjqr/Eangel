@@ -18,14 +18,14 @@
 #define MAX_LEN_ENTRY_NAME 64
 #define MAX_LEN_ENTRY_VALUE 128
 
-
-int openConfigFile(char * confFileName);
-int getConfigEntry(char * grpName, char * entryName, char * entryBuf, int entryBufSize);
-int setConfigEntry(char * grpName, char * entryName, char * entryBuf, int entryBufSize);
+int openConfigFile(char *confFileName);
+int getConfigEntry(char *grpName, char *entryName, char *entryBuf,
+                   int entryBufSize);
+int setConfigEntry(char *grpName, char *entryName, char *entryBuf,
+                   int entryBufSize);
 int saveConfigFile();
 int closeConfigFile();
 
 int dumpConfigs();
 
 #endif
-

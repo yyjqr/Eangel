@@ -358,7 +358,7 @@ class SimpleTracker:
                 # type/category change
                 if prev.get('type') is not None and det.get('type') is not None:
                     if str(prev.get('type')) != str(det.get('type')):
-                        
+
                         ann.append('type_changed')
 
             anomalies[tid] = ann
@@ -467,4 +467,3 @@ def analyze_csv_frames(csv_text, tracker=None):
         'anomalies': all_anomalies,
         'timestamp': int(time.time())
     }
-

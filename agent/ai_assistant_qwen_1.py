@@ -15,14 +15,14 @@ def get_qwen_response(prompt):
             ],
             temperature=0.7
         )
-        
+
         # 增加响应有效性检查
         if not response or not hasattr(response, 'output'):
             raise ValueError("无效的API响应结构")
-        
+
         if response.status_code != 200:
             raise ConnectionError(f"API请求失败，状态码：{response.status_code}")
-            
+
         # 调试时可打印完整响应
         print("完整响应:", response)
         # 新版API结构解析
@@ -35,7 +35,7 @@ def get_qwen_response(prompt):
             raise ConnectionError("API未返回有效响应")
 
         ##return response.output.choices[0]['message']['content']
-    
+
     except Exception as e:
         return f"⚠️ 服务异常: {str(e)}"
 
@@ -44,10 +44,10 @@ if __name__ == "__main__":
         user_input = " ".join(sys.argv[1:])
         if not user_input:
             raise ValueError("请输入查询内容")
-            
+
         result = get_qwen_response(user_input)
         print(f"🔍 通义千问回复：\n{result}")
-        
+
     except Exception as e:
         print(f"❌ 严重错误: {str(e)}")
         # 打印堆栈跟踪（调试时取消注释）

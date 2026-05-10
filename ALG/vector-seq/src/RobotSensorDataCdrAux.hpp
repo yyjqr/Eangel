@@ -24,12 +24,11 @@
 
 #include "RobotSensorData.h"
 
-constexpr uint32_t RobotSensorData_max_cdr_typesize {300UL};
-constexpr uint32_t RobotSensorData_max_key_cdr_typesize {0UL};
+constexpr uint32_t RobotSensorData_max_cdr_typesize{300UL};
+constexpr uint32_t RobotSensorData_max_key_cdr_typesize{0UL};
 
-constexpr uint32_t RobotFrameInfoData_max_cdr_typesize {29612UL};
-constexpr uint32_t RobotFrameInfoData_max_key_cdr_typesize {0UL};
-
+constexpr uint32_t RobotFrameInfoData_max_cdr_typesize{29612UL};
+constexpr uint32_t RobotFrameInfoData_max_key_cdr_typesize{0UL};
 
 namespace eprosima {
 namespace fastcdr {
@@ -37,23 +36,13 @@ namespace fastcdr {
 class Cdr;
 class CdrSizeCalculator;
 
+eProsima_user_DllExport void serialize_key(eprosima::fastcdr::Cdr &scdr,
+                                           const RobotSensorData &data);
 
-
-eProsima_user_DllExport void serialize_key(
-        eprosima::fastcdr::Cdr& scdr,
-        const RobotSensorData& data);
-
-
-
-
-
-eProsima_user_DllExport void serialize_key(
-        eprosima::fastcdr::Cdr& scdr,
-        const RobotFrameInfoData& data);
-
+eProsima_user_DllExport void serialize_key(eprosima::fastcdr::Cdr &scdr,
+                                           const RobotFrameInfoData &data);
 
 } // namespace fastcdr
 } // namespace eprosima
 
 #endif // _FAST_DDS_GENERATED_ROBOTSENSORDATACDRAUX_HPP_
-

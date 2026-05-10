@@ -53,8 +53,11 @@ bool tcpSocket::connectSocket() {
     cout << szPeerAddress << "**************" << endl;
     // If no error occurs, inet_ntoa returns a character pointer to a static
     // buffer containing the text address in standard ".'' notation
-    strcpy(szPeerAddress, inet_ntoa(client_address.sin_addr)); // 将ip地址从字符串转换为xxx.xxx.xxx.xxx
-                                                               // 0301
+    strcpy(
+        szPeerAddress,
+        inet_ntoa(
+            client_address.sin_addr)); // 将ip地址从字符串转换为xxx.xxx.xxx.xxx
+                                       // 0301
     // Copy a string.the second parameter strSource Null-terminated source
     // string
     cout << szPeerAddress << endl;

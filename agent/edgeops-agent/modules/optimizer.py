@@ -15,4 +15,3 @@ def auto_optimize(status_json):
         return "Restart AI to clear memory"
 
     return None
-

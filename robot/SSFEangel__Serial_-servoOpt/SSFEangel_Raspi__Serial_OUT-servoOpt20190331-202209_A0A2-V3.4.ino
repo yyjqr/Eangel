@@ -91,7 +91,7 @@ void loop() {
   for (pos = startANGLE; pos <= stopANGLE;
        pos += 10) // goes from 0 degrees to 180 degrees 1---->3      04042016
                   // ---->6(20161117扫描更快，范围更大)
-  { // in steps of 1 degree
+  {               // in steps of 1 degree
     if (servo_connect_status) {
       myservo.write(pos); // tell servo to go to position in variable 'pos'
       Serial.print("Pos: ");
@@ -127,8 +127,9 @@ void loop() {
     Serial.print("distance,cm:");
     Serial.println(Middle); // test
     if (Middle < kMaxDetectDistance && Middle > 0) {
-      if (Middle < 40) // >35改为<35,这样不会一直满足减速条件，也避免在室内，减速几次就转弯
-                       // 20181209
+      if (Middle <
+          40) // >35改为<35,这样不会一直满足减速条件，也避免在室内，减速几次就转弯
+              // 20181209
       {
         carSlowdown();
         // ----->

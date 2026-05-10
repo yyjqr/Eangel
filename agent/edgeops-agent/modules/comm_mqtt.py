@@ -100,4 +100,3 @@ class MqttClient:
             except Exception:
                 payload = str(msg)
         self.client.publish(topic, payload)
-

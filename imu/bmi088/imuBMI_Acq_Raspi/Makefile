@@ -1,4 +1,4 @@
-#CC=aarch64-himix100-linux-gcc  
+#CC=aarch64-himix100-linux-gcc
 #64位 V8 ？？
 #CC=arm-linux-gnueabi-gcc
 
@@ -6,7 +6,7 @@ SRCS = $(wildcard imu_record.c )
 TARGET := $(SRCS:%.c=%)
 
 LIB=libbcm2835.a  #ADD LIB 202001
-#add 
+#add
 SRCS += $(wildcard spi_interface.c )
 
 SRCS += $(wildcard bmi088_accel.c )
@@ -21,7 +21,7 @@ TARGET :=imuBMI_record
 default:
 	#$(CC) -Wall -O2  -I../../drv/extdrv/imu_recorder/ $(SRCS) -o $(TARGET) -lpthread
 	$(CC) -Wall -O2   $(SRCS) $(LIB) -o $(TARGET) -lpthread
-	
+
 
 clean:
 	rm -rf $(TARGET) *.o

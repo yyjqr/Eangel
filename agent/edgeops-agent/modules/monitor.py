@@ -18,4 +18,3 @@ def collect_status():
         "camera_ok": camera_ok(),
         "timestamp": time.time()
     })
-

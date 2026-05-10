@@ -118,7 +118,8 @@ static uint16_t null_ptr_check(struct bmi088_dev *dev);
  * @retval zero -> Success
  * @retval Any non zero value -> Fail
  */
-static uint16_t set_gyro_data_ready_int(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev);
+static uint16_t set_gyro_data_ready_int(const struct bmi088_int_cfg *int_config,
+                                        struct bmi088_dev *dev);
 
 /*!
  * @brief This API configures the pins which fire the
@@ -131,7 +132,8 @@ static uint16_t set_gyro_data_ready_int(const struct bmi088_int_cfg *int_config,
  * @retval zero -> Success
  * @retval Any non zero value -> Fail
  */
-static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev);
+static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config,
+                                   struct bmi088_dev *dev);
 
 /***************************************************************************/
 /**\name        Extern Declarations
@@ -154,289 +156,254 @@ static struct bmi088_cfg gyro_cfg_copy;
  *  It performs the selection of I2C/SPI read mechanism according to the
  *  selected interface and reads the chip-id of gyro sensor.
  */
-uint16_t bmi088_gyro_init(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    //uint8_t reg_addr[2] = {0}; 
-    //uint8_t *data = &reg_addr[1];
-    uint8_t reg_addr;
-     uint8_t data;
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        reg_addr = BMI088_GYRO_CHIP_ID_REG;
-        /* Read gyro chip id */
-        //printf("FUNC:%s  line %d\n",__FUNCTION__,__LINE__);
-        rslt |= bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-        printf(" GYRO  CHIP ID is 0x%x \n",data); //test
-         if (data!=BMI088_GYRO_CHIP_ID)
-         {
-               rslt |= bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-                printf(" "STR_FAIL" GYRO  CHIP ID another read is 0x%x -----\n",data); //test    
-         }
-         else
-         {
-             /* code */
-             printf(" "STR_OK" GYRO  CHIP ID another read is 0x%x -----\n",data);
-         }
-         
-        
-
-        if (rslt == BMI088_OK)
-        {
-            /* Assign Chip Id */
-            dev->gyro_chip_id = data;
-
-            /* Initializing gyro sensor parameters with default values */
-            dev->gyro_cfg.bw = BMI088_GYRO_ODR_RESET_VAL;
-            dev->gyro_cfg.power = BMI088_GYRO_PM_NORMAL;
-            dev->gyro_cfg.range = BMI088_GYRO_RANGE_2000_DPS;
-
-            /* Copying gyro_cfg parameters of device structure to
-             * gyro_cfg_copy structure to maintain a copy. This will
-             * help us to prevent writing same configuration data
-             * again and again */
-            gyro_cfg_copy.bw = dev->gyro_cfg.bw;
-            gyro_cfg_copy.power = dev->gyro_cfg.power;
-            gyro_cfg_copy.range = dev->gyro_cfg.range;
-
-        }
-        else
-        {
-            rslt = BMI088_E_COM_FAIL;
-        }
-
+uint16_t bmi088_gyro_init(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  // uint8_t reg_addr[2] = {0};
+  // uint8_t *data = &reg_addr[1];
+  uint8_t reg_addr;
+  uint8_t data;
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    reg_addr = BMI088_GYRO_CHIP_ID_REG;
+    /* Read gyro chip id */
+    // printf("FUNC:%s  line %d\n",__FUNCTION__,__LINE__);
+    rslt |= bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+    printf(" GYRO  CHIP ID is 0x%x \n", data); // test
+    if (data != BMI088_GYRO_CHIP_ID) {
+      rslt |= bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+      printf(" " STR_FAIL " GYRO  CHIP ID another read is 0x%x -----\n",
+             data); // test
+    } else {
+      /* code */
+      printf(" " STR_OK " GYRO  CHIP ID another read is 0x%x -----\n", data);
     }
-     
-        reg_addr = BMI088_GYRO_BANDWIDTH_REG;
-        /* Read gyro chip id */
-        rslt |= bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-         printf(" GYRO  CHIP BMI088_GYRO_BANDWIDTH_REG is 0x%x -----\n", data); //test  
-        
 
+    if (rslt == BMI088_OK) {
+      /* Assign Chip Id */
+      dev->gyro_chip_id = data;
 
-    return rslt;
+      /* Initializing gyro sensor parameters with default values */
+      dev->gyro_cfg.bw = BMI088_GYRO_ODR_RESET_VAL;
+      dev->gyro_cfg.power = BMI088_GYRO_PM_NORMAL;
+      dev->gyro_cfg.range = BMI088_GYRO_RANGE_2000_DPS;
+
+      /* Copying gyro_cfg parameters of device structure to
+       * gyro_cfg_copy structure to maintain a copy. This will
+       * help us to prevent writing same configuration data
+       * again and again */
+      gyro_cfg_copy.bw = dev->gyro_cfg.bw;
+      gyro_cfg_copy.power = dev->gyro_cfg.power;
+      gyro_cfg_copy.range = dev->gyro_cfg.range;
+
+    } else {
+      rslt = BMI088_E_COM_FAIL;
+    }
+  }
+
+  reg_addr = BMI088_GYRO_BANDWIDTH_REG;
+  /* Read gyro chip id */
+  rslt |= bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+  printf(" GYRO  CHIP BMI088_GYRO_BANDWIDTH_REG is 0x%x -----\n", data); // test
+
+  return rslt;
 }
 
 /*!
  * @brief This API reads the data from the given register address
  * of gyro sensor.
  */
-uint16_t bmi088_get_gyro_regs(uint8_t reg_addr, uint8_t *data, uint16_t len, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
+uint16_t bmi088_get_gyro_regs(uint8_t reg_addr, uint8_t *data, uint16_t len,
+                              struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        /* Configuring reg_addr for SPI Interface */
-        if (dev->interface == BMI088_SPI_INTF)
-        {
-            reg_addr = (reg_addr | BMI088_SPI_RD_MASK);
-             //printf("Intf is SPI, Read address is 0x%02x \n",reg_addr);  //test OK
-        }
-        
-        /* read a gyro register */
-        rslt = dev->read(dev->gyro_id, reg_addr, data, len);
-
-        if (rslt != BMI088_OK)
-        {
-            rslt = BMI088_E_COM_FAIL;
-        }
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    /* Configuring reg_addr for SPI Interface */
+    if (dev->interface == BMI088_SPI_INTF) {
+      reg_addr = (reg_addr | BMI088_SPI_RD_MASK);
+      // printf("Intf is SPI, Read address is 0x%02x \n",reg_addr);  //test OK
     }
 
-    return rslt;
+    /* read a gyro register */
+    rslt = dev->read(dev->gyro_id, reg_addr, data, len);
+
+    if (rslt != BMI088_OK) {
+      rslt = BMI088_E_COM_FAIL;
+    }
+  }
+
+  return rslt;
 }
 
 /*!
  * @brief This API writes the given data to the register address
  * of gyro sensor.
  */
-uint16_t bmi088_set_gyro_regs(uint8_t reg_addr, uint8_t *data, uint16_t len, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if ((rslt == BMI088_OK) && (data != NULL) && (len != 0))
-    {
-        /* Configuring reg_addr for SPI Interface */
-        if (dev->interface == BMI088_SPI_INTF)
-        {
-            reg_addr = (reg_addr & BMI088_SPI_WR_MASK);
-        }
-
-        /* write to a gyro register */
-        rslt = dev->write(dev->gyro_id, reg_addr, data, len);
-
-        if (rslt != BMI088_OK)
-        {
-            rslt = BMI088_E_COM_FAIL;
-        }
+uint16_t bmi088_set_gyro_regs(uint8_t reg_addr, uint8_t *data, uint16_t len,
+                              struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if ((rslt == BMI088_OK) && (data != NULL) && (len != 0)) {
+    /* Configuring reg_addr for SPI Interface */
+    if (dev->interface == BMI088_SPI_INTF) {
+      reg_addr = (reg_addr & BMI088_SPI_WR_MASK);
     }
 
-    return rslt;
+    /* write to a gyro register */
+    rslt = dev->write(dev->gyro_id, reg_addr, data, len);
+
+    if (rslt != BMI088_OK) {
+      rslt = BMI088_E_COM_FAIL;
+    }
+  }
+
+  return rslt;
 }
 
 /*!
  * @brief This API resets the gyro sensor.
  */
-uint16_t bmi088_gyro_soft_reset(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t data, reg_addr;
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        /* Reset gyro device */
-        reg_addr = BMI088_GYRO_SOFTRESET_REG;
-        data = BMI088_SOFT_RESET_VAL;
-        rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+uint16_t bmi088_gyro_soft_reset(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t data, reg_addr;
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    /* Reset gyro device */
+    reg_addr = BMI088_GYRO_SOFTRESET_REG;
+    data = BMI088_SOFT_RESET_VAL;
+    rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
 
-        if (rslt == BMI088_OK)
-        {
-            /* delay 30 ms after writing reset value to its register */
-            dev->delay_ms(BMI088_GYRO_SOFTRESET_DELAY);
-        }
+    if (rslt == BMI088_OK) {
+      /* delay 30 ms after writing reset value to its register */
+      dev->delay_ms(BMI088_GYRO_SOFTRESET_DELAY);
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  * @brief This API sets the power mode, range and bandwidth
  * of gyro sensor.
  */
-uint16_t bmi088_set_gyro_meas_conf(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr;
-    bool is_range_invalid = false, is_odr_invalid = false;
-    uint8_t odr, range,data;
+uint16_t bmi088_set_gyro_meas_conf(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr;
+  bool is_range_invalid = false, is_odr_invalid = false;
+  uint8_t odr, range, data;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        odr = dev->gyro_cfg.odr;
-        range = dev->gyro_cfg.range;
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    odr = dev->gyro_cfg.odr;
+    range = dev->gyro_cfg.range;
 
-        /* Check if range is not previously configured range */
-        if (range != gyro_cfg_copy.range)
-        {
-            /* Check for valid range */
-            if (range <= BMI088_GYRO_RANGE_125_DPS)
-            {
-                reg_addr = BMI088_GYRO_RANGE_REG;
-                /* Write range value to range register */
-                rslt = bmi088_set_gyro_regs(reg_addr, &range, BMI088_ONE, dev);
+    /* Check if range is not previously configured range */
+    if (range != gyro_cfg_copy.range) {
+      /* Check for valid range */
+      if (range <= BMI088_GYRO_RANGE_125_DPS) {
+        reg_addr = BMI088_GYRO_RANGE_REG;
+        /* Write range value to range register */
+        rslt = bmi088_set_gyro_regs(reg_addr, &range, BMI088_ONE, dev);
 
-                /* If rslt is ok, copy the current range to previous range to maintain a copy */
-                if (rslt == BMI088_OK)
-                {
-                    gyro_cfg_copy.range = range;
-                }
-            }
-            else
-            {
-                /* Set range as invalid */
-                is_range_invalid = true;
-            }
+        /* If rslt is ok, copy the current range to previous range to maintain a
+         * copy */
+        if (rslt == BMI088_OK) {
+          gyro_cfg_copy.range = range;
         }
-
-        /* Check if odr is not previously configured odr */
-        if (odr != gyro_cfg_copy.odr)
-        {
-            /* Check for valid odr */
-            if (odr <= BMI088_GYRO_BW_32_ODR_100_HZ)
-            {
-                reg_addr = BMI088_GYRO_BANDWIDTH_REG;
-                /* Write odr value to odr register */
-                rslt = bmi088_set_gyro_regs(reg_addr, &odr, BMI088_ONE, dev);
-                printf("set new ODR \n");
-                /* If rslt is ok, copy the current odr to previous odr to maintain a copy */
-                if (rslt == BMI088_OK)
-                {
-                    gyro_cfg_copy.odr = odr;
-                     reg_addr = BMI088_GYRO_BANDWIDTH_REG;
-                    /* Read gyro chip id */
-                    rslt |= bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-                    printf(" After set, GYRO  CHIP BMI088_GYRO_BANDWIDTH_REG  is 0x%x -----\n", data); //test  
-                }
-            }
-            else
-            {
-                /* Set odr as invalid */
-                is_odr_invalid = true;
-            }
-        }
+      } else {
+        /* Set range as invalid */
+        is_range_invalid = true;
+      }
     }
 
-    /* If invalid conditions take place, make rslt as invalid */
-    if ((is_range_invalid) || (is_odr_invalid))
-    {
-        rslt = BMI088_E_INVALID_INPUT;
+    /* Check if odr is not previously configured odr */
+    if (odr != gyro_cfg_copy.odr) {
+      /* Check for valid odr */
+      if (odr <= BMI088_GYRO_BW_32_ODR_100_HZ) {
+        reg_addr = BMI088_GYRO_BANDWIDTH_REG;
+        /* Write odr value to odr register */
+        rslt = bmi088_set_gyro_regs(reg_addr, &odr, BMI088_ONE, dev);
+        printf("set new ODR \n");
+        /* If rslt is ok, copy the current odr to previous odr to maintain a
+         * copy */
+        if (rslt == BMI088_OK) {
+          gyro_cfg_copy.odr = odr;
+          reg_addr = BMI088_GYRO_BANDWIDTH_REG;
+          /* Read gyro chip id */
+          rslt |= bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+          printf(" After set, GYRO  CHIP BMI088_GYRO_BANDWIDTH_REG  is 0x%x "
+                 "-----\n",
+                 data); // test
+        }
+      } else {
+        /* Set odr as invalid */
+        is_odr_invalid = true;
+      }
     }
+  }
 
-    return rslt;
+  /* If invalid conditions take place, make rslt as invalid */
+  if ((is_range_invalid) || (is_odr_invalid)) {
+    rslt = BMI088_E_INVALID_INPUT;
+  }
+
+  return rslt;
 }
 
 /*!
  * @brief This API sets the power mode of the gyro sensor.
  */
-uint16_t bmi088_set_gyro_power_mode(struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, power;
-    bool is_power_switching_mode_valid = true;
+uint16_t bmi088_set_gyro_power_mode(struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, power;
+  bool is_power_switching_mode_valid = true;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        power = dev->gyro_cfg.power;
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    power = dev->gyro_cfg.power;
 
-        /* Check if power is not previously configured power */
-        if (power != gyro_cfg_copy.power)
-        {
-            /* Check for invalid power switching (i.e) deep suspend to suspend */
-            if ((power == BMI088_GYRO_PM_SUSPEND) && (gyro_cfg_copy.power == BMI088_GYRO_PM_DEEP_SUSPEND))
-            {
-                is_power_switching_mode_valid = false;
-            }
+    /* Check if power is not previously configured power */
+    if (power != gyro_cfg_copy.power) {
+      /* Check for invalid power switching (i.e) deep suspend to suspend */
+      if ((power == BMI088_GYRO_PM_SUSPEND) &&
+          (gyro_cfg_copy.power == BMI088_GYRO_PM_DEEP_SUSPEND)) {
+        is_power_switching_mode_valid = false;
+      }
 
-            /* Check for invalid power switching (i.e) from suspend to deep suspend */
-            if ((power == BMI088_GYRO_PM_DEEP_SUSPEND) && (gyro_cfg_copy.power == BMI088_GYRO_PM_SUSPEND))
-            {
-                is_power_switching_mode_valid = false;
-            }
+      /* Check for invalid power switching (i.e) from suspend to deep suspend */
+      if ((power == BMI088_GYRO_PM_DEEP_SUSPEND) &&
+          (gyro_cfg_copy.power == BMI088_GYRO_PM_SUSPEND)) {
+        is_power_switching_mode_valid = false;
+      }
 
-            /* Check if power switching mode is valid*/
-            if (is_power_switching_mode_valid)
-            {
-                reg_addr = BMI088_GYRO_LPM1_REG;
-                /* Write power to power register */
-                rslt = bmi088_set_gyro_regs(reg_addr, &power, BMI088_ONE, dev);
+      /* Check if power switching mode is valid*/
+      if (is_power_switching_mode_valid) {
+        reg_addr = BMI088_GYRO_LPM1_REG;
+        /* Write power to power register */
+        rslt = bmi088_set_gyro_regs(reg_addr, &power, BMI088_ONE, dev);
 
-                /* If rslt is fine, copy current power to previous power to maintain a copy */
-                if (rslt == BMI088_OK)
-                {
-                    gyro_cfg_copy.power = power;
-                }
-            }
+        /* If rslt is fine, copy current power to previous power to maintain a
+         * copy */
+        if (rslt == BMI088_OK) {
+          gyro_cfg_copy.power = power;
         }
-
+      }
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
@@ -444,45 +411,43 @@ uint16_t bmi088_set_gyro_power_mode(struct bmi088_dev *dev)
  * store it in the bmi088_sensor_data structure instance
  * passed by the user.
  */
-uint16_t bmi088_get_gyro_data(struct bmi088_sensor_data *gyro, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t index = 0, reg_addr, data[6];
-    uint32_t lsb, msb, msblsb;
+uint16_t bmi088_get_gyro_data(struct bmi088_sensor_data *gyro,
+                              struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t index = 0, reg_addr, data[6];
+  uint32_t lsb, msb, msblsb;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if ((rslt == BMI088_OK) && (gyro != NULL))
-    {
-        reg_addr = BMI088_GYRO_X_LSB_REG;
-        /* read gyro sensor data */
-        rslt = bmi088_get_gyro_regs(reg_addr, data, BMI088_SIX, dev);
-           
-        if (rslt == BMI088_OK)
-        {
-            lsb = (uint32_t)data[index++];
-            msb = (uint32_t)data[index++];
-            msblsb = (msb << BMI088_EIGHT) | lsb;
-            gyro->x = (int16_t)msblsb; /* Data in X axis */
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if ((rslt == BMI088_OK) && (gyro != NULL)) {
+    reg_addr = BMI088_GYRO_X_LSB_REG;
+    /* read gyro sensor data */
+    rslt = bmi088_get_gyro_regs(reg_addr, data, BMI088_SIX, dev);
 
-            lsb = (uint32_t)data[index++];
-            msb = (uint32_t)data[index++];
-            msblsb = (msb << BMI088_EIGHT) | lsb;
-            gyro->y = (int16_t)msblsb; /* Data in Y axis */
+    if (rslt == BMI088_OK) {
+      lsb = (uint32_t)data[index++];
+      msb = (uint32_t)data[index++];
+      msblsb = (msb << BMI088_EIGHT) | lsb;
+      gyro->x = (int16_t)msblsb; /* Data in X axis */
 
-            lsb = (uint32_t)data[index++];
-            msb = (uint32_t)data[index++];
-            msblsb = (msb << BMI088_EIGHT) | lsb;
-            gyro->z = (int16_t)msblsb; /* Data in Z axis */
-        }
-        //test
-            // for (int j=0;j<6;j++){
-            //     printf("Test 2 GYRO-XYZ :data[%d] is  %d  \n", j,data[j]);
-            // }
+      lsb = (uint32_t)data[index++];
+      msb = (uint32_t)data[index++];
+      msblsb = (msb << BMI088_EIGHT) | lsb;
+      gyro->y = (int16_t)msblsb; /* Data in Y axis */
+
+      lsb = (uint32_t)data[index++];
+      msb = (uint32_t)data[index++];
+      msblsb = (msb << BMI088_EIGHT) | lsb;
+      gyro->z = (int16_t)msblsb; /* Data in Z axis */
     }
+    // test
+    //  for (int j=0;j<6;j++){
+    //      printf("Test 2 GYRO-XYZ :data[%d] is  %d  \n", j,data[j]);
+    //  }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
@@ -490,130 +455,108 @@ uint16_t bmi088_get_gyro_data(struct bmi088_sensor_data *gyro, struct bmi088_dev
  * based on the user settings in the bmi088_int_cfg
  * structure instance.
  */
-uint16_t bmi088_set_gyro_int_config(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
+uint16_t bmi088_set_gyro_int_config(const struct bmi088_int_cfg *int_config,
+                                    struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
 
-    switch (int_config->gyro_int_type)
-    {
-        case BMI088_GYRO_DATA_RDY_INT:
-            {
-            /* Data ready interrupt */
-            rslt = set_gyro_data_ready_int(int_config, dev);
-        }
-            break;
-        default:
-            break;
-    }
+  switch (int_config->gyro_int_type) {
+  case BMI088_GYRO_DATA_RDY_INT: {
+    /* Data ready interrupt */
+    rslt = set_gyro_data_ready_int(int_config, dev);
+  } break;
+  default:
+    break;
+  }
 
-    return rslt;
-
+  return rslt;
 }
 
 /*!
  *  @brief This API enables or disables the Gyro Self test feature in the
  *  sensor.
  */
-uint16_t bmi088_set_gyro_selftest(uint8_t selftest, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data = 0;
+uint16_t bmi088_set_gyro_selftest(uint8_t selftest, struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data = 0;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        /* Check for valid selftest input */
-        if ((selftest == BMI088_ENABLE) || (selftest == BMI088_DISABLE))
-        {
-            reg_addr = BMI088_GYRO_SELF_TEST_REG;
-            /* Read self test register */
-            rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    /* Check for valid selftest input */
+    if ((selftest == BMI088_ENABLE) || (selftest == BMI088_DISABLE)) {
+      reg_addr = BMI088_GYRO_SELF_TEST_REG;
+      /* Read self test register */
+      rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
 
-            if (rslt == BMI088_OK)
-            {
-                /* Enable self-test */
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_SELF_TEST_EN, selftest);
-                /* write self test input value to self-test register */
-                rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-            }
-        }
-        else
-        {
-            rslt = BMI088_E_INVALID_INPUT;
-        }
+      if (rslt == BMI088_OK) {
+        /* Enable self-test */
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_SELF_TEST_EN, selftest);
+        /* write self test input value to self-test register */
+        rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+      }
+    } else {
+      rslt = BMI088_E_INVALID_INPUT;
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  *  @brief This API checks whether the self test functionality of the
  *  gyro sensor is working or not.
  */
-uint16_t bmi088_perform_gyro_selftest(int8_t *result, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data = 0, loop_break = 1;
+uint16_t bmi088_perform_gyro_selftest(int8_t *result, struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data = 0, loop_break = 1;
 
-    *result = BMI088_SELFTEST_FAIL;
+  *result = BMI088_SELFTEST_FAIL;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if (rslt == BMI088_OK)
-    {
-        /* Enable the gyro self-test */
-        rslt = bmi088_set_gyro_selftest(BMI088_ENABLE, dev);
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if (rslt == BMI088_OK) {
+    /* Enable the gyro self-test */
+    rslt = bmi088_set_gyro_selftest(BMI088_ENABLE, dev);
 
-        if (rslt == BMI088_OK)
-        {
-            /* Loop till self-test ready bit is set */
-            while (loop_break)
-            {
-                reg_addr = BMI088_GYRO_SELF_TEST_REG;
-                /* Read self-test register to check if self-test ready bit is set */
-                rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+    if (rslt == BMI088_OK) {
+      /* Loop till self-test ready bit is set */
+      while (loop_break) {
+        reg_addr = BMI088_GYRO_SELF_TEST_REG;
+        /* Read self-test register to check if self-test ready bit is set */
+        rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
 
-                if (rslt == BMI088_OK)
-                {
-                    data = BMI088_GET_BITSLICE(data, BMI088_GYRO_SELF_TEST_RDY);
+        if (rslt == BMI088_OK) {
+          data = BMI088_GET_BITSLICE(data, BMI088_GYRO_SELF_TEST_RDY);
 
-                    /* If self-test ready bit is set, exit the loop */
-                    if (data)
-                    {
-                        loop_break = 0;
-                    }
-                }
-                else
-                {
-                    /* Exit the loop in case of communication failure */
-                    loop_break = 0;
-                }
-            }
-
-            if (rslt == BMI088_OK)
-            {
-                /* Read self-test register to check for self-test Ok bit */
-                rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-
-                if (rslt == BMI088_OK)
-                {
-                    data = BMI088_GET_BITSLICE(data, BMI088_GYRO_SELF_TEST_RESULT);
-
-                    /* Update the self-test result based on self-test Ok bit */
-                    if (!data)
-                    {
-                        *result = BMI088_SELFTEST_PASS;
-                    }
-                }
-            }
+          /* If self-test ready bit is set, exit the loop */
+          if (data) {
+            loop_break = 0;
+          }
+        } else {
+          /* Exit the loop in case of communication failure */
+          loop_break = 0;
         }
+      }
 
+      if (rslt == BMI088_OK) {
+        /* Read self-test register to check for self-test Ok bit */
+        rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+
+        if (rslt == BMI088_OK) {
+          data = BMI088_GET_BITSLICE(data, BMI088_GYRO_SELF_TEST_RESULT);
+
+          /* Update the self-test result based on self-test Ok bit */
+          if (!data) {
+            *result = BMI088_SELFTEST_PASS;
+          }
+        }
+      }
     }
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*****************************************************************************/
@@ -622,137 +565,130 @@ uint16_t bmi088_perform_gyro_selftest(int8_t *result, struct bmi088_dev *dev)
  * @brief This API is used to validate the device structure pointer for
  * null conditions.
  */
-static uint16_t null_ptr_check(struct bmi088_dev *dev)
-{
-    uint16_t rslt;
+static uint16_t null_ptr_check(struct bmi088_dev *dev) {
+  uint16_t rslt;
 
-    if ((dev == NULL) || (dev->read == NULL) || (dev->write == NULL) || (dev->delay_ms == NULL))
-    {
-        /* Device structure pointer is not valid */
-        rslt = BMI088_E_NULL_PTR;
-    }
-    else
-    {
-        /* Device structure is fine */
-        rslt = BMI088_OK;
-    }
+  if ((dev == NULL) || (dev->read == NULL) || (dev->write == NULL) ||
+      (dev->delay_ms == NULL)) {
+    /* Device structure pointer is not valid */
+    rslt = BMI088_E_NULL_PTR;
+  } else {
+    /* Device structure is fine */
+    rslt = BMI088_OK;
+  }
 
-    return rslt;
+  return rslt;
 }
 
 /*!
  * @brief This API sets the data ready interrupt for gyro sensor.
  */
-static uint16_t set_gyro_data_ready_int(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data;
+static uint16_t set_gyro_data_ready_int(const struct bmi088_int_cfg *int_config,
+                                        struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if ((rslt == BMI088_OK) && (int_config != NULL))
-    {
-        reg_addr = BMI088_GYRO_INT_CTRL_REG;
-        /* Data to enable new data ready interrupt */
-        data = BMI088_GYRO_DRDY_INT_ENABLE_VAL;  //0X80
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if ((rslt == BMI088_OK) && (int_config != NULL)) {
+    reg_addr = BMI088_GYRO_INT_CTRL_REG;
+    /* Data to enable new data ready interrupt */
+    data = BMI088_GYRO_DRDY_INT_ENABLE_VAL; // 0X80
 
-        /* write data to interrupt control register */
-        rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+    /* write data to interrupt control register */
+    rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
 
-        if (rslt == BMI088_OK)
-        {
-            reg_addr = BMI088_GYRO_INT3_INT4_IO_MAP_REG;
+    if (rslt == BMI088_OK) {
+      reg_addr = BMI088_GYRO_INT3_INT4_IO_MAP_REG;
 
-            /* update data to map data ready interrupt to appropriate pins */
-            if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_3)
-            {
-                data = BMI088_GYRO_MAP_DRDY_TO_INT3;
-                 //printf("FUNC:%s  line %d\n", __FUNCTION__, __LINE__);
-            }
+      /* update data to map data ready interrupt to appropriate pins */
+      if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_3) {
+        data = BMI088_GYRO_MAP_DRDY_TO_INT3;
+        // printf("FUNC:%s  line %d\n", __FUNCTION__, __LINE__);
+      }
 
-            if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_4)
-            {
-                data = BMI088_GYRO_MAP_DRDY_TO_INT4;
-            }
+      if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_4) {
+        data = BMI088_GYRO_MAP_DRDY_TO_INT4;
+      }
 
-            if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_BOTH)
-            {
-                data = BMI088_GYRO_MAP_DRDY_TO_BOTH_INT3_INT4;
-            }
+      if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_BOTH) {
+        data = BMI088_GYRO_MAP_DRDY_TO_BOTH_INT3_INT4;
+      }
 
-            /* write data to interrupt map register */
-            rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-             printf("FUNC:%s  line %d,INT SET PIN is 0x%d \n", __FUNCTION__, __LINE__,data);
-            /* Configure interrupt pin */
-            rslt |= set_int_pin_config(int_config, dev);
-
-        }
+      /* write data to interrupt map register */
+      rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+      printf("FUNC:%s  line %d,INT SET PIN is 0x%d \n", __FUNCTION__, __LINE__,
+             data);
+      /* Configure interrupt pin */
+      rslt |= set_int_pin_config(int_config, dev);
     }
+  }
 
-    return rslt;
-
+  return rslt;
 }
 
 /*!
  * @brief This API configures the pins which fire the
  * interrupt signal when any interrupt occurs.
  */
-static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config, struct bmi088_dev *dev)
-{
-    uint16_t rslt = BMI088_OK;
-    uint8_t reg_addr, data;
+static uint16_t set_int_pin_config(const struct bmi088_int_cfg *int_config,
+                                   struct bmi088_dev *dev) {
+  uint16_t rslt = BMI088_OK;
+  uint8_t reg_addr, data;
 
-    /* Check for null pointer in the device structure*/
-    rslt = null_ptr_check(dev);
-    /* Proceed if null check is fine */
-    if ((rslt == BMI088_OK) && (int_config != NULL))
-    {
-        reg_addr = BMI088_GYRO_INT3_INT4_IO_CONF_REG;  //0x16  
-        /* Read interrupt configuration register */
-        rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-         printf(""STR_OK" GET BMI088_GYRO_INT3_INT4_IO_CONF_REG IS 0x%x  \n",data);
+  /* Check for null pointer in the device structure*/
+  rslt = null_ptr_check(dev);
+  /* Proceed if null check is fine */
+  if ((rslt == BMI088_OK) && (int_config != NULL)) {
+    reg_addr = BMI088_GYRO_INT3_INT4_IO_CONF_REG; // 0x16
+    /* Read interrupt configuration register */
+    rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+    printf("" STR_OK " GET BMI088_GYRO_INT3_INT4_IO_CONF_REG IS 0x%x  \n",
+           data);
 
-        if (rslt == BMI088_OK)
-        {
-            /* Interrupt pin or channel 3 */
-            if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_3)
-            {
-                /* Update data with user configured bmi088_int_cfg structure */
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT3_LVL, int_config->gyro_int_pin_3_cfg.lvl);
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT3_OD, int_config->gyro_int_pin_3_cfg.output_mode);
-            }
+    if (rslt == BMI088_OK) {
+      /* Interrupt pin or channel 3 */
+      if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_3) {
+        /* Update data with user configured bmi088_int_cfg structure */
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT3_LVL,
+                                   int_config->gyro_int_pin_3_cfg.lvl);
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT3_OD,
+                                   int_config->gyro_int_pin_3_cfg.output_mode);
+      }
 
-            /* Interrupt pin or channel 4 */
-            if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_4)
-            {
-                /* Update data with user configured bmi088_int_cfg structure */
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT4_LVL, int_config->gyro_int_pin_4_cfg.lvl);
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT4_OD, int_config->gyro_int_pin_4_cfg.output_mode);
-            }
+      /* Interrupt pin or channel 4 */
+      if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_4) {
+        /* Update data with user configured bmi088_int_cfg structure */
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT4_LVL,
+                                   int_config->gyro_int_pin_4_cfg.lvl);
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT4_OD,
+                                   int_config->gyro_int_pin_4_cfg.output_mode);
+      }
 
-            /* Both Interrupt pins or channels */
-            if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_BOTH)
-            {
-                /* Update data with user configured bmi088_int_cfg structure */
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT3_LVL, int_config->gyro_int_pin_3_cfg.lvl);
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT3_OD, int_config->gyro_int_pin_3_cfg.output_mode);
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT4_LVL, int_config->gyro_int_pin_4_cfg.lvl);
-                data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT4_OD, int_config->gyro_int_pin_4_cfg.output_mode);
-            }
+      /* Both Interrupt pins or channels */
+      if (int_config->gyro_int_channel == BMI088_INT_CHANNEL_BOTH) {
+        /* Update data with user configured bmi088_int_cfg structure */
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT3_LVL,
+                                   int_config->gyro_int_pin_3_cfg.lvl);
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT3_OD,
+                                   int_config->gyro_int_pin_3_cfg.output_mode);
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT4_LVL,
+                                   int_config->gyro_int_pin_4_cfg.lvl);
+        data = BMI088_SET_BITSLICE(data, BMI088_GYRO_INT4_OD,
+                                   int_config->gyro_int_pin_4_cfg.output_mode);
+      }
 
-            /* write to interrupt configuration register */
-            rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-        }
+      /* write to interrupt configuration register */
+      rslt = bmi088_set_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
     }
-    //test 
-     rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
-         printf(""STR_OK" ANOTHER GET BMI088_GYRO_INT3_INT4_IO_CONF_REG IS 0x%x  \n",data);
+  }
+  // test
+  rslt = bmi088_get_gyro_regs(reg_addr, &data, BMI088_ONE, dev);
+  printf("" STR_OK " ANOTHER GET BMI088_GYRO_INT3_INT4_IO_CONF_REG IS 0x%x  \n",
+         data);
 
-
-    return rslt;
-
+  return rslt;
 }
 
 /** @}*/
-

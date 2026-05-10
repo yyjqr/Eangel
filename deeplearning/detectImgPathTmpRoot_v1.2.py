@@ -1,6 +1,6 @@
 ## -*- coding: UTF-8 -*-
 #拼接字符串并换行
-#@author: JACK YANG 
+#@author: JACK YANG
 #@date:201902-->10 --->
       #202006-->202101--->202110
       #2023.03
@@ -57,7 +57,7 @@ arrayKEYWORDS_EN=['chip','Chip','risc','RISC-V','5G','Robot','robot','COVID','Di
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -68,11 +68,11 @@ def make_img_msg(fn):
     return image
 
 def get_recognize_img(fn):
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
-  ## 文件路径变动，所以split选择也需从7---变到index9 202210  
+  ## 文件路径变动，所以split选择也需从7---变到index9 202210
   ##---->/home/ai/jetson-inference/build/aarch64/bin/images/test/2022-11-06_15:38:40.jpg  1106
   ## 后台运行程序，识别图片存储到/tmp/xxx.jpg
     image=MIMEImage(data,name=fn.split("/")[2])  #以/分隔目录文件/tmp/xxx.jpg，只要后面的文件名 20190222！
@@ -83,7 +83,7 @@ def get_recognize_img(fn):
 
 def get_file_list(file_path):
     #dir_list=glob.glob("/tmp/*.jpg")
-    dir_list = []    
+    dir_list = []
     extensions = ['jpg', 'jpeg','JPG','JPEG'] # 注意下这里
     for extension in extensions:
        file_glob=file_path+'*.' + extension
@@ -122,7 +122,7 @@ def parse_cmd_param(argv):
 def findKeyWordInNews(str):
    #print(str)
    for i in range(14):
-       
+
        if array[i] in str:
            #print("test")
            return True
@@ -133,7 +133,7 @@ def findValuedInfoInNews(str,keyWords):
    #print(len(keyWords))
    #print(keyWords)
    for i in range(len(keyWords)):
-       
+
        if keyWords[i] in str:
            #print("test")
            return True
@@ -150,7 +150,7 @@ class GrabNewsSina():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.tech-news li  a'):
            if findValuedInfoInNews(news.text,arrayKEYWORDS_CN):
                tittle=news.text
@@ -161,7 +161,7 @@ class GrabNewsSina():
                 #article.append(url.strip())
                    print(newsUrl)
                    self.NewsList.append({string:newsUrl})
-   
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
@@ -171,7 +171,7 @@ class GrabNewsAI():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.searchtitle   a'):
             if findValuedInfoInNews(news.text,array):
                tittle=news.text
@@ -215,7 +215,7 @@ class GrabNewsTechnet():
 def writeNewsTechNet():
     grabNews = GrabNewsTechnet()
     grabNews.getNews()
-  
+
     #fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
     with codecs.open(newsFullPath,'a', 'utf-8') as fp:
         for news in grabNews.NewsList:
@@ -286,7 +286,7 @@ def mail():
          text = MIMEText(content, 'plain', 'utf-8')
          msg.attach(text)
     #fp.close
-    
+
     path = '/tmp/'         # 替换为你的路径
     listN=get_file_list(path)
     print (listN)
@@ -300,9 +300,9 @@ def mail():
            msg.attach(get_recognize_img(imgPath))
        except Exception as e:  #如果try中的语句没有执行，则会执行>$
            print (str(e))
-    else: 
+    else:
         print("no pic capture!")
-         
+
     msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     msg['Subject']="EXAID 识别 %s" %year_month  #邮件的主题，也可以说是标题
@@ -320,4 +320,3 @@ def mail():
 
 if __name__ == '__main__':
   mail()
-        

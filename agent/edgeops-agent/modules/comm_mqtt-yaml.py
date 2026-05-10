@@ -9,4 +9,3 @@ class MqttClient:
 
     def publish(self, topic, msg):
         self.client.publish(topic, msg)
-

@@ -20,7 +20,7 @@ before_install:
         #-------------
         # Anaconda doesn't support conda install opencv & binstart wasn't working
         # so instead we download and build from source. The only other trick is making
-        # sure we move the correct files to the correct Python installation, which is 
+        # sure we move the correct files to the correct Python installation, which is
         # done via specifying PYTHON_PACKAGES_PATH
         # - @JimHokanson
         #
@@ -38,24 +38,24 @@ before_install:
   - cmake -DBUILD_TIFF=ON -DBUILD_opencv_java=OFF -DWITH_CUDA=OFF -DENABLE_AVX=ON -DWITH_OPENGL=ON -DWITH_OPENCL=ON -DWITH_IPP=ON -DWITH_TBB=ON -DWITH_EIGEN=ON -DWITH_V4L=ON -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") -DPYTHON_EXECUTABLE=$(which python3) -DPYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") -DPYTHON_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") ..
   - make -j4
   - sudo make install
-  
+
   - cd /   #return to home dir 0824
   - pwd
-  
+
         # https://gist.github.com/itguy51/4239282
         # ------------------------------------------
-        
+
   - echo "/usr/local/lib" | sudo tee -a /etc/ld.so.conf.d/opencv.conf
   - sudo ldconfig
   - echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" | sudo tee -a /etc/bash.bashrc
   - echo "export PKG_CONFIG_PATH" | sudo tee -a /etc/bash.bashrc
-  - export PYTHONPATH=$OPENCV_BUILD_DIR/lib/python3.3/site-packages:$PYTHONPATH 
+  - export PYTHONPATH=$OPENCV_BUILD_DIR/lib/python3.3/site-packages:$PYTHONPATH
   # configure opencv.pc add Jack
   #cd /usr/local/lib
   # CICD ENV INSTALL LIB IN DIFFERENT DIR!!!SO CHANGE TO TEST.
   - cd /usr/lib/x86_64-linux-gnu
   #containing the dir
-  # sudo mkdir pkgconfig     
+  # sudo mkdir pkgconfig
   - cd pkgconfig
   - sudo touch opencv.pc
   - echo "prefix=/usr/lib/x86_64-linux-gnu exec_prefix=${prefix}" | sudo tee -a opencv.pc
@@ -63,7 +63,7 @@ before_install:
   # echo "libdir=/usr/local/lib" | sudo tee -a opencv.pc
   - echo "includedir_old=/usr/include/opencv4" | sudo tee -a opencv.pc
   - echo "includedir_new=/usr/include" | sudo tee -a opencv.pc
-  
+
   - echo "Name:OpenCV" | sudo tee -a opencv.pc
   #must add Version ,否则会报Package 'opencv' has no Name: field ,然后编译会出错！！
   - echo "Description:Open Source Computer Vision Library" | sudo tee -a opencv.pc
@@ -72,9 +72,9 @@ before_install:
   #echo "Libs: -L${exec_prefix}/lib -lopencv_world" | sudo tee -a opencv.pc
   #- echo "Libs.private: -ldl -lm -lpthread -lrt" | sudo tee -a opencv.pc
   #- echo "Cflags: -I${includedir_old} -I${includedir_new}" | sudo tee -a opencv.pc
-  
- 
-  
+
+
+
   - cd /usr/include/opencv4/opencv2
   - ls -alh
   - cd /usr/lib/x86_64-linux-gnu
@@ -86,8 +86,8 @@ before_install:
 
 #Name: OpenCV
 #Description: Open Source Computer Vision Library
-#Version: 4.1.0  
- 
+#Version: 4.1.0
+
 
 
 
@@ -98,6 +98,6 @@ script:
   # ./opencv_install.sh
   - cd $TRAVIS_BUILD_DIR/videoRecord
   - make
-  
+
   - cd $TRAVIS_BUILD_DIR/cam10min_OPENCV4
   - make
