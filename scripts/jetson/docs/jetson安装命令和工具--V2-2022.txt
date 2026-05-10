@@ -1,0 +1,128 @@
+Jetson相关命令 202210
+系统时区设置： 2024.12
+
+ 2102  ls -l /etc/localtime
+ 2103  timedatectl list-timezones
+ 2104  sudo timedatectl set-timezone Asia/Shanghai
+  timedatectl
+
+
+雅迅： jetpack 5.0.2 (241012)
+Linux mec 5.10.104-tegra #8 SMP PREEMPT Fri Nov 24 09:49:19 HKT 2023 aarch64 aarch64 aarch64 GNU/Linux
+
+scp拷贝文件到远程目录 （- P 端口）  11.23
+scp  -P 13253 sourceOrin-IFS1123.zip   nvidia@43.129.238.106:~/Documents/
+
+压缩动态库，包括符合链接 0522
+zip ~/libfastDDS.zip -y ./libfa*
+生成较复杂的或随机密码 （0523）
+echo -n "your_password" | sha256sum
+您可以使用Shell命令来生成SHA-256哈希算法密码。在大多数Linux和Unix系统上，您可以使用echo命令结合openssl工具来完成此操作。以下是在Shell中生成SHA-256密码的示例：
+
+echo -n "your_password" | openssl dgst -sha256
+
+作者：与我一起成长
+链接：https://www.jianshu.com/p/47777ef279a4
+
+
+./detectnet --network=ssd-inception-v2 --input-codec=h264 ~/Documents/ipc09/1693472160000/  images/test/10-20/
+
+jtop工具安装
+sudo apt install python3-pip
+ sudo -H pip3 install -U jetson-stats
+局域网内远程界面登陆（VNC 20230721)
+https://blog.csdn.net/qq11423709/article/details/118726650
+sudo apt show vino
+编译命令
+按当前机器最大核数
+make -j$(nproc)
+## 安装命令 2024
+sudo apt install chrony
+##安装定时执行任务
+sudo apt-get update && sudo apt-get install cron
+
+ffmpeg工具
+ffplay -i rtsp://admin:hk123456@192.168.41.206:554/Streaming/Channels/1?transportmode=unicast&profile=Profile_1
+
+## 3 日志输出
+nohup yourcommand 2>&1 &
+# 0 – stdin (standard input)，1 – stdout (standard output)，2 – stderr (standard error) ；
+# 2>&1是将标准错误（2）重定向到标准输出（&1），标准输出（&1）再被重定向输入到日志文件中。
+
+如果希望将日志输出到别的文件中，可以增加一个文件路径参数。如下：
+
+nohup yourcommand > myout.log 2>&1 &
+
+其中myout.log是保存输出的文件名称
+ 
+sudo ./mec  > xxx.log 2>&1
+
+/home/nvidia/.local/share   删除回收站的文件。里面可能有Trash目录 （20230410）
+
+
+时间和时钟
+sudo date -s "2022-11-11 xxx"
+读取RTC时间
+sudo hwclock -r
+根据系统时间，设置rtc时间，
+sudo hwclock -w
+
+nvidia@miivii-tegra:~$ timedatectl 
+               Local time: 一 2023-02-13 09:42:24 CST
+           Universal time: 一 2023-02-13 01:42:24 UTC
+                 RTC time: 一 2023-02-13 01:42:25    
+                Time zone: Asia/Shanghai (CST, +0800)
+System clock synchronized: yes                       
+              NTP service: n/a                       
+          RTC in local TZ: no      这个命令可以查看检查各种系统时间。
+
+时区修改设置（2024.12）
+		   ls -l /etc/localtime
+  sudo timedatectl set-timezone Asia/Shanghai
+  timedatectl 
+
+
+删除日志，增加存储空间 11.11
+rm  /var/log/syslog
+ 
+
+2023.01.30
+很多时候 telnet 完就无法退出了，ctrl+c 有时也无法退出
+后来找到了正确的命令 ctrl+]  然后在telnet 命令行输入 quit  就可以退出了
+
+nc命令也可以测试端口    
+nc -v -z -w2 192.168.72.116 5000-5002
+nc -v -z -w2 192.168.72.116 554
+rtty
+sudo apt install -y libev-dev libssl-dev 
+
+ cuda版本查看  e413caec06
+ e413caec06
+33b75b70d4
+
+
+nvidia@miivii-tegra:~$ nvcc -V
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2022 NVIDIA Corporation
+Built on Wed_May__4_00:02:26_PDT_2022
+Cuda compilation tools, release 11.4, V11.4.239
+Build cuda_11.4.r11.4/compiler.31294910_0
+
+
+
+以下所有命令均为mec-app正常启动后才有效
+1、保存融合后的csv和txt数据，保存路径：/mnt/share/merge
+开启保存csv和txt数据：sudo /tmp/mec-fal-merge-save 1
+关闭保存csv和txt数据：sudo /tmp/mec-fal-merge-save 0
+2、保存毫米波雷达原始数据，保存路径：/mnt/share/radar
+开启保存毫米波雷达原始数据：sudo /tmp/mec-fal-radar-save 1
+关闭保存毫米波雷达原始数据：sudo /tmp/mec-fal-radar-save 0
+3、保存图像数据，保存路径：/mnt/share/ipc
+开启保存图像数据：sudo /tmp/mec-fal-ipc-save 1
+关闭保存图像数据：sudo /tmp/mec-fal-ipc-save 0
+
+
+调试视频数据流
+sudo /tmp/mec-fal-rtspIpc-debugchn  0xff
+sudo /tmp/mec-fal-rtspIpc-debugchn  0
+
