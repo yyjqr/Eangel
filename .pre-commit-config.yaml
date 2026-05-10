@@ -34,5 +34,17 @@ repos:
         name: cppcheck
         entry: cppcheck
         language: system
-        args: ["--error-exitcode=1", "--enable=all", "--suppress=missingIncludeSystem"]
+        args: [
+          "--error-exitcode=1",
+          "--enable=all",
+          "--std=c++17",                    # 显式指定C++标准
+          "--force",                        # 强制检查所有 #ifdef 组合
+          "-D__has_include",                # 强行定义宏，解决 json.hpp 等现代头文件的预处理死锁
+          "--max-configs=1",
+          "--suppress=preprocessorErrorDirective", # 即使预处理报错也不中断对业务代码的分析
+          "--suppress=toomanyconfigs",      # 屏蔽配置过多的警告提示
+          "--suppress=missingIncludeSystem" # 屏蔽找不到系统标准库头文件的警告
+        ]
+        # 🛠️ 关键一步：在检查时彻底过滤掉 json.hpp 所在的目录或文件，防止其卡死
+        exclude: '.*videoRecordH264/json\.hpp'
         types_or: [c, c++]

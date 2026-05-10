@@ -35,22 +35,22 @@
 
 enum {
 
-    /**
-     * Do not check for format changes.
-     */
-    AV_BUFFERSRC_FLAG_NO_CHECK_FORMAT = 1,
+  /**
+   * Do not check for format changes.
+   */
+  AV_BUFFERSRC_FLAG_NO_CHECK_FORMAT = 1,
 
-    /**
-     * Immediately push the frame to the output.
-     */
-    AV_BUFFERSRC_FLAG_PUSH = 4,
+  /**
+   * Immediately push the frame to the output.
+   */
+  AV_BUFFERSRC_FLAG_PUSH = 4,
 
-    /**
-     * Keep a reference to the frame.
-     * If the frame if reference-counted, create a new reference; otherwise
-     * copy the frame data.
-     */
-    AV_BUFFERSRC_FLAG_KEEP_REF = 8,
+  /**
+   * Keep a reference to the frame.
+   * If the frame if reference-counted, create a new reference; otherwise
+   * copy the frame data.
+   */
+  AV_BUFFERSRC_FLAG_KEEP_REF = 8,
 
 };
 
@@ -71,49 +71,49 @@ unsigned av_buffersrc_get_nb_failed_requests(AVFilterContext *buffer_src);
  * av_free(). All the allocated fields in it remain owned by the caller.
  */
 typedef struct AVBufferSrcParameters {
-    /**
-     * video: the pixel format, value corresponds to enum AVPixelFormat
-     * audio: the sample format, value corresponds to enum AVSampleFormat
-     */
-    int format;
-    /**
-     * The timebase to be used for the timestamps on the input frames.
-     */
-    AVRational time_base;
+  /**
+   * video: the pixel format, value corresponds to enum AVPixelFormat
+   * audio: the sample format, value corresponds to enum AVSampleFormat
+   */
+  int format;
+  /**
+   * The timebase to be used for the timestamps on the input frames.
+   */
+  AVRational time_base;
 
-    /**
-     * Video only, the display dimensions of the input frames.
-     */
-    int width, height;
+  /**
+   * Video only, the display dimensions of the input frames.
+   */
+  int width, height;
 
-    /**
-     * Video only, the sample (pixel) aspect ratio.
-     */
-    AVRational sample_aspect_ratio;
+  /**
+   * Video only, the sample (pixel) aspect ratio.
+   */
+  AVRational sample_aspect_ratio;
 
-    /**
-     * Video only, the frame rate of the input video. This field must only be
-     * set to a non-zero value if input stream has a known constant framerate
-     * and should be left at its initial value if the framerate is variable or
-     * unknown.
-     */
-    AVRational frame_rate;
+  /**
+   * Video only, the frame rate of the input video. This field must only be
+   * set to a non-zero value if input stream has a known constant framerate
+   * and should be left at its initial value if the framerate is variable or
+   * unknown.
+   */
+  AVRational frame_rate;
 
-    /**
-     * Video with a hwaccel pixel format only. This should be a reference to an
-     * AVHWFramesContext instance describing the input frames.
-     */
-    AVBufferRef *hw_frames_ctx;
+  /**
+   * Video with a hwaccel pixel format only. This should be a reference to an
+   * AVHWFramesContext instance describing the input frames.
+   */
+  AVBufferRef *hw_frames_ctx;
 
-    /**
-     * Audio only, the audio sampling rate in samples per second.
-     */
-    int sample_rate;
+  /**
+   * Audio only, the audio sampling rate in samples per second.
+   */
+  int sample_rate;
 
-    /**
-     * Audio only, the audio channel layout
-     */
-    uint64_t channel_layout;
+  /**
+   * Audio only, the audio channel layout
+   */
+  uint64_t channel_layout;
 } AVBufferSrcParameters;
 
 /**
@@ -135,7 +135,8 @@ AVBufferSrcParameters *av_buffersrc_parameters_alloc(void);
  *              copies or references when necessary.
  * @return 0 on success, a negative AVERROR code on failure.
  */
-int av_buffersrc_parameters_set(AVFilterContext *ctx, AVBufferSrcParameters *param);
+int av_buffersrc_parameters_set(AVFilterContext *ctx,
+                                AVBufferSrcParameters *param);
 
 /**
  * Add a frame to the buffer source.
@@ -150,8 +151,8 @@ int av_buffersrc_parameters_set(AVFilterContext *ctx, AVBufferSrcParameters *par
  * This function is equivalent to av_buffersrc_add_frame_flags() with the
  * AV_BUFFERSRC_FLAG_KEEP_REF flag.
  */
-av_warn_unused_result
-int av_buffersrc_write_frame(AVFilterContext *ctx, const AVFrame *frame);
+av_warn_unused_result int av_buffersrc_write_frame(AVFilterContext *ctx,
+                                                   const AVFrame *frame);
 
 /**
  * Add a frame to the buffer source.
@@ -171,8 +172,8 @@ int av_buffersrc_write_frame(AVFilterContext *ctx, const AVFrame *frame);
  * This function is equivalent to av_buffersrc_add_frame_flags() without the
  * AV_BUFFERSRC_FLAG_KEEP_REF flag.
  */
-av_warn_unused_result
-int av_buffersrc_add_frame(AVFilterContext *ctx, AVFrame *frame);
+av_warn_unused_result int av_buffersrc_add_frame(AVFilterContext *ctx,
+                                                 AVFrame *frame);
 
 /**
  * Add a frame to the buffer source.
@@ -189,9 +190,9 @@ int av_buffersrc_add_frame(AVFilterContext *ctx, AVFrame *frame);
  * @return            >= 0 in case of success, a negative AVERROR code
  *                    in case of failure
  */
-av_warn_unused_result
-int av_buffersrc_add_frame_flags(AVFilterContext *buffer_src,
-                                 AVFrame *frame, int flags);
+av_warn_unused_result int
+av_buffersrc_add_frame_flags(AVFilterContext *buffer_src, AVFrame *frame,
+                             int flags);
 
 /**
  * Close the buffer source after EOF.

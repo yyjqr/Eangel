@@ -23,10 +23,10 @@ function check_gnss {
 }
 function check_v2x {
     # 检查V2X状态令
-   
+
    output=$(cv2x-config --get-v2x-status|grep V2X)
    echo "get output:"+$output
-   
+
 
    if echo $output |grep "rx_status=1";then
       echo "v2x ok"+$logFile
@@ -106,9 +106,9 @@ mem_user_used=`free | sed -n 3p | awk '{print $3}'`
 }
 # 以此类推，为其他状态添加函数 主循环或一次性检查
 
-while true; do  
-    # 在这里执行你的命令，比如：  
-    echo "run check state操作"  
+while true; do
+    # 在这里执行你的命令，比如：
+    echo "run check state操作"
     # 然后等待600秒（即10分钟）
     #GET Current time
     date_time=$(date "+%Y-%m-%d_%H%M%S")
@@ -117,8 +117,7 @@ while true; do
     check_gnss $date_time>> $path/gnss$date_hour.log
     #check_v2x >> /mnt/sdcard/gnss$date_time.log
     check_v2x $date_time
-    get_Dev_state $date_time  >> $path/gnss$date_hour.log  
+    get_Dev_state $date_time  >> $path/gnss$date_hour.log
     echo "sleep 4mins++++++"
-    sleep 200  
+    sleep 200
 done
-

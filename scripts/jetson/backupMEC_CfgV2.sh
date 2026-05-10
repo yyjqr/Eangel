@@ -26,7 +26,7 @@ backupBasicCfg()
 
         #备份License.dat文件
         sudo cp /var/GoMEC/app/GoEMEC/License.dat $Dir
-       
+
 	sudo cp /etc/ntp.conf  $Dir
 }
 

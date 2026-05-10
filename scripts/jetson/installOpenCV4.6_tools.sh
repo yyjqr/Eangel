@@ -6,7 +6,7 @@
  sudo apt-get install libjpeg-dev libtiff-dev libgif-dev
  sudo apt-get install libgstreamer1.0-dev gstreamer1.0-gtk3
  sudo apt-get install libgstreamer-plugins-base1.0-dev gstreamer1.0-gl -y
-##ffmpeg 
+##ffmpeg
  sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev
  sudo apt-get install libgtk2.0-dev libcanberra-gtk*
  sudo apt-get install libxvidcore-dev libx264-dev libgtk-3-dev

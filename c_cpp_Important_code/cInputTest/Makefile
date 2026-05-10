@@ -1,4 +1,4 @@
-#CC = aarch64-himix100-linux-gcc 
+#CC = aarch64-himix100-linux-gcc
 CC =gcc
 #
 

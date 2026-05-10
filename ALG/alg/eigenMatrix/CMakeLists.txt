@@ -18,6 +18,6 @@ add_executable(${PROJECT_NAME} "eigenTest.cpp"  )
 
 target_link_libraries(
    ${PROJECT_NAME}
-   
+
     Eigen3::Eigen
    )

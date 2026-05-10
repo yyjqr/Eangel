@@ -40,34 +40,34 @@ bool is_perfect_square(u128 value, u64* root = nullptr) {
 void check_cuboid(u64 a, u64 b, u64 c) {
     cout << "----------------------------------------\n";
     cout << "Checking a=" << a << " b=" << b << " c=" << c << "\n";
-    
+
     u128 a2 = (u128)a * a;
     u128 b2 = (u128)b * b;
     u128 c2 = (u128)c * c;
-    
+
     u128 face_ab = a2 + b2;
     u128 face_bc = b2 + c2;
     u128 face_ac = a2 + c2;
     u128 space_diag = a2 + b2 + c2;
-    
+
     u64 root_ab, root_bc, root_ac, root_space;
     bool ok_ab = is_perfect_square(face_ab, &root_ab);
     bool ok_bc = is_perfect_square(face_bc, &root_bc);
     bool ok_ac = is_perfect_square(face_ac, &root_ac);
     bool ok_space = is_perfect_square(space_diag, &root_space);
-    
-    cout << "  [Face AB] a^2 + b^2 = " << face_ab << " -> " 
+
+    cout << "  [Face AB] a^2 + b^2 = " << face_ab << " -> "
          << (ok_ab ? "Valid Square (root=" + to_string(root_ab) + ")" : "NOT a square") << "\n";
-         
-    cout << "  [Face BC] b^2 + c^2 = " << face_bc << " -> " 
+
+    cout << "  [Face BC] b^2 + c^2 = " << face_bc << " -> "
          << (ok_bc ? "Valid Square (root=" + to_string(root_bc) + ")" : "NOT a square") << "\n";
-         
-    cout << "  [Face AC] a^2 + c^2 = " << face_ac << " -> " 
+
+    cout << "  [Face AC] a^2 + c^2 = " << face_ac << " -> "
          << (ok_ac ? "Valid Square (root=" + to_string(root_ac) + ")" : "NOT a square") << "\n";
-         
-    cout << "  [Space  ] a^2+b^2+c^2 = " << space_diag << " -> " 
+
+    cout << "  [Space  ] a^2+b^2+c^2 = " << space_diag << " -> "
          << (ok_space ? "Valid Square (root=" + to_string(root_space) + ")" : "NOT a square") << "\n";
-         
+
     if (ok_ab && ok_bc && ok_ac && ok_space) {
         cout << "  >>> PERFECT CUBOID FOUND! <<<\n";
     } else {
@@ -128,10 +128,10 @@ int main() {
         {476706562570ULL, 5340302922240ULL, 35179543237608ULL},
         {1985172121881ULL, 5814953872200ULL, 6052494041920ULL}
     };
-    
+
     for (const auto& t : tests) {
         check_cuboid(t.a, t.b, t.c);
     }
-    
+
     return 0;
 }

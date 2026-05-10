@@ -32,7 +32,7 @@ curTime=`date '+%Y-%m-%d_%H%M%S'`
 echo $curTime
 #FILENAME_TEMPLATE="video_${IP_ADDRESS}_${curTime}.h264"
 
-echo $FILENAME_TEMPLATE  
+echo $FILENAME_TEMPLATE
 # 生成带日期和通道名的文件名模板
   #FILENAME_TEMPLATE="video_${IP_ADDRESS}_%Y%m%d_%H%M%S.h264"
 

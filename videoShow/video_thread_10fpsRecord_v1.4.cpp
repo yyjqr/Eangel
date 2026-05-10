@@ -108,9 +108,10 @@ int main(int argc, char **argv) {
     }
 
     if (char(waitKey(5)) == 27 ||
-        char(waitKey(5)) == 'q') // 27是键盘摁下esc时，计算机接收到的ascii码值
-                                 //  ----->如果waitKey函数不进行数据格式转换为char类型，则该程序在VS中可以正常运行，但是在linux系统不能运行，主要是由于数据格式的问题linux
-                                 //  char() 1118
+        char(waitKey(5)) ==
+            'q') // 27是键盘摁下esc时，计算机接收到的ascii码值
+                 //  ----->如果waitKey函数不进行数据格式转换为char类型，则该程序在VS中可以正常运行，但是在linux系统不能运行，主要是由于数据格式的问题linux
+                 //  char() 1118
     {
       break;
     }

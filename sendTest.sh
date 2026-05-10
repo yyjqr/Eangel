@@ -4,9 +4,7 @@ cd pySpider/searchOpt
 echo "search valueable info"
 mkdir techNews
 #python techAI_searchValueOpt.py
-cd crawler
-python main-spider2-nosend.py
-#python techRank_DB_opt.py 
+python techRank_DB_opt.py
 #echo "search mil news"
 cd ~/Eangle/robot/
 

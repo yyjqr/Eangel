@@ -1,4 +1,4 @@
-LINUX高级命令  
+LINUX高级命令
 
 fping ,对多个ip地址，或网关的ping测试。
 指定范围的ip ping测试  02.23
@@ -44,12 +44,12 @@ curl 10.229.203.6:11883 -v
 > Host: 10.229.203.6:11883
 > User-Agent: curl/7.58.0
 > Accept: */*
-> 
+>
 * Empty reply from server
 * Connection #0 to host 10.229.203.6 left intact
 curl: (52) Empty reply from server
 
- 
+
 ## 查看端口使用或占用情况
 sudo netstat -atno |grep 2819
 -o：--timers，显示计时器
@@ -64,7 +64,7 @@ Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkMa
 sudo tcpdump  -i eth0 port 6000 -nnAX
 多个端口抓取  2023.04排查融合 RSM
 sudo ./tcpdump  -i eth3 port "8899 or 18300 or 1883" -w RV_FUSITON_mqtt_0331.pcap
-tcpdump -i eth0 host 192.168. 5.12 -w /hack/ms08067.pcap 
+tcpdump -i eth0 host 192.168. 5.12 -w /hack/ms08067.pcap
 多个激光雷达设备IP抓包
 sudo tcpdump -i eth0 -s0 -w lidar4-01031805.cap host 172.16.4.96 or host 172.16.4.97 or host 172.16.4.98 or host 172.16.4.99
 ##抓取两个程序之间通讯的数据包
@@ -108,7 +108,7 @@ yx@mec:/etc/netplan$sudo vim 01-network-manager-all.yaml
   363  sudo /etc/init.d/network restart
   364  /etc/init.d/network restart
   365  /etc/init.d/network-manager restart
-  
+
   386  sudo vi /etc/network/interfaces
   387  sudo vi /etc/systemd/network/interfaces
   395  sudo ifconfig eth2 192.168.41.178 netmask 255.255.255.0
@@ -125,7 +125,7 @@ yx@mec:/etc/netplan$sudo vim 01-network-manager-all.yaml
   515  cat /etc/networks
   516  cd /etc/network
   713  sudo vim /etc/network/interfaces
- 
+
   716  sudo systemctl  restart networking.service
 删除网关
 sudo route del  gw 192.168.1.254
@@ -176,8 +176,3 @@ nvidia@miivii-tegra:~$ fping -g 192.168.1.0/24 2>/dev/null
 192.168.1.11 is alive
 192.168.1.12 is alive
 192.168.1.13 is alive
-
-
-
-
-

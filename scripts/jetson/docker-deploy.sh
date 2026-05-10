@@ -40,8 +40,8 @@ fi
  sudo docker cp  ~/docker_libs/usr/lib/aarch64-linux-gnu/  -L $CONTAINER_ID:/var/GoMEC/lib/systemLib/
  sudo docker cp  ~/docker_libs/usr/bin/command_link  -L $CONTAINER_ID:/usr/bin/
 
-}  
- 
+}
+
   ## vim mec-libs-docker.md5
 case "$1" in
         #MEC出厂初始化
@@ -57,9 +57,9 @@ case "$1" in
         ;;
         "2")
 	        echo "Get order '2': files:libs and mec-app To Docker "
-		filesToDocker	
+		filesToDocker
 		;;
-	"3")	
+	"3")
                 #sudo docker run -it --rm --net=host --runtime nvidia -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix nvcr.io/nvidia/l4t-cuda:11.4.19-runtime
                 sudo docker run -it  --net=host --runtime nvidia -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix nvcr.io/nvidia/l4t-cuda:11.4.19-runtime-mec
 		;;

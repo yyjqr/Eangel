@@ -47,7 +47,7 @@ def main():
         try:
             print(f"🟢 开始录制到文件")
             ffmpeg_process = run_ffmpeg()
-            
+
             # 监控FFmpeg输出
             while True:
                 output = ffmpeg_process.stdout.readline()
@@ -55,11 +55,11 @@ def main():
                     break
                 if output:
                     print(output.decode().strip())
-                    
+
             # 检测退出状态
             if ffmpeg_process.returncode != 0:
                 print(f"🔴 FFmpeg异常退出(代码:{ffmpeg_process.returncode})，尝试重连...")
-            
+
         except KeyboardInterrupt:
             print("\n🛑 用户终止操作")
             ffmpeg_process.send_signal(signal.SIGINT)
@@ -67,7 +67,7 @@ def main():
             break
         except Exception as e:
             print(f"❌ 发生异常: {str(e)}")
-        
+
         # 等待重试
         print(f"⏳ {RECONNECT_INTERVAL}秒后尝试重新连接...")
         time.sleep(RECONNECT_INTERVAL)

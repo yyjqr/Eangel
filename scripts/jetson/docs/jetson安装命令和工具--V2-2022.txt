@@ -54,7 +54,7 @@ nohup yourcommand 2>&1 &
 nohup yourcommand > myout.log 2>&1 &
 
 其中myout.log是保存输出的文件名称
- 
+
 sudo ./mec  > xxx.log 2>&1
 
 /home/nvidia/.local/share   删除回收站的文件。里面可能有Trash目录 （20230410）
@@ -67,34 +67,34 @@ sudo hwclock -r
 根据系统时间，设置rtc时间，
 sudo hwclock -w
 
-nvidia@miivii-tegra:~$ timedatectl 
+nvidia@miivii-tegra:~$ timedatectl
                Local time: 一 2023-02-13 09:42:24 CST
            Universal time: 一 2023-02-13 01:42:24 UTC
-                 RTC time: 一 2023-02-13 01:42:25    
+                 RTC time: 一 2023-02-13 01:42:25
                 Time zone: Asia/Shanghai (CST, +0800)
-System clock synchronized: yes                       
-              NTP service: n/a                       
+System clock synchronized: yes
+              NTP service: n/a
           RTC in local TZ: no      这个命令可以查看检查各种系统时间。
 
 时区修改设置（2024.12）
 		   ls -l /etc/localtime
   sudo timedatectl set-timezone Asia/Shanghai
-  timedatectl 
+  timedatectl
 
 
 删除日志，增加存储空间 11.11
 rm  /var/log/syslog
- 
+
 
 2023.01.30
 很多时候 telnet 完就无法退出了，ctrl+c 有时也无法退出
 后来找到了正确的命令 ctrl+]  然后在telnet 命令行输入 quit  就可以退出了
 
-nc命令也可以测试端口    
+nc命令也可以测试端口
 nc -v -z -w2 192.168.72.116 5000-5002
 nc -v -z -w2 192.168.72.116 554
 rtty
-sudo apt install -y libev-dev libssl-dev 
+sudo apt install -y libev-dev libssl-dev
 
  cuda版本查看  e413caec06
  e413caec06
@@ -125,4 +125,3 @@ Build cuda_11.4.r11.4/compiler.31294910_0
 调试视频数据流
 sudo /tmp/mec-fal-rtspIpc-debugchn  0xff
 sudo /tmp/mec-fal-rtspIpc-debugchn  0
-
