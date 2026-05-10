@@ -9,3 +9,30 @@ repos:
     rev: 22.10.0
     hooks:
     -   id: black
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace      # 去除行尾空格
+      - id: end-of-file-fixer        # 确保文件以换行符结尾
+      - id: check-yaml               # 检查 YAML 格式
+      - id: check-added-large-files  # 防止大文件被提交 (默认 500KB)
+      - id: check-merge-conflict     # 检查是否存在合并冲突标志
+
+  # C/C++ 自动格式化 (需要本地安装有 clang-format)
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v17.0.6
+    hooks:
+      - id: clang-format
+        types_or: [c, c++, cuda]
+
+  # C++ 静态代码检查 (需要本地安装有 cppcheck)
+  - repo: local
+    hooks:
+      - id: cppcheck
+        name: cppcheck
+        entry: cppcheck
+        language: system
+        args: ["--error-exitcode=1", "--enable=all", "--suppress=missingIncludeSystem"]
+        types_or: [c, c++]
