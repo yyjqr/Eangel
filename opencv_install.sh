@@ -17,7 +17,7 @@ if [ -f "$directory/$file" ]; then
     echo "File exists"
 else
     echo "File does not exist"
-    exit 0 
+    exit 0
 fi
 
 sudo unzip opencv4.1.0.zip

@@ -42,7 +42,7 @@ pin1=13
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -115,7 +115,7 @@ class GrabNews2():
                 #article.append(url.strip())
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
-   
+
 
 
 #adopt from other article
@@ -158,7 +158,7 @@ def mail():
     #txt=MIMEText(news.encode(),'plain','unicode')
     msg.attach(techHtml)
     fp.close
-    
+
     #writeNews2()
     #fp2 = open('sina-news.html')
     #techHtml_2 = MIMEText(fp2.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
@@ -173,9 +173,9 @@ def mail():
     if listN:
         imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
         print('Send IMG is "%s" ' %imgPath)
-    
-    
-        pic=make_img_msg(imgPath) 
+
+
+        pic=make_img_msg(imgPath)
         if pic is None:
            print ("no picture captured!")
         else:
@@ -198,4 +198,3 @@ def mail():
 
 if __name__ == '__main__':
   mail()
-        

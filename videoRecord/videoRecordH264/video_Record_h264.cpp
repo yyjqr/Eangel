@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
   //	VideoWriter writer(pVideoFileName, VideoWriter::fourcc('M', 'P', '4',
   //'2'), videoCapturer.get(CAP_PROP_FPS),
   //					   Size(videoCapturer.get(CAP_PROP_FRAME_WIDTH),
-  //videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
+  // videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
   // X,V,I,D --- H264   DIVX -mp4
   VideoWriter writer(pVideoFileName, VideoWriter::fourcc('H', '2', '6', '4'),
                      videoCapturer.get(CAP_PROP_FPS),
@@ -176,12 +176,12 @@ int main(int argc, char **argv) {
   pthread_t card_monitor_thread;
   pthread_create(&card_monitor_thread, NULL, monitor_mem_thread_proc, NULL);
   log_info(" " STR_OK " line:%d,creat threads to record audio and monitor "
-                      "mem,test bCapture:%d\n",
+           "mem,test bCapture:%d\n",
            __LINE__, bCapture);
   // namedWindow("RobotCam", WINDOW_NORMAL);
   Mat frame;
   log_info(" " STR_OK " line:%d,creat threads to record audio and monitor "
-                      "mem,test videoCapturer.isOpened():%d\n",
+           "mem,test videoCapturer.isOpened():%d\n",
            __LINE__, videoCapturer.isOpened());
   while (videoCapturer.isOpened()) {
 

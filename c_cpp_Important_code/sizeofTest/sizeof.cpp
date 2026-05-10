@@ -19,18 +19,19 @@ int main(void) {
   char str[] = "Hello";
   printf("%d\n", sizeof(str));
   printf("%d\n", strlen(str));
-  char* p = str;
+  char *p = str;
   printf("%d\n", sizeof(p));
 
   Func(str);
- printf("c++ val:%d\n", __cplusplus);  
+  printf("c++ val:%d\n", __cplusplus);
 
   int AA[] = {1, 3};
   int BB[] = {2, 3};
   int CC[] = {4, 5, 6};
-  int* ABC[] = {AA, BB, CC};
+  int *ABC[] = {AA, BB, CC};
   printf("sizeof(ABC):%d,sizeof(BB):%d \n", sizeof(ABC), sizeof(BB));
-  printf("sizeof(int):%d,sizeof(AA):%d,AA:0x%x,BB:0x%x \n", sizeof(int), sizeof(AA), AA, BB);
+  printf("sizeof(int):%d,sizeof(AA):%d,AA:0x%x,BB:0x%x \n", sizeof(int),
+         sizeof(AA), AA, BB);
   for (int i = 0; i < 3; i++) {
     printf("sizeof(ABC[%d]):%d,ABC[i]:0x%x \n", i, sizeof(ABC[i]), ABC[i]);
     //   int* p=ABC[i];
@@ -46,29 +47,29 @@ int main(void) {
     //     }
     // }
   }
-// 数组排列顺序
-  int array[3][3]={1,2,3,4,5,6,7,8,9};
-  for(int i=0;i<3;i++){
-    printf("array[%d][%d]:%d\n",i, 2-i, array[i][2-i]);
+  // 数组排列顺序
+  int array[3][3] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  for (int i = 0; i < 3; i++) {
+    printf("array[%d][%d]:%d\n", i, 2 - i, array[i][2 - i]);
   }
 
   string log_Path = "./log";
   //    cout<<" log path:"<<log_Path<<endl;
   string logDir = "mkdir -p " + log_Path;
   system(logDir.c_str());
-  std::string log_file = log_Path + "/servo";  //日志在之前创建。
+  std::string log_file = log_Path + "/servo"; // 日志在之前创建。
   time_t timep, current_time;
-  tm local;  // pointer ---->tm
+  tm local; // pointer ---->tm
   char buf[100] = {0};
 
   printf("test pointer local:0x%x\n", &local);
-  current_time = time(&timep);  //
-                                //   local=localtime(&current_time);
+  current_time = time(&timep); //
+                               //   local=localtime(&current_time);
 
   // if local define as tm*,then will has this error. 08.30
   // test pointer local:0x6
   // Segmentation fault (core dumped)
-  localtime_r(&current_time, &local);  // 转为本地时间   thread_safe!!
+  localtime_r(&current_time, &local); // 转为本地时间   thread_safe!!
   printf("After assign ,test pointer local:0x%x\n", &local);
   strftime(buf, 64, "%Y-%m-%d_%H:%M:%S", &local);
   printf("time buf:%s\n", buf);

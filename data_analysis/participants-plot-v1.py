@@ -38,7 +38,7 @@ try:
     # 检查文件是否存在
     if not os.path.exists(lr_file):
         raise FileNotFoundError(f"文件不存在: {lr_file}")
-    
+
     # 尝试不同的分隔符
     try:
         #df = pd.read_csv(lr_file, sep='\t')
@@ -50,7 +50,7 @@ try:
     except Exception as e:
         print(f"读取CSV失败: {str(e)}")
         df = pd.read_csv(lr_file)  # 最后尝试自动检测分隔符
-    
+
     print(f"成功读取文件，行数: {len(df)}")
     print("前5行数据:")
     print(df.head())
@@ -59,13 +59,13 @@ try:
     # 检查必要的列是否存在
     required_columns = ['ts', 'Lon', 'Lat', 'Vel', 'TargetID']
     missing_columns = [col for col in required_columns if col not in df.columns]
-    
+
     if missing_columns:
         raise ValueError(f"CSV文件中缺少必要的列: {', '.join(missing_columns)}")
-    
+
     print("数据列信息:")
     print(df.info())
-    
+
 except Exception as e:
     print(f"处理文件时出错: {str(e)}")
     print("程序将在5秒后退出...")
@@ -80,12 +80,12 @@ try:
         df['ts'] = pd.to_numeric(df['ts'], errors='coerce')
         # 删除无效行
         df = df.dropna(subset=['ts'])
-    
+
     df['datetime'] = pd.to_datetime(df['ts'], unit='s')
     df = df.sort_values('ts')
-    
+
     print(f"时间范围: {df['datetime'].min()} 到 {df['datetime'].max()}")
-    
+
     # 计算航向角（基于连续点之间的位置变化）
     def calculate_heading(group):
         group = group.sort_values('ts')
@@ -103,10 +103,10 @@ try:
         return group
 
     df = df.groupby('TargetID').apply(calculate_heading).reset_index(drop=True)
-    
+
     print("航向角计算完成")
     print(f"目标ID列表: {df['TargetID'].unique()}")
-    
+
 except Exception as e:
     print(f"处理数据时出错: {str(e)}")
     print("程序将在5秒后退出...")
@@ -117,7 +117,7 @@ except Exception as e:
 try:
     app = dash.Dash(__name__)
     server = app.server
-    
+
     # 添加调试信息面板
     debug_info = html.Div([
         html.H3("调试信息"),
@@ -129,12 +129,12 @@ try:
         html.P(f"纬度范围: {df['Lat'].min()} - {df['Lat'].max()}"),
         html.P(f"速度范围: {df['Vel'].min()} - {df['Vel'].max()} m/s")
     ])
-    
+
     app.layout = html.Div([
         html.H1(f"目标轨迹分析 (文件: {file_name})", style={'textAlign': 'center'}),
-        
+
         debug_info,
-        
+
         html.Div([
             dcc.Graph(id='trajectory-map', style={'width': '50%', 'display': 'inline-block'}),
             dcc.Graph(id='velocity-plot', style={'width': '50%', 'display': 'inline-block'})
@@ -157,7 +157,7 @@ try:
             )
         ], style={'width': '50%', 'margin': '20px auto'})
     ])
-    
+
     print("Dash应用初始化完成")
 
 except Exception as e:
@@ -183,7 +183,7 @@ def update_plots(marker_size):
             lat=df['Lat'],
             mode='lines+markers',
             marker=dict(size=marker_size, color=df['FrameID'], colorscale='Viridis'),
-            text=[f"目标ID: {tid}<br>时间: {dt}<br>速度: {vel:.3f} m/s" 
+            text=[f"目标ID: {tid}<br>时间: {dt}<br>速度: {vel:.3f} m/s"
                   for tid, dt, vel in zip(df['TargetID'], df['datetime'].dt.strftime('%H:%M:%S.%f'), df['Vel'])],
             hoverinfo='text',
             line=dict(color='blue', width=2)
@@ -249,7 +249,7 @@ def update_plots(marker_size):
         )
 
         return fig_map, fig_vel, fig_coord, fig_heading
-    
+
     except Exception as e:
         print(f"更新图表时出错: {str(e)}")
         # 返回空图表
@@ -267,11 +267,11 @@ if __name__ == '__main__':
         print("2. 尝试使用 http://localhost:8050 访问")
         print("3. 如果使用服务器，请确保绑定到正确IP地址")
         print("4. 检查是否有其他程序占用了8050端口")
-        
+
         # 添加更多调试信息
         print("\n服务器启动信息:")
         app.run_server(debug=True, host='0.0.0.0', port=8050)
-        
+
     except Exception as e:
         print(f"启动服务器时出错: {str(e)}")
         print("程序将在5秒后退出...")

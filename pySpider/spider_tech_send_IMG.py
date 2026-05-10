@@ -38,7 +38,7 @@ pin1=13
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -94,7 +94,7 @@ class GrabNews2():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.tech-news li  a'):
            tittle=news.text
            print(news.text)
@@ -106,7 +106,7 @@ class GrabNews2():
                 #article.append(url.strip())
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
-   
+
 
 
 #adopt from other article
@@ -144,16 +144,16 @@ def mail():
     techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
     msg.attach(techHtml)
     fp.close
-    
+
 
     path = '/tmp'         # 替换为你的路径
     dir = os.listdir(path)                  # dir是目录下的全部文件
     listN=get_file_list(path)
     #print (listN)
     imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
-    print('Send IMG is "%s" ' %imgPath)    
+    print('Send IMG is "%s" ' %imgPath)
     pic=imgPath
-    print (pic) 
+    print (pic)
     if pic is None:
         print ("no picture captured!")
     else:
@@ -176,4 +176,3 @@ def mail():
 
 if __name__ == '__main__':
   mail()
-        

@@ -1,6 +1,6 @@
 #拼接字符串并换行
 ## -*- coding: UTF-8 -*-
-#@author: JACK YANG 
+#@author: JACK YANG
 #@date:201902-->10 --->
       #202006-->202101--->202110
       # 2022.09 add rank map
@@ -79,7 +79,7 @@ KEYWORDS_RANK_MAP={ 'chip':1,'risc':0.8,'5G':1,
 'plane':0.7,
   'Drone':0.8,
   'missile':1,
-'warship':0.7,  
+'warship':0.7,
 'art':0.4,
 'design':0.8,
 
@@ -89,7 +89,7 @@ print(KEYWORDS_RANK_MAP)
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -116,7 +116,7 @@ def get_file_list(file_path):
 def findKeyWordInNews(str):
    #print(str)
    for i in range(14):
-       
+
        if array[i] in str:
            #print("test")
            return True
@@ -127,7 +127,7 @@ def findValuedInfoInNews(str,keyWords):
    #print(len(keyWords))
    #print(keyWords)
    for i in range(len(keyWords)):
-       
+
        if keyWords[i] in str:
            #print("test")
            return True
@@ -141,7 +141,7 @@ def findValuedInfoRank(str,keyMap):
    print_flag=True
    #for i in range(len(keyWords)):
    for i in keyMap:
-       #print(i)   
+       #print(i)
        if  i in str:
            #print(i)
            rankValue+=keyMap[i]
@@ -149,7 +149,7 @@ def findValuedInfoRank(str,keyMap):
            if print_flag==True :
               print("compute str: {0} rank value:{1}\n".format(str,rankValue))
               print_flag=False
-           else: 
+           else:
               #print("Add rank value:{0}\n".format(rankValue))
    print("Final news:{0} rank value:{0}\n".format(str,rankValue))
    return rankValue
@@ -166,7 +166,7 @@ class GrabNews():
         for news in soup.select('.post-block__title  a'):
             if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
                 tittle=news.text
-                print(news.text) 
+                print(news.text)
                 for string in news.stripped_strings:
                     newsUrl=news.attrs['href']
                 #article.append(url.strip())
@@ -183,15 +183,15 @@ class GrabNewsProduct():
         #html = requests.get(url,headers = headers).text
         print("time out optimize")
         req  = requests.get(url,headers = headers, timeout=5)
-        html =req.text      
+        html =req.text
  # r2.encoding = 'utf-8'
         print ("requests.get {} encoding: {} " .format(url, requests.get(url).encoding))
-        
+
         soup = BeautifulSoup(html, "html.parser")
 
         #print(soup.get_text())
         #for news in soup.select('a.enk2x9t2 css-7v7n8p epl65fo4'):  #更换了class相关字段,class前要加点.  202202 ---->enk2x9t2 css-7v
-        for news in soup.select('a.enk2x9t2'): 
+        for news in soup.select('a.enk2x9t2'):
             #if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
             if findValuedInfoRank(news.text,KEYWORDS_RANK_MAP):
                tittle=news.text
@@ -203,13 +203,13 @@ class GrabNewsProduct():
                    #newHtml = newsHtml.replace('/n',"") #将换行符替换成空
                    #print("After filter\n")
                for string in news.stripped_strings:
-                    
+
                     if news.attrs['href'].startswith('http'):
                         newsUrl=news.attrs['href']
                     else:
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
-                    
+
                     if {string:newsUrl} not in self.NewsList:
                         #print('newsUrl', newsUrl)
                         self.NewsList.append({string:newsUrl})
@@ -227,7 +227,7 @@ class GrabNewsSina():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.tech-news li  a'):
            if findValuedInfoInNews(news.text,arrayKEYWORDS_CN):
                tittle=news.text
@@ -238,7 +238,7 @@ class GrabNewsSina():
                 #article.append(url.strip())
                    print(newsUrl)
                    self.NewsList.append({string:newsUrl})
-   
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
@@ -248,7 +248,7 @@ class GrabNewsAI():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.searchtitle   a'):
             #if findValuedInfoInNews(news.text,array):
             if findValuedInfoRank(news.text,KEYWORDS_RANK_MAP):
@@ -293,7 +293,7 @@ class GrabNewsTechnet():
 def writeNewsTechNet():
     grabNews = GrabNewsTechnet()
     grabNews.getNews()
-  
+
     with codecs.open(newsFullPath,'a', 'utf-8') as fp:
         for news in grabNews.NewsList:
             for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
@@ -345,7 +345,7 @@ def writeNewsProduct():
      #w---->a  改为追加内容的模式 202209
     fp = codecs.open(newsFullPath, 'a', 'utf-8')
     for news in grabNews.NewsList:
-        for key in news.keys(): 
+        for key in news.keys():
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
             #print("test write")
             #print(news[key])
@@ -361,7 +361,7 @@ def mail():
     #add AI topic search 202006
     writeNewsAI()
     try:
-        writeNewsProduct()  
+        writeNewsProduct()
         writeNewsSina()
     except Exception as e:
         print (str(e))
@@ -372,7 +372,7 @@ def mail():
         techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
         msg.attach(techHtml)
     #fp.close
-    
+
     path = '/tmp'         # 替换为你的路径
     listN=get_file_list(path)
     #print (listN)
@@ -380,8 +380,8 @@ def mail():
        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
        print('Send IMG is "%s" ' %imgPath)
        msg.attach(make_img_msg(imgPath))
-    else: 
-        print("no pic capture!")     
+    else:
+        print("no pic capture!")
     msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的用户",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     msg['Subject']="EXAID 价值Rank %s" %year_month  #邮件的主题，也可以说是标题
@@ -399,4 +399,3 @@ def mail():
 
 if __name__ == '__main__':
   mail()
-        

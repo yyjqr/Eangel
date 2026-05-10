@@ -31,7 +31,7 @@ _pwd = "XXX"  #需在qq邮箱开启SMTP服务并获取授权码
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -58,7 +58,7 @@ array=['机器人','新冠','量子','物联网','硬科技','数字','5G','Robo
 def findKeyWordInNews(str):
    #print(str)
    for i in range(15):
-       
+
        if array[i] in str:
            #print("test")
            return True
@@ -71,7 +71,7 @@ class GrabNews():
         url = 'https://techcrunch.com/'
         r = requests.get(url)
         soup = BeautifulSoup(r.text, "html.parser")
-        
+
         #for news in newsList:
             #for string in news.stripped_strings:
                 #newsUrl = 'http://eis.whu.edu.cn/' + news['href']
@@ -103,11 +103,11 @@ class GrabNews2():
                 #article.append(url.strip())
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
-                
 
-         
-    
-    
+
+
+
+
 
 class GrabNewsTechnet():
     def __init__(self):
@@ -129,13 +129,13 @@ class GrabNewsTechnet():
                     else:
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
-                    
+
                     if {string:newsUrl} not in self.NewsList:
                         print('newsUrl', newsUrl)
                         self.NewsList.append({string:newsUrl})
                     else:
                         print("------- ")
-                
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
@@ -145,13 +145,13 @@ class GrabNewsAI():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.searchtitle   a'):
             if findKeyWordInNews(news.text):
                tittle=news.text
                print(news.text)
                for string in news.stripped_strings:
-                    
+
                     newsUrl=news.attrs['href']
                     #article.append(url.strip())
                     print(newsUrl)
@@ -166,7 +166,7 @@ print (date)
 def writeNews():
     grabNews = GrabNews()
     grabNews.getNews()
-  
+
     fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
@@ -190,21 +190,21 @@ def writeNews2():
 def writeNewsTechNet():
     grabNews = GrabNewsTechnet()
     grabNews.getNews()
-  
+
     fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
             fp.write('<hr />')
     fp.close()
-    
+
 #adopt AI from other article
 def writeNewsAI():
     print("SEARCH AI news")
     grabNews = GrabNewsAI()
     grabNews.getNews()
-    
-    fp = codecs.open('news%s.html' % date, 'w', 'utf-8') 
+
+    fp = codecs.open('news%s.html' % date, 'w', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -225,9 +225,9 @@ def mail():
     msg.attach(techHtml)
     fp.close
 
-     
+
     pic=None
-    print (pic) 
+    print (pic)
     if pic is None:
         print ("no picture captured!")
     else:
@@ -250,4 +250,3 @@ def mail():
 
 if __name__ == '__main__':
   mail()
-        

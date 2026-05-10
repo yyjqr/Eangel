@@ -12,10 +12,8 @@ car_remote_app_control
 <img width="741" alt="机器人图像传输控制逻辑_V1_202203" src="https://user-images.githubusercontent.com/26375374/157189279-26324d3b-3cec-40d8-967f-54ff0fc786da.png">
 # 移动机器人控制
 基于超声波和IMU，避障，获取车的姿态或振动等，再来控制机器人。另基于摄像头传输移动机器人画面，在线检测，图像处理来控制。在线识别检测基于yoloV4,yolo V5.
-# 爬虫 
+# 爬虫
 另把爬取的新闻，科技类附在邮件里。基于了BS4和XPATH,LXML等。
 
 ## C,C++编程重点研究
 基于一些基本的代码研究数据类型，相关指针，内存问题。
-
-

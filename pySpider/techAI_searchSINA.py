@@ -37,7 +37,7 @@ pin1=13
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -91,7 +91,7 @@ class GrabNews2():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.tech-news li  a'):
            tittle=news.text
            print(news.text)
@@ -103,7 +103,7 @@ class GrabNews2():
                 #article.append(url.strip())
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
-   
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
@@ -113,7 +113,7 @@ class GrabNewsAI():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.searchtitle   a'):
            tittle=news.text
            print(news.text)
@@ -180,7 +180,7 @@ def mail():
     techHtml = MIMEText(fp.read(), 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711
     msg.attach(techHtml)
     fp.close
-    
+
     path = '/tmp'         # 替换为你的路径
     listN=get_file_list(path)
     #print (listN)
@@ -188,8 +188,8 @@ def mail():
        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
        print('Send IMG is "%s" ' %imgPath)
        msg.attach(make_img_msg(imgPath))
-    else: 
-        print("no pic capture!")     
+    else:
+        print("no pic capture!")
     #msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['From'] = Header(my_sender)
     msg['To'] = Header(receiver,'utf-8')

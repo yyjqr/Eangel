@@ -6,7 +6,7 @@ import re
 import requests
 from lxml import etree
 from lxml.html.clean import Cleaner  #CLEANER 0415
-import chardet 
+import chardet
 import urllib
 
 def Page_Info(myPage):
@@ -26,14 +26,14 @@ def StringListSave(save_path, filename, slist):
             fp.write("%s\t\t%s\n" % (s[0].encode("utf8"), s[1].encode("utf8")))
             #fp.write("%s\t\t%s\n" % (s[0], s[1]))
 
-#测试new_page的内容    
+#测试new_page的内容
 def testNewPage(save_path, filename, new_page):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     path = save_path + "/" + filename + ".txt"
     fp = open(path, "w+")
     fp.write(new_page)
-    
+
 def New_Page_Info(new_page):
     '''Regex(slowly) or Xpath(fast)'''
     # new_page_info = re.findall(r'<td class=".*?">.*?<a href="(.*?)\.html.*?>(.*?)</a></td>',new_page,re.S)
@@ -77,11 +77,11 @@ def filterHtml(new_page):
     content = re.sub(r'<td class="gray">', '', content)  #add 匹配td开始的字符串
     #content = re.sub(r'<span>^[0-9]*</span>', '', content)  #add 匹配span开始的字符串
     content = re.sub(r'<span>[^>]*</span>', '', content)  #add 匹配span开始的字符串
-    
-    #content = re.sub(r'<td class="^[A-Za-z0-9]+$>"', '', content)  #add Test 0502  
-    #content = re.sub(r'<td ^class>', '', content)  #add Test 0502  
-    #content = re.sub(r'<^td>', '', content)   #<td class=  
-    content = re.sub(r'</td>', '', content)   #<td class=  
+
+    #content = re.sub(r'<td class="^[A-Za-z0-9]+$>"', '', content)  #add Test 0502
+    #content = re.sub(r'<td ^class>', '', content)  #add Test 0502
+    #content = re.sub(r'<^td>', '', content)   #<td class=
+    content = re.sub(r'</td>', '', content)   #<td class=
  # 清理网页头标题之类
     #content = content.split('本周点击排行')[1]
     content = content.split('点击数')[1]
@@ -121,7 +121,7 @@ def testEncode(url):
     data1 = urllib.request.urlopen(url).read()
   #用chardet进行内容分析
     chardit1 = chardet.detect(data1)
-    print ("html codeing:"+chardit1['encoding']) # 
+    print ("html codeing:"+chardit1['encoding']) #
 
 if __name__ == '__main__':
     print ("start")

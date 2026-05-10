@@ -2,7 +2,7 @@
 
 #拼接字符串并换行## -*- coding: UTF-8 -*-
 #@author: JACK YANG
-#@date:201902-->10-->202008->202011 
+#@date:201902-->10-->202008->202011
 #       ->202104-->202201--->0307--->0425
 #       ->202206
 #Email:  yyjqr789@sina.com
@@ -18,7 +18,7 @@ from email.header import Header
 import ssl
 import sys,os  #os.listdir 201902
 import time
-import glob  #查找通配文件 
+import glob  #查找通配文件
 
 from email.utils import formataddr
 
@@ -58,7 +58,7 @@ year_month=datetime.now().strftime('%Y-%m')
 print ("现在时间:%s" %timeForDB)
 newsFullPath=os.path.join(save_news_path,date+'.html')
 print(newsFullPath)
-   
+
 
 array=['机器人','物联网','硬科技','数字','5G','Robot','robot','Robotics','Digital','AI','IOT','ML','car','Car','plane','Plane','gun',
        'flighter','NASA','Mars','War','craft','Craft','fighter',
@@ -76,7 +76,7 @@ sql = """ INSERT INTO techTB(Id,Rate,title,author,publish_time,content,url,key_w
 def findKeyWordInNews(str):
    #print(str)
    for i in range(14):
-       
+
        if array[i] in str:
            #print("test")
            return True
@@ -86,7 +86,7 @@ def findValuedInfoInNews(str,keyWords):
 
    #print(keyWords)
    for i in range(len(keyWords)):
-       
+
        if keyWords[i] in str:
            #print("test")
            return True
@@ -96,7 +96,7 @@ def findValuedInfoOPT(str,keyWords):
    #print(str)
    valueIndex=0
    for i in range(len(keyWords)):
-       
+
        if keyWords[i] in str:
            valueIndex+=1
            if valueIndex>=2:
@@ -106,7 +106,7 @@ def findValuedInfoOPT(str,keyWords):
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -137,7 +137,7 @@ class GrabNews():
         url = 'https://techcrunch.com/'
         r = requests.get(url)
         soup = BeautifulSoup(r.text, "html.parser")
-        
+
         for news in soup.select('.post-block__title  a'):
            for string in news.stripped_strings:
                 tittle=news.text
@@ -165,9 +165,9 @@ class GrabNewsSina():
                 #article.append(url.strip())
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
-                
 
-         
+
+
 
 class GrabNewsTechnet():
     def __init__(self):
@@ -189,13 +189,13 @@ class GrabNewsTechnet():
                     else:
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
-                    
+
                     if {string:newsUrl} not in self.NewsList:
                         print('newsUrl', newsUrl)
                         self.NewsList.append({string:newsUrl})
                     else:
                         print("------- ")
-                
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
@@ -213,7 +213,7 @@ class GrabNewsAI():
                    tittle=news.text
                    print(news.text)
                    for string in news.stripped_strings:
-                        
+
                         newsUrl=news.attrs['href']
                         #article.append(url.strip())
                         print(newsUrl)
@@ -227,7 +227,7 @@ class GrabNewsAI():
 
         except Exception as e:
             print("except error:" ,e)
-            
+
 
 class GrabNewsProduct():
     def __init__(self):
@@ -238,14 +238,14 @@ class GrabNewsProduct():
         #html = requests.get(url,headers = headers).text
         print("time out optimize")
         req  = requests.get(url,headers = headers, timeout=5)
-        html =req.text      
+        html =req.text
  # r2.encoding = 'utf-8'
         print ("requests.get {} encoding: {} " .format(url, requests.get(url).encoding))
-        
+
         soup = BeautifulSoup(html, "html.parser")
         #soup=filterHtml(soup)
-        for news in soup.select('a.enk2x9t2'): 
-        #for news in soup.select('a#data-vars-ga-outbound-link'):  #更换了class相关字段,class前要加点.  202202 
+        for news in soup.select('a.enk2x9t2'):
+        #for news in soup.select('a#data-vars-ga-outbound-link'):  #更换了class相关字段,class前要加点.  202202
             if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
                tittle=news.text
                print(news.text)
@@ -253,17 +253,17 @@ class GrabNewsProduct():
                print("After filter\n")
                #if str_news !="":
                    #newsHtml=str_news.decode('utf-8') # python3
-        #匹配所有html标签并用“”代替 
+        #匹配所有html标签并用“”代替
                    #newHtml = newsHtml.replace('/n',"") #将换行符替换成空
                    #print("After filter\n")
                for string in news.stripped_strings:
-                    
+
                     if news.attrs['href'].startswith('http'):
                         newsUrl=news.attrs['href']
                     else:
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
-                    
+
                     if {string:newsUrl} not in self.NewsList:
                         #print('newsUrl', newsUrl)
                         self.NewsList.append({string:newsUrl})
@@ -306,9 +306,9 @@ def filterHtml(new_page):
     content = re.sub(r'<td class="cBlue">', '', content)  #add 匹配td开始$
     content = re.sub(r'<td class="gray">', '', content)  #add 匹配td开始>$
     content = re.sub(r'<span>[^>]*</span>', '', content)  #add 匹配span开$
-    
-    #content = re.sub(r'<td ^class>', '', content)  #add Test 0502  
-    content = re.sub(r'</td>', '', content)   #<td class=  
+
+    #content = re.sub(r'<td ^class>', '', content)  #add Test 0502
+    content = re.sub(r'</td>', '', content)   #<td class=
  # 清理网页头标题之类
     content = content.split('点击数')[1]
     content = content.split('返回顶部')[0]
@@ -343,7 +343,7 @@ class GrabDriveWEB():
                         newsUrl=news.attrs['href']
                     else:
                         newsUrl=URL+news.attrs['href']
-                    
+
                     self.NewsList.append({string:newsUrl})
                     #newsIndex=newsIndex+1
                     print(newsIndex)
@@ -357,7 +357,7 @@ class GrabDriveWEB():
 def writeNews():
     grabNews = GrabNews()
     grabNews.getNews()
-  
+
     fp = codecs.open(newsFullPath , 'a', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
@@ -381,7 +381,7 @@ def writeNewsDrive():
 def writeNewsTechNet():
     grabNews = GrabNewsTechnet()
     grabNews.getNews()
-  
+
     fp = codecs.open(newsFullPath , 'a', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
@@ -389,14 +389,14 @@ def writeNewsTechNet():
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
             fp.write('<hr />')
     fp.close()
-    
+
 #adopt AI from other article
 def writeNewsAI():
     print("SEARCH AI news")
     grabNews = GrabNewsAI()
     grabNews.getNews()
-    
-    fp = codecs.open(newsFullPath, 'w', 'utf-8') 
+
+    fp = codecs.open(newsFullPath, 'w', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -409,18 +409,18 @@ def writeNewsProduct():
     print("SEARCH Product news")
     grabNews = GrabNewsProduct()
     grabNews.getNews()
-    
+
     fp = codecs.open(newsFullPath, 'w', 'utf-8')
-    #fp = codecs.open("newsProduct.html", 'w', 'utf-8') 
+    #fp = codecs.open("newsProduct.html", 'w', 'utf-8')
     for news in grabNews.NewsList:
-        for key in news.keys(): 
+        for key in news.keys():
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
             #print("test write")
             #print(news[key])
             fp.write('<hr />')
     fp.close()
 
-    
+
 def mail():
   ret=True
   try:
@@ -436,9 +436,9 @@ def mail():
     techHtml = MIMEText(newsHtml, 'html', 'utf-8')  #内容, 格式, 编码 English web 20190711--->fp.read().decode('utf-8')
         #print("After filter:%s\n" %newsHtml)
     #else:
-     #   techHtml=''' 
+     #   techHtml='''
       #           未获取到相关内容
-           
+
        #       '''
     msg.attach(techHtml)
 
@@ -451,8 +451,8 @@ def mail():
        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
        print('Send IMG is "%s" ' %imgPath)
        msg.attach(make_img_msg(imgPath))
-    else: 
-        print("no pic capture!")  
+    else:
+        print("no pic capture!")
     msg['From']=formataddr(["smart Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     msg['Subject']="科prod %s" %year_month  #邮件的主题，也可以说是标题
@@ -470,4 +470,3 @@ def mail():
 
 if __name__ == '__main__':
   mail()
-        

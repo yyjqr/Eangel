@@ -53,7 +53,7 @@ def make_txt_msg(fn):
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -87,7 +87,7 @@ def parseHtml(file):
     print("解析HTML")
     html = etree.HTML(file)
     tag3 = html.xpath('/html/tr/td[1]/text()')
-    print (tag3) 
+    print (tag3)
 
 def filterHtml(file):
     #html = requests.get(url, headers=headers).content
@@ -106,7 +106,7 @@ def parseNews(file):
     #new_page_info = re.findall(r'<td class=".*?">.*?<a href="(.*?)\.html.*?>(.*?)</a></td>',new_page,re.S)
     # 假设content为已经拿到的html
     fr = open(file)   #add 0404
-    content = fr.read() 
+    content = fr.read()
     # Ctext取周围k行(k<5),定为3
 
     blocksWidth = 3
@@ -134,7 +134,7 @@ def mail():
     #txt=MIMEText('这是一封来自Eangel机器人的邮件，谢谢!2019012','plain','utf-8')
  #获取文件路径
     num=int(time.time())
-    print (num%5) 
+    print (num%5)
     if (num%5) == 0:
         file='/home/pi/news网易新闻抓取/科技.txt'
     elif (num%5) == 1:
@@ -162,13 +162,13 @@ def mail():
        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
        print('Send IMG is "%s" ' %imgPath)
        msg.attach(make_img_msg(imgPath))
-    else: 
-        print("no pic capture!") 
+    else:
+        print("no pic capture!")
     #msg.attach(make_img_msg('/home/pi/EangelCam2019.jpg'))    #  single ''!!! 0603
     msg['From']=formataddr(["Eangel Robot Ⅱ",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     msg['Subject']="SE3 Cam 2020 %s" %file.split("/")[4].split(".")[0] #邮件的主题，也可以说是标题
-    print ('subject is "%s" '  %file.split("/")[4].split(".")[0])   
+    print ('subject is "%s" '  %file.split("/")[4].split(".")[0])
 
     server=smtplib.SMTP_SSL("smtp.qq.com",465) #发件人邮箱中的SMTP服务器，端口是25 (默认）---------->465
     server.login(my_sender,_pwd)  #括号中对应的是发件人邮箱账号、邮箱密码
@@ -190,6 +190,5 @@ def mail():
    #GPIO.output(pin1,GPIO.HIGH)
 
 if __name__ == '__main__':
-  net_spiderNews()  
+  net_spiderNews()
   mail()
-        

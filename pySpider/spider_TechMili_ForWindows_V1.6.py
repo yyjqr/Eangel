@@ -10,7 +10,7 @@ from email.header import Header
 import ssl
 import sys,os  #os.listdir 201902
 import time
-import glob  #查找通配文件 
+import glob  #查找通配文件
 
 from email.utils import formataddr
 
@@ -31,7 +31,7 @@ _pwd = "XXfuxycoehyobbji"  #需在qq邮箱开启SMTP服务并获取授权码
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -53,7 +53,7 @@ def get_file_list(file_path):
         dir_list = sorted(dir_list,  key=lambda x: os.path.getmtime(os.path.join(file_path, x)))
         # print(dir_list)
         return dir_list
-    
+
 
 array=['机器人','物联网','硬科技','数字','5G','Robot','robot','Robotics','Digital','AI','IOT','ML','car','Car','plane','Plane','gun',
        'flighter','NASA','Mars','War','craft','Craft','fighter',
@@ -61,7 +61,7 @@ array=['机器人','物联网','硬科技','数字','5G','Robot','robot','Roboti
 def findKeyWordInNews(str):
    #print("len(array)" ,len(array))
    for i in range(len(array)):
-       
+
        if array[i] in str:
            #print("test")
            return True
@@ -74,7 +74,7 @@ class GrabNews():
         url = 'https://techcrunch.com/'
         r = requests.get(url)
         soup = BeautifulSoup(r.text, "html.parser")
-        
+
         #for news in newsList:
             #for string in news.stripped_strings:
                 #newsUrl = 'http://eis.whu.edu.cn/' + news['href']
@@ -106,9 +106,9 @@ class GrabNewsSina():
                 #article.append(url.strip())
                 print(newsUrl)
                 self.NewsList.append({string:newsUrl})
-                
 
-         
+
+
 
 class GrabNewsTechnet():
     def __init__(self):
@@ -130,13 +130,13 @@ class GrabNewsTechnet():
                     else:
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
-                    
+
                     if {string:newsUrl} not in self.NewsList:
                         print('newsUrl', newsUrl)
                         self.NewsList.append({string:newsUrl})
                     else:
                         print("------- ")
-                
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
@@ -146,13 +146,13 @@ class GrabNewsAI():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.searchtitle   a'):
             if findKeyWordInNews(news.text):
                tittle=news.text
                print(news.text)
                for string in news.stripped_strings:
-                    
+
                     newsUrl=news.attrs['href']
                     #article.append(url.strip())
                     print(newsUrl)
@@ -174,20 +174,20 @@ class GrabNewsProduct():
                tittle=news.text
                print(news.text)
                for string in news.stripped_strings:
-                    
+
                     if news.attrs['href'].startswith('http'):
                         newsUrl=news.attrs['href']
                     else:
                         newsUrl=url+news.attrs['href']
                     #article.append(url.strip())
-                    
+
                     if {string:newsUrl} not in self.NewsList:
                         print('newsUrl', newsUrl)
                         self.NewsList.append({string:newsUrl})
                     else:
                         print("------- ")
 
-                    
+
 
 # get the sys date and hour,minutes!!
 #def GetDate():
@@ -200,7 +200,7 @@ year_month=datetime.now().strftime('%Y-%m')
 def writeNews():
     grabNews = GrabNews()
     grabNews.getNews()
-  
+
     fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
@@ -224,21 +224,21 @@ def writeNewsSina():
 def writeNewsTechNet():
     grabNews = GrabNewsTechnet()
     grabNews.getNews()
-  
+
     fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
             fp.write('<hr />')
     fp.close()
-    
+
 #adopt AI from other article
 def writeNewsAI():
     print("SEARCH AI news")
     grabNews = GrabNewsAI()
     grabNews.getNews()
-    
-    fp = codecs.open('news%s.html' % date, 'w', 'utf-8') 
+
+    fp = codecs.open('news%s.html' % date, 'w', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -251,11 +251,11 @@ def writeNewsProduct():
     print("SEARCH Product news")
     grabNews = GrabNewsProduct()
     grabNews.getNews()
-    
+
     fp = codecs.open('news%s.html' %date, 'w', 'utf-8')
     #fileName='news%s.html' %date
     #print(fileName)
-    #fp = codecs.open("newsProduct.html", 'w', 'utf-8') 
+    #fp = codecs.open("newsProduct.html", 'w', 'utf-8')
     for news in grabNews.NewsList:
         for key in news.keys(): # key:value. key是新闻标题，value是新闻链接
             fp.write('<a href=%s>%s</a>' % (news[key], '*'+key))
@@ -264,7 +264,7 @@ def writeNewsProduct():
             fp.write('<hr />')
     fp.close()
 
-    
+
 def mail():
   ret=True
   try:
@@ -280,9 +280,9 @@ def mail():
     msg.attach(techHtml)
     fp.close()
 
-     
+
     pic=None
-    print (pic) 
+    print (pic)
     if pic is None:
         print ("no picture captured!")
     else:
@@ -305,4 +305,3 @@ def mail():
 
 if __name__ == '__main__':
   mail()
-        
