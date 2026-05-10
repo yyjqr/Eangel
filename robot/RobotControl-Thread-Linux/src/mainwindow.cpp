@@ -567,4 +567,3 @@ void MainWindow::on_comboBox_ipAddr_currentTextChanged(const QString &arg1)
     addr=arg1;
     qDebug()<<"current connect addr:"<<addr;
 }
-

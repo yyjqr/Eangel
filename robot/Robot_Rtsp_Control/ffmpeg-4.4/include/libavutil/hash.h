@@ -49,9 +49,9 @@
  *
  * If your application needs to support a wide range of different hash
  * functions, then the Generic Hashing API is for you. It provides a generic,
- * reusable API for @ref lavu_hash "all hash functions" implemented in libavutil.
- * If you just need to use one particular hash function, use the @ref lavu_hash
- * "individual hash" directly.
+ * reusable API for @ref lavu_hash "all hash functions" implemented in
+ * libavutil. If you just need to use one particular hash function, use the @ref
+ * lavu_hash "individual hash" directly.
  *
  * @section Sample Code
  *

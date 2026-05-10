@@ -23,20 +23,21 @@
  * DOVI configuration
  */
 
-
 #ifndef AVUTIL_DOVI_META_H
 #define AVUTIL_DOVI_META_H
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /*
  * DOVI configuration
  * ref: dolby-vision-bitstreams-within-the-iso-base-media-file-format-v2.1.2
         dolby-vision-bitstreams-in-mpeg-2-transport-stream-multiplex-v1.2
  * @code
- * uint8_t  dv_version_major, the major version number that the stream complies with
- * uint8_t  dv_version_minor, the minor version number that the stream complies with
+ * uint8_t  dv_version_major, the major version number that the stream complies
+ with
+ * uint8_t  dv_version_minor, the minor version number that the stream complies
+ with
  * uint8_t  dv_profile, the Dolby Vision profile
  * uint8_t  dv_level, the Dolby Vision level
  * uint8_t  rpu_present_flag
@@ -49,14 +50,14 @@
  *       its size is not a part of the public ABI.
  */
 typedef struct AVDOVIDecoderConfigurationRecord {
-    uint8_t dv_version_major;
-    uint8_t dv_version_minor;
-    uint8_t dv_profile;
-    uint8_t dv_level;
-    uint8_t rpu_present_flag;
-    uint8_t el_present_flag;
-    uint8_t bl_present_flag;
-    uint8_t dv_bl_signal_compatibility_id;
+  uint8_t dv_version_major;
+  uint8_t dv_version_minor;
+  uint8_t dv_profile;
+  uint8_t dv_level;
+  uint8_t rpu_present_flag;
+  uint8_t el_present_flag;
+  uint8_t bl_present_flag;
+  uint8_t dv_bl_signal_compatibility_id;
 } AVDOVIDecoderConfigurationRecord;
 
 /**

@@ -26,19 +26,19 @@
 
 #include "libavutil/version.h"
 
-#define LIBSWSCALE_VERSION_MAJOR   5
-#define LIBSWSCALE_VERSION_MINOR   9
+#define LIBSWSCALE_VERSION_MAJOR 5
+#define LIBSWSCALE_VERSION_MINOR 9
 #define LIBSWSCALE_VERSION_MICRO 100
 
-#define LIBSWSCALE_VERSION_INT  AV_VERSION_INT(LIBSWSCALE_VERSION_MAJOR, \
-                                               LIBSWSCALE_VERSION_MINOR, \
-                                               LIBSWSCALE_VERSION_MICRO)
-#define LIBSWSCALE_VERSION      AV_VERSION(LIBSWSCALE_VERSION_MAJOR, \
-                                           LIBSWSCALE_VERSION_MINOR, \
-                                           LIBSWSCALE_VERSION_MICRO)
-#define LIBSWSCALE_BUILD        LIBSWSCALE_VERSION_INT
+#define LIBSWSCALE_VERSION_INT                                                 \
+  AV_VERSION_INT(LIBSWSCALE_VERSION_MAJOR, LIBSWSCALE_VERSION_MINOR,           \
+                 LIBSWSCALE_VERSION_MICRO)
+#define LIBSWSCALE_VERSION                                                     \
+  AV_VERSION(LIBSWSCALE_VERSION_MAJOR, LIBSWSCALE_VERSION_MINOR,               \
+             LIBSWSCALE_VERSION_MICRO)
+#define LIBSWSCALE_BUILD LIBSWSCALE_VERSION_INT
 
-#define LIBSWSCALE_IDENT        "SwS" AV_STRINGIFY(LIBSWSCALE_VERSION)
+#define LIBSWSCALE_IDENT "SwS" AV_STRINGIFY(LIBSWSCALE_VERSION)
 
 /**
  * FF_API_* defines may be placed below to indicate public API that will be
@@ -47,7 +47,7 @@
  */
 
 #ifndef FF_API_SWS_VECTOR
-#define FF_API_SWS_VECTOR            (LIBSWSCALE_VERSION_MAJOR < 6)
+#define FF_API_SWS_VECTOR (LIBSWSCALE_VERSION_MAJOR < 6)
 #endif
 
 #endif /* SWSCALE_VERSION_H */

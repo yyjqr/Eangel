@@ -25,12 +25,12 @@
  * Allocated as AVHWDeviceContext.hwctx
  */
 typedef struct AVMediaCodecDeviceContext {
-    /**
-     * android/view/Surface handle, to be filled by the user.
-     *
-     * This is the default surface used by decoders on this device.
-     */
-    void *surface;
+  /**
+   * android/view/Surface handle, to be filled by the user.
+   *
+   * This is the default surface used by decoders on this device.
+   */
+  void *surface;
 } AVMediaCodecDeviceContext;
 
 #endif /* AVUTIL_HWCONTEXT_MEDIACODEC_H */

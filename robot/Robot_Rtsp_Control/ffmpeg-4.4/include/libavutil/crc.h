@@ -27,10 +27,10 @@
 #ifndef AVUTIL_CRC_H
 #define AVUTIL_CRC_H
 
-#include <stdint.h>
-#include <stddef.h>
 #include "attributes.h"
 #include "version.h"
+#include <stddef.h>
+#include <stdint.h>
 
 /**
  * @defgroup lavu_crc32 CRC
@@ -47,16 +47,16 @@
 typedef uint32_t AVCRC;
 
 typedef enum {
-    AV_CRC_8_ATM,
-    AV_CRC_16_ANSI,
-    AV_CRC_16_CCITT,
-    AV_CRC_32_IEEE,
-    AV_CRC_32_IEEE_LE,  /*< reversed bitorder version of AV_CRC_32_IEEE */
-    AV_CRC_16_ANSI_LE,  /*< reversed bitorder version of AV_CRC_16_ANSI */
-    AV_CRC_24_IEEE,
-    AV_CRC_8_EBU,
-    AV_CRC_MAX,         /*< Not part of public API! Do not use outside libavutil. */
-}AVCRCId;
+  AV_CRC_8_ATM,
+  AV_CRC_16_ANSI,
+  AV_CRC_16_CCITT,
+  AV_CRC_32_IEEE,
+  AV_CRC_32_IEEE_LE, /*< reversed bitorder version of AV_CRC_32_IEEE */
+  AV_CRC_16_ANSI_LE, /*< reversed bitorder version of AV_CRC_16_ANSI */
+  AV_CRC_24_IEEE,
+  AV_CRC_8_EBU,
+  AV_CRC_MAX, /*< Not part of public API! Do not use outside libavutil. */
+} AVCRCId;
 
 /**
  * Initialize a CRC table.
@@ -90,8 +90,8 @@ const AVCRC *av_crc_get_table(AVCRCId crc_id);
  *
  * @see av_crc_init() "le" parameter
  */
-uint32_t av_crc(const AVCRC *ctx, uint32_t crc,
-                const uint8_t *buffer, size_t length) av_pure;
+uint32_t av_crc(const AVCRC *ctx, uint32_t crc, const uint8_t *buffer,
+                size_t length) av_pure;
 
 /**
  * @}

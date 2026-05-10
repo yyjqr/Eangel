@@ -55,6 +55,7 @@ uint32_t av_map_videotoolbox_format_from_pixfmt(enum AVPixelFormat pix_fmt);
  * Same as av_map_videotoolbox_format_from_pixfmt function, but can map and
  * return full range pixel formats via a flag.
  */
-uint32_t av_map_videotoolbox_format_from_pixfmt2(enum AVPixelFormat pix_fmt, bool full_range);
+uint32_t av_map_videotoolbox_format_from_pixfmt2(enum AVPixelFormat pix_fmt,
+                                                 bool full_range);
 
 #endif /* AVUTIL_HWCONTEXT_VIDEOTOOLBOX_H */

@@ -26,8 +26,8 @@
 #ifndef AVUTIL_DISPLAY_H
 #define AVUTIL_DISPLAY_H
 
-#include <stdint.h>
 #include "common.h"
+#include <stdint.h>
 
 /**
  * @addtogroup lavu_video

@@ -92,4 +92,3 @@ while True:
 cap.release()
 
 #到这里完成了TCPserver的部分，接下来在Qt中完成TCPClient的部分
-

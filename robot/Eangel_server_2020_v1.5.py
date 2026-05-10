@@ -95,8 +95,8 @@ while True:
                print("car Pause")
             elif data=='S':    #slow down  add 202003
                ser.write('S')
-               print("car SLOW DOWN!")   
-# "C" 20200301ADD            
+               print("car SLOW DOWN!")
+# "C" 20200301ADD
             elif data=='C':
                #os.system('~/home/pi/camCap/source/cam10min/camFS10m_opt')
                subprocess.Popen('~/camCap/source/cam1min/camFS1min', shell = True, stdout = subprocess.PIPE)
@@ -105,21 +105,21 @@ while True:
             elif data=='M':
                #subprocess.popen('mplayer /home/pi/Music/Soundtrack - Define Dancing.mp3')
                subprocess.Popen(["mplayer", "-slave", "-quiet", "/home/pi/Music/Soundtrack - Define Dancing.mp3"], stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = False)
-	       print ("Play music") 
+	       print ("Play music")
                time.sleep(1)
-# "Z" 20200307ADD    send Email        
+# "Z" 20200307ADD    send Email
             elif data=='Z':
                subprocess.Popen('~/sendDiffNews.sh', shell = True, stdout = subprocess.PIPE)
                print("SEND Email------ !")
                logger.info("SEND Email------ !")
 
-            
+
             else:
                ser.flushInput()
                #input=ser.read(1)
                #runtime=ord(input)
                runtime=2
-               print (" Robot running time is %d seconds ..."%runtime)  #20180625   
+               print (" Robot running time is %d seconds ..."%runtime)  #20180625
             continue
     except Exception:
             socket_tcp.close()

@@ -95,14 +95,14 @@ while True:
             elif data=='M':
                #subprocess.popen('mplayer /home/pi/Music/Soundtrack - Define Dancing.mp3')
                subprocess.Popen(["mplayer", "-slave", "-quiet", "/home/pi/Music/Soundtrack - Define Dancing.mp3"], stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = False)
-	       print("Play music") 
+	       print("Play music")
                time.sleep(1)
             else:
                ser.flushInput()
                input=ser.read(1)
                runtime=ord(input)
-               
-               print (" Robot running time is %d seconds ..."%runtime)  #20180625   
+
+               print (" Robot running time is %d seconds ..."%runtime)  #20180625
             continue
     except Exception:
             socket_tcp.close()

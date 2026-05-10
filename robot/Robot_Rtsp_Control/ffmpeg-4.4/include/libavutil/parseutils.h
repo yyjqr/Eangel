@@ -46,19 +46,19 @@
  * @param[in] log_ctx parent logging context
  * @return >= 0 on success, a negative error code otherwise
  */
-int av_parse_ratio(AVRational *q, const char *str, int max,
-                   int log_offset, void *log_ctx);
+int av_parse_ratio(AVRational *q, const char *str, int max, int log_offset,
+                   void *log_ctx);
 
-#define av_parse_ratio_quiet(rate, str, max) \
-    av_parse_ratio(rate, str, max, AV_LOG_MAX_OFFSET, NULL)
+#define av_parse_ratio_quiet(rate, str, max)                                   \
+  av_parse_ratio(rate, str, max, AV_LOG_MAX_OFFSET, NULL)
 
 /**
  * Parse str and put in width_ptr and height_ptr the detected values.
  *
- * @param[in,out] width_ptr pointer to the variable which will contain the detected
- * width value
- * @param[in,out] height_ptr pointer to the variable which will contain the detected
- * height value
+ * @param[in,out] width_ptr pointer to the variable which will contain the
+ * detected width value
+ * @param[in,out] height_ptr pointer to the variable which will contain the
+ * detected height value
  * @param[in] str the string to parse: it has to be a string in the format
  * width x height or a valid video size abbreviation.
  * @return >= 0 on success, a negative error code otherwise
@@ -106,7 +106,8 @@ int av_parse_color(uint8_t *rgba_color, const char *color_string, int slen,
  * av_parse_color().
  *
  * @param color_idx index of the requested color, starting from 0
- * @param rgbp      if not NULL, will point to a 3-elements array with the color value in RGB
+ * @param rgbp      if not NULL, will point to a 3-elements array with the color
+ * value in RGB
  * @return the color name string or NULL if color_idx is not in the array
  */
 const char *av_get_known_color_name(int color_idx, const uint8_t **rgb);
@@ -151,7 +152,8 @@ int av_parse_time(int64_t *timeval, const char *timestr, int duration);
  * syntax: '?tag1=val1&tag2=val2...'. Little URL decoding is done.
  * Return 1 if found.
  */
-int av_find_info_tag(char *arg, int arg_size, const char *tag1, const char *info);
+int av_find_info_tag(char *arg, int arg_size, const char *tag1,
+                     const char *info);
 
 /**
  * Simplified version of strptime

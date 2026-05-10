@@ -82,21 +82,21 @@ typedef struct AVBuffer AVBuffer;
  * to be allocated directly.
  */
 typedef struct AVBufferRef {
-    AVBuffer *buffer;
+  AVBuffer *buffer;
 
-    /**
-     * The data buffer. It is considered writable if and only if
-     * this is the only reference to the buffer, in which case
-     * av_buffer_is_writable() returns 1.
-     */
-    uint8_t *data;
-    /**
-     * Size of data in bytes.
-     */
+  /**
+   * The data buffer. It is considered writable if and only if
+   * this is the only reference to the buffer, in which case
+   * av_buffer_is_writable() returns 1.
+   */
+  uint8_t *data;
+  /**
+   * Size of data in bytes.
+   */
 #if FF_API_BUFFER_SIZE_T
-    int      size;
+  int size;
 #else
-    size_t   size;
+  size_t size;
 #endif
 } AVBufferRef;
 
@@ -286,9 +286,10 @@ typedef struct AVBufferPool AVBufferPool;
  * @return newly created buffer pool on success, NULL on error.
  */
 #if FF_API_BUFFER_SIZE_T
-AVBufferPool *av_buffer_pool_init(int size, AVBufferRef* (*alloc)(int size));
+AVBufferPool *av_buffer_pool_init(int size, AVBufferRef *(*alloc)(int size));
 #else
-AVBufferPool *av_buffer_pool_init(size_t size, AVBufferRef* (*alloc)(size_t size));
+AVBufferPool *av_buffer_pool_init(size_t size,
+                                  AVBufferRef *(*alloc)(size_t size));
 #endif
 
 /**
@@ -308,10 +309,12 @@ AVBufferPool *av_buffer_pool_init(size_t size, AVBufferRef* (*alloc)(size_t size
  */
 #if FF_API_BUFFER_SIZE_T
 AVBufferPool *av_buffer_pool_init2(int size, void *opaque,
-                                   AVBufferRef* (*alloc)(void *opaque, int size),
+                                   AVBufferRef *(*alloc)(void *opaque,
+                                                         int size),
 #else
 AVBufferPool *av_buffer_pool_init2(size_t size, void *opaque,
-                                   AVBufferRef* (*alloc)(void *opaque, size_t size),
+                                   AVBufferRef *(*alloc)(void *opaque,
+                                                         size_t size),
 #endif
                                    void (*pool_free)(void *opaque));
 

@@ -30,9 +30,9 @@
  * Public libavcodec VA API header.
  */
 
-#include <stdint.h>
 #include "libavutil/attributes.h"
 #include "version.h"
+#include <stdint.h>
 
 #if FF_API_STRUCT_VAAPI_CONTEXT
 
@@ -54,29 +54,29 @@
  * Deprecated: use AVCodecContext.hw_frames_ctx instead.
  */
 struct attribute_deprecated vaapi_context {
-    /**
-     * Window system dependent data
-     *
-     * - encoding: unused
-     * - decoding: Set by user
-     */
-    void *display;
+  /**
+   * Window system dependent data
+   *
+   * - encoding: unused
+   * - decoding: Set by user
+   */
+  void *display;
 
-    /**
-     * Configuration ID
-     *
-     * - encoding: unused
-     * - decoding: Set by user
-     */
-    uint32_t config_id;
+  /**
+   * Configuration ID
+   *
+   * - encoding: unused
+   * - decoding: Set by user
+   */
+  uint32_t config_id;
 
-    /**
-     * Context ID (video decode pipeline)
-     *
-     * - encoding: unused
-     * - decoding: Set by user
-     */
-    uint32_t context_id;
+  /**
+   * Context ID (video decode pipeline)
+   *
+   * - encoding: unused
+   * - decoding: Set by user
+   */
+  uint32_t context_id;
 };
 
 /* @} */

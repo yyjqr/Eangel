@@ -75,9 +75,9 @@ logger.debug("Do something")
 #logger.warning("Something maybe fail.")
 #logger.info("logFinish")
 
-def ReceiveDataThread(socket_tcp,address): 
+def ReceiveDataThread(socket_tcp,address):
     print ("Rev data....")
-    while True:    #add 20200311!!!    
+    while True:    #add 20200311!!!
         try:
                 #socket_tcp.settimeout(5)#500----->5s
                 data=socket_tcp.recv(8192)
@@ -113,8 +113,8 @@ def ReceiveDataThread(socket_tcp,address):
                        print("car Pause")
                     elif data=='S':    #slow down  add 202003
                        ser.write(str.encode('S'))
-                       print("car SLOW DOWN!")   
-        # "C" 20200301ADD            
+                       print("car SLOW DOWN!")
+        # "C" 20200301ADD
                     elif data=='C':
                        #os.system('~/home/pi/camCap/source/cam10min/camFS10m_opt')
                        subprocess.Popen('~/camCap/source/cam1min/camFS1min', shell = True, stdout = subprocess.PIPE)
@@ -123,20 +123,20 @@ def ReceiveDataThread(socket_tcp,address):
                     elif data=='M':
                        #subprocess.popen('mplayer /home/pi/Music/Soundtrack - Define Dancing.mp3')
                        subprocess.Popen(["mplayer", "-slave", "-quiet", "/home/pi/Music/Soundtrack - Define Dancing.mp3"], stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = False)
-                       print("Play music") 
+                       print("Play music")
                        time.sleep(1)
-        # "Z" 20200307ADD    send Email        
+        # "Z" 20200307ADD    send Email
                     elif data=='Z':
                        subprocess.Popen('~/sendDiffNews.sh', shell = True, stdout = subprocess.PIPE)
                        print("SEND Email------ !")
                        logger.info("SEND Email------ !")
-                    
+
                     else:
                        ser.flushInput()
                        input=ser.read(1)
                        runtime=ord(input)
-                       
-                       print (" Robot running time is %d seconds ..."%runtime)  #20180625   
+
+                       print (" Robot running time is %d seconds ..."%runtime)  #20180625
                     #continue
                     if not data:
                          print("RECEIVE WRONG!")
@@ -184,5 +184,3 @@ if __name__ == '__main__':
     thread.start()
     #thread.join()
 #原文链接：https://blog.csdn.net/qq_39687901/article/details/81531101
-
-

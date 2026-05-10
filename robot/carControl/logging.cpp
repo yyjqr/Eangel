@@ -19,7 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- 
+
 #include "logging.h"
 #include <stdio.h>
 #include <string.h>
@@ -104,8 +104,8 @@ void Log::SetFile( const char* filename )
             return ;
 
        FILE* file = fopen(filename, "w+");
-       
-		if( file != NULL )  
+
+		if( file != NULL )
 		{
 			SetFile(file);
 			mFilename = filename;
@@ -122,7 +122,7 @@ void Log::SetFile( const char* filename )
             return ;
 		}
 
-	}	
+	}
 }
 
 // LevelToStr
@@ -171,7 +171,3 @@ void Log::writeLogHead(){
 //    std::string log_head;10
     fprintf(Log::GetFile(), "%s:", log_head.c_str());
 }
-
-
-
-	

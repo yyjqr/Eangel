@@ -49,122 +49,122 @@
  * List of possible 3D Types
  */
 enum AVStereo3DType {
-    /**
-     * Video is not stereoscopic (and metadata has to be there).
-     */
-    AV_STEREO3D_2D,
+  /**
+   * Video is not stereoscopic (and metadata has to be there).
+   */
+  AV_STEREO3D_2D,
 
-    /**
-     * Views are next to each other.
-     *
-     * @code{.unparsed}
-     *    LLLLRRRR
-     *    LLLLRRRR
-     *    LLLLRRRR
-     *    ...
-     * @endcode
-     */
-    AV_STEREO3D_SIDEBYSIDE,
+  /**
+   * Views are next to each other.
+   *
+   * @code{.unparsed}
+   *    LLLLRRRR
+   *    LLLLRRRR
+   *    LLLLRRRR
+   *    ...
+   * @endcode
+   */
+  AV_STEREO3D_SIDEBYSIDE,
 
-    /**
-     * Views are on top of each other.
-     *
-     * @code{.unparsed}
-     *    LLLLLLLL
-     *    LLLLLLLL
-     *    RRRRRRRR
-     *    RRRRRRRR
-     * @endcode
-     */
-    AV_STEREO3D_TOPBOTTOM,
+  /**
+   * Views are on top of each other.
+   *
+   * @code{.unparsed}
+   *    LLLLLLLL
+   *    LLLLLLLL
+   *    RRRRRRRR
+   *    RRRRRRRR
+   * @endcode
+   */
+  AV_STEREO3D_TOPBOTTOM,
 
-    /**
-     * Views are alternated temporally.
-     *
-     * @code{.unparsed}
-     *     frame0   frame1   frame2   ...
-     *    LLLLLLLL RRRRRRRR LLLLLLLL
-     *    LLLLLLLL RRRRRRRR LLLLLLLL
-     *    LLLLLLLL RRRRRRRR LLLLLLLL
-     *    ...      ...      ...
-     * @endcode
-     */
-    AV_STEREO3D_FRAMESEQUENCE,
+  /**
+   * Views are alternated temporally.
+   *
+   * @code{.unparsed}
+   *     frame0   frame1   frame2   ...
+   *    LLLLLLLL RRRRRRRR LLLLLLLL
+   *    LLLLLLLL RRRRRRRR LLLLLLLL
+   *    LLLLLLLL RRRRRRRR LLLLLLLL
+   *    ...      ...      ...
+   * @endcode
+   */
+  AV_STEREO3D_FRAMESEQUENCE,
 
-    /**
-     * Views are packed in a checkerboard-like structure per pixel.
-     *
-     * @code{.unparsed}
-     *    LRLRLRLR
-     *    RLRLRLRL
-     *    LRLRLRLR
-     *    ...
-     * @endcode
-     */
-    AV_STEREO3D_CHECKERBOARD,
+  /**
+   * Views are packed in a checkerboard-like structure per pixel.
+   *
+   * @code{.unparsed}
+   *    LRLRLRLR
+   *    RLRLRLRL
+   *    LRLRLRLR
+   *    ...
+   * @endcode
+   */
+  AV_STEREO3D_CHECKERBOARD,
 
-    /**
-     * Views are next to each other, but when upscaling
-     * apply a checkerboard pattern.
-     *
-     * @code{.unparsed}
-     *     LLLLRRRR          L L L L    R R R R
-     *     LLLLRRRR    =>     L L L L  R R R R
-     *     LLLLRRRR          L L L L    R R R R
-     *     LLLLRRRR           L L L L  R R R R
-     * @endcode
-     */
-    AV_STEREO3D_SIDEBYSIDE_QUINCUNX,
+  /**
+   * Views are next to each other, but when upscaling
+   * apply a checkerboard pattern.
+   *
+   * @code{.unparsed}
+   *     LLLLRRRR          L L L L    R R R R
+   *     LLLLRRRR    =>     L L L L  R R R R
+   *     LLLLRRRR          L L L L    R R R R
+   *     LLLLRRRR           L L L L  R R R R
+   * @endcode
+   */
+  AV_STEREO3D_SIDEBYSIDE_QUINCUNX,
 
-    /**
-     * Views are packed per line, as if interlaced.
-     *
-     * @code{.unparsed}
-     *    LLLLLLLL
-     *    RRRRRRRR
-     *    LLLLLLLL
-     *    ...
-     * @endcode
-     */
-    AV_STEREO3D_LINES,
+  /**
+   * Views are packed per line, as if interlaced.
+   *
+   * @code{.unparsed}
+   *    LLLLLLLL
+   *    RRRRRRRR
+   *    LLLLLLLL
+   *    ...
+   * @endcode
+   */
+  AV_STEREO3D_LINES,
 
-    /**
-     * Views are packed per column.
-     *
-     * @code{.unparsed}
-     *    LRLRLRLR
-     *    LRLRLRLR
-     *    LRLRLRLR
-     *    ...
-     * @endcode
-     */
-    AV_STEREO3D_COLUMNS,
+  /**
+   * Views are packed per column.
+   *
+   * @code{.unparsed}
+   *    LRLRLRLR
+   *    LRLRLRLR
+   *    LRLRLRLR
+   *    ...
+   * @endcode
+   */
+  AV_STEREO3D_COLUMNS,
 };
 
 /**
  * List of possible view types.
  */
 enum AVStereo3DView {
-    /**
-     * Frame contains two packed views.
-     */
-    AV_STEREO3D_VIEW_PACKED,
+  /**
+   * Frame contains two packed views.
+   */
+  AV_STEREO3D_VIEW_PACKED,
 
-    /**
-     * Frame contains only the left view.
-     */
-    AV_STEREO3D_VIEW_LEFT,
+  /**
+   * Frame contains only the left view.
+   */
+  AV_STEREO3D_VIEW_LEFT,
 
-    /**
-     * Frame contains only the right view.
-     */
-    AV_STEREO3D_VIEW_RIGHT,
+  /**
+   * Frame contains only the right view.
+   */
+  AV_STEREO3D_VIEW_RIGHT,
 };
 
 /**
  * Inverted views, Right/Bottom represents the left view.
  */
-#define AV_STEREO3D_FLAG_INVERT     (1 << 0)
+#define AV_STEREO3D_FLAG_INVERT (1 << 0)
 
 /**
  * Stereo 3D type: this structure describes how two videos are packed
@@ -174,20 +174,20 @@ enum AVStereo3DView {
  *       its size is not a part of the public ABI.
  */
 typedef struct AVStereo3D {
-    /**
-     * How views are packed within the video.
-     */
-    enum AVStereo3DType type;
+  /**
+   * How views are packed within the video.
+   */
+  enum AVStereo3DType type;
 
-    /**
-     * Additional information about the frame packing.
-     */
-    int flags;
+  /**
+   * Additional information about the frame packing.
+   */
+  int flags;
 
-    /**
-     * Determines which views are packed.
-     */
-    enum AVStereo3DView view;
+  /**
+   * Determines which views are packed.
+   */
+  enum AVStereo3DView view;
 } AVStereo3D;
 
 /**

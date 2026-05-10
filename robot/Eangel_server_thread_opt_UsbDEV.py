@@ -2,7 +2,7 @@
 # encoding: utf-8
 ##基于python3 采用线程，socket支持多客户端连接
 #  Jack   yyjqr789@sina.com
-#202003-05 
+#202003-05
 #2024.12 opt process
 # 部分参考 https://www.cnblogs.com/liyang93/p/9117387.html
 #codeing:gb18030
@@ -35,10 +35,10 @@ def get_ip_address_opt():
         # Get the IP address associated with the default interface
         iface_info = netifaces.ifaddresses(default_interface)
         ip_info = iface_info.get(netifaces.AF_INET)
-        
+
         if ip_info:
             return ip_info[0]['addr']
-    
+
     return None  # Return None if no active IP address is found
 
 # Define host IP and port
@@ -146,4 +146,3 @@ if __name__ == '__main__':
     # 新开一个线程，用于接收新连接
     thread = Thread(target=accept_client)
     thread.start()
-

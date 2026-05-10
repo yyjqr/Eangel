@@ -3,65 +3,62 @@
 #include <QThread>
 #include <vector>
 
-#include <queue>
-#include <QTimer>
 #include "camSocketParam.h"
 #include "controlTCP.h"
 #include <QMutex>
+#include <QTimer>
+#include <queue>
 using namespace std;
 
-
-
-class MyThread : public QThread
-{
-    Q_OBJECT
+class MyThread : public QThread {
+  Q_OBJECT
 public:
-    MyThread();
-    ~MyThread();
-    //    void receivePic();
-       void setThreadStop();
-    //    camInfo getOneFrame();
-    bool connectTCPSocket(QString addr);
-    //取出一帧的数据，用于显示
-    camInfo getCamOneFrame();
-    void setThreadFlag(bool b_runFlag);
+  MyThread();
+  ~MyThread();
+  //    void receivePic();
+  void setThreadStop();
+  //    camInfo getOneFrame();
+  bool connectTCPSocket(QString addr);
+  // 取出一帧的数据，用于显示
+  camInfo getCamOneFrame();
+  void setThreadFlag(bool b_runFlag);
 
 protected:
-    virtual void run();
+  virtual void run();
 
 private:
-     bool  getOneFrame();
+  bool getOneFrame();
 
 private slots:
-    void receivePic(QByteArray bytes);
-    void receiveValidPicture(QByteArray bytes);
-    void startTime();
-    void socket_disconnect();
+  void receivePic(QByteArray bytes);
+  void receiveValidPicture(QByteArray bytes);
+  void startTime();
+  void socket_disconnect();
 
-//    void  getOneFrame();
+  //    void  getOneFrame();
 signals:
-    void SIGNAL_get_one_frame(camInfo);
-    void SIGNAL_camSocketDisconnect();
+  void SIGNAL_get_one_frame(camInfo);
+  void SIGNAL_camSocketDisconnect();
+
 private:
-    bool b_run;
+  bool b_run;
 
-    int m_index=0;
-    bool b_dataFlag;
-    controlTCP* m_pictureSocket;
-    QTcpSocket* m_tcpSocket;
-    queue<camInfo> camSaveQueue;
-    QTimer *myTimer;
-    QTimer *getFrameTimer;
-    int imageCount=0;
-    int imageWidth,imageHeight;
-    //多线程读取与保护
-    QMutex m_dataMutex;
-    int m_countNOdata,m_tryGetDataTimes;
-    camInfo oneCamInfo;
-    camInfo oneFrameInfo,OneTempFrame; //队列中取一帧数据,此后面声明变量有报错
-    bool   b_dataValid;
-    uint8_t *imageExtraDataBuf;
-
+  int m_index = 0;
+  bool b_dataFlag;
+  controlTCP *m_pictureSocket;
+  QTcpSocket *m_tcpSocket;
+  queue<camInfo> camSaveQueue;
+  QTimer *myTimer;
+  QTimer *getFrameTimer;
+  int imageCount = 0;
+  int imageWidth, imageHeight;
+  // 多线程读取与保护
+  QMutex m_dataMutex;
+  int m_countNOdata, m_tryGetDataTimes;
+  camInfo oneCamInfo;
+  camInfo oneFrameInfo, OneTempFrame; // 队列中取一帧数据,此后面声明变量有报错
+  bool b_dataValid;
+  uint8_t *imageExtraDataBuf;
 };
 
 #endif // PICTURETHREAD_H

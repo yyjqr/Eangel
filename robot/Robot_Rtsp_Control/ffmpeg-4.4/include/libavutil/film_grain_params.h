@@ -22,12 +22,12 @@
 #include "frame.h"
 
 enum AVFilmGrainParamsType {
-    AV_FILM_GRAIN_PARAMS_NONE = 0,
+  AV_FILM_GRAIN_PARAMS_NONE = 0,
 
-    /**
-     * The union is valid when interpreted as AVFilmGrainAOMParams (codec.aom)
-     */
-    AV_FILM_GRAIN_PARAMS_AV1,
+  /**
+   * The union is valid when interpreted as AVFilmGrainAOMParams (codec.aom)
+   */
+  AV_FILM_GRAIN_PARAMS_AV1,
 };
 
 /**
@@ -37,84 +37,84 @@ enum AVFilmGrainParamsType {
  *       av_film_grain_params_alloc(). Its size is not a part of the public ABI.
  */
 typedef struct AVFilmGrainAOMParams {
-    /**
-     * Number of points, and the scale and value for each point of the
-     * piecewise linear scaling function for the uma plane.
-     */
-    int num_y_points;
-    uint8_t y_points[14][2 /* value, scaling */];
+  /**
+   * Number of points, and the scale and value for each point of the
+   * piecewise linear scaling function for the uma plane.
+   */
+  int num_y_points;
+  uint8_t y_points[14][2 /* value, scaling */];
 
-    /**
-     * Signals whether to derive the chroma scaling function from the luma.
-     * Not equivalent to copying the luma values and scales.
-     */
-    int chroma_scaling_from_luma;
+  /**
+   * Signals whether to derive the chroma scaling function from the luma.
+   * Not equivalent to copying the luma values and scales.
+   */
+  int chroma_scaling_from_luma;
 
-    /**
-     * If chroma_scaling_from_luma is set to 0, signals the chroma scaling
-     * function parameters.
-     */
-    int num_uv_points[2 /* cb, cr */];
-    uint8_t uv_points[2 /* cb, cr */][10][2 /* value, scaling */];
+  /**
+   * If chroma_scaling_from_luma is set to 0, signals the chroma scaling
+   * function parameters.
+   */
+  int num_uv_points[2 /* cb, cr */];
+  uint8_t uv_points[2 /* cb, cr */][10][2 /* value, scaling */];
 
-    /**
-     * Specifies the shift applied to the chroma components. For AV1, its within
-     * [8; 11] and determines the range and quantization of the film grain.
-     */
-    int scaling_shift;
+  /**
+   * Specifies the shift applied to the chroma components. For AV1, its within
+   * [8; 11] and determines the range and quantization of the film grain.
+   */
+  int scaling_shift;
 
-    /**
-     * Specifies the auto-regression lag.
-     */
-    int ar_coeff_lag;
+  /**
+   * Specifies the auto-regression lag.
+   */
+  int ar_coeff_lag;
 
-    /**
-     * Luma auto-regression coefficients. The number of coefficients is given by
-     * 2 * ar_coeff_lag * (ar_coeff_lag + 1).
-     */
-    int8_t ar_coeffs_y[24];
+  /**
+   * Luma auto-regression coefficients. The number of coefficients is given by
+   * 2 * ar_coeff_lag * (ar_coeff_lag + 1).
+   */
+  int8_t ar_coeffs_y[24];
 
-    /**
-     * Chroma auto-regression coefficients. The number of coefficients is given by
-     * 2 * ar_coeff_lag * (ar_coeff_lag + 1) + !!num_y_points.
-     */
-    int8_t ar_coeffs_uv[2 /* cb, cr */][25];
+  /**
+   * Chroma auto-regression coefficients. The number of coefficients is given by
+   * 2 * ar_coeff_lag * (ar_coeff_lag + 1) + !!num_y_points.
+   */
+  int8_t ar_coeffs_uv[2 /* cb, cr */][25];
 
-    /**
-     * Specifies the range of the auto-regressive coefficients. Values of 6,
-     * 7, 8 and so on represent a range of [-2, 2), [-1, 1), [-0.5, 0.5) and
-     * so on. For AV1 must be between 6 and 9.
-     */
-    int ar_coeff_shift;
+  /**
+   * Specifies the range of the auto-regressive coefficients. Values of 6,
+   * 7, 8 and so on represent a range of [-2, 2), [-1, 1), [-0.5, 0.5) and
+   * so on. For AV1 must be between 6 and 9.
+   */
+  int ar_coeff_shift;
 
-    /**
-     * Signals the down shift applied to the generated gaussian numbers during
-     * synthesis.
-     */
-    int grain_scale_shift;
+  /**
+   * Signals the down shift applied to the generated gaussian numbers during
+   * synthesis.
+   */
+  int grain_scale_shift;
 
-    /**
-     * Specifies the luma/chroma multipliers for the index to the component
-     * scaling function.
-     */
-    int uv_mult[2 /* cb, cr */];
-    int uv_mult_luma[2 /* cb, cr */];
+  /**
+   * Specifies the luma/chroma multipliers for the index to the component
+   * scaling function.
+   */
+  int uv_mult[2 /* cb, cr */];
+  int uv_mult_luma[2 /* cb, cr */];
 
-    /**
-     * Offset used for component scaling function. For AV1 its a 9-bit value
-     * with a range [-256, 255]
-     */
-    int uv_offset[2 /* cb, cr */];
+  /**
+   * Offset used for component scaling function. For AV1 its a 9-bit value
+   * with a range [-256, 255]
+   */
+  int uv_offset[2 /* cb, cr */];
 
-    /**
-     * Signals whether to overlap film grain blocks.
-     */
-    int overlap_flag;
+  /**
+   * Signals whether to overlap film grain blocks.
+   */
+  int overlap_flag;
 
-    /**
-     * Signals to clip to limited color levels after film grain application.
-     */
-    int limit_output_range;
+  /**
+   * Signals to clip to limited color levels after film grain application.
+   */
+  int limit_output_range;
 } AVFilmGrainAOMParams;
 
 /**
@@ -126,24 +126,24 @@ typedef struct AVFilmGrainAOMParams {
  *       its size is not a part of the public ABI.
  */
 typedef struct AVFilmGrainParams {
-    /**
-     * Specifies the codec for which this structure is valid.
-     */
-    enum AVFilmGrainParamsType type;
+  /**
+   * Specifies the codec for which this structure is valid.
+   */
+  enum AVFilmGrainParamsType type;
 
-    /**
-     * Seed to use for the synthesis process, if the codec allows for it.
-     */
-    uint64_t seed;
+  /**
+   * Seed to use for the synthesis process, if the codec allows for it.
+   */
+  uint64_t seed;
 
-    /**
-     * Additional fields may be added both here and in any structure included.
-     * If a codec's film grain structure differs slightly over another
-     * codec's, fields within may change meaning depending on the type.
-     */
-    union {
-        AVFilmGrainAOMParams aom;
-    } codec;
+  /**
+   * Additional fields may be added both here and in any structure included.
+   * If a codec's film grain structure differs slightly over another
+   * codec's, fields within may change meaning depending on the type.
+   */
+  union {
+    AVFilmGrainAOMParams aom;
+  } codec;
 } AVFilmGrainParams;
 
 /**

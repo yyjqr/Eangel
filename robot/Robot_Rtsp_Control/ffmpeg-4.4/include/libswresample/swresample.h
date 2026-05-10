@@ -34,8 +34,8 @@
  * Audio resampling, sample format conversion and mixing library.
  *
  * Interaction with lswr is done through SwrContext, which is
- * allocated with swr_alloc() or swr_alloc_set_opts(). It is opaque, so all parameters
- * must be set with the @ref avoptions API.
+ * allocated with swr_alloc() or swr_alloc_set_opts(). It is opaque, so all
+ * parameters must be set with the @ref avoptions API.
  *
  * The first thing you will need to do in order to use lswr is to allocate
  * SwrContext. This can be done with swr_alloc() or swr_alloc_set_opts(). If you
@@ -49,9 +49,9 @@
  * matrix). This is using the swr_alloc() function.
  * @code
  * SwrContext *swr = swr_alloc();
- * av_opt_set_channel_layout(swr, "in_channel_layout",  AV_CH_LAYOUT_5POINT1, 0);
- * av_opt_set_channel_layout(swr, "out_channel_layout", AV_CH_LAYOUT_STEREO,  0);
- * av_opt_set_int(swr, "in_sample_rate",     48000,                0);
+ * av_opt_set_channel_layout(swr, "in_channel_layout",  AV_CH_LAYOUT_5POINT1,
+ * 0); av_opt_set_channel_layout(swr, "out_channel_layout", AV_CH_LAYOUT_STEREO,
+ * 0); av_opt_set_int(swr, "in_sample_rate",     48000,                0);
  * av_opt_set_int(swr, "out_sample_rate",    44100,                0);
  * av_opt_set_sample_fmt(swr, "in_sample_fmt",  AV_SAMPLE_FMT_FLTP, 0);
  * av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_S16,  0);
@@ -119,10 +119,10 @@
  * swr_free().
  */
 
-#include <stdint.h>
 #include "libavutil/channel_layout.h"
 #include "libavutil/frame.h"
 #include "libavutil/samplefmt.h"
+#include <stdint.h>
 
 #include "libswresample/version.h"
 
@@ -134,39 +134,39 @@
  */
 
 #define SWR_FLAG_RESAMPLE 1 ///< Force resampling even if equal sample rate
-//TODO use int resample ?
-//long term TODO can we enable this dynamically?
+// TODO use int resample ?
+// long term TODO can we enable this dynamically?
 
 /** Dithering algorithms */
 enum SwrDitherType {
-    SWR_DITHER_NONE = 0,
-    SWR_DITHER_RECTANGULAR,
-    SWR_DITHER_TRIANGULAR,
-    SWR_DITHER_TRIANGULAR_HIGHPASS,
+  SWR_DITHER_NONE = 0,
+  SWR_DITHER_RECTANGULAR,
+  SWR_DITHER_TRIANGULAR,
+  SWR_DITHER_TRIANGULAR_HIGHPASS,
 
-    SWR_DITHER_NS = 64,         ///< not part of API/ABI
-    SWR_DITHER_NS_LIPSHITZ,
-    SWR_DITHER_NS_F_WEIGHTED,
-    SWR_DITHER_NS_MODIFIED_E_WEIGHTED,
-    SWR_DITHER_NS_IMPROVED_E_WEIGHTED,
-    SWR_DITHER_NS_SHIBATA,
-    SWR_DITHER_NS_LOW_SHIBATA,
-    SWR_DITHER_NS_HIGH_SHIBATA,
-    SWR_DITHER_NB,              ///< not part of API/ABI
+  SWR_DITHER_NS = 64, ///< not part of API/ABI
+  SWR_DITHER_NS_LIPSHITZ,
+  SWR_DITHER_NS_F_WEIGHTED,
+  SWR_DITHER_NS_MODIFIED_E_WEIGHTED,
+  SWR_DITHER_NS_IMPROVED_E_WEIGHTED,
+  SWR_DITHER_NS_SHIBATA,
+  SWR_DITHER_NS_LOW_SHIBATA,
+  SWR_DITHER_NS_HIGH_SHIBATA,
+  SWR_DITHER_NB, ///< not part of API/ABI
 };
 
 /** Resampling Engines */
 enum SwrEngine {
-    SWR_ENGINE_SWR,             /**< SW Resampler */
-    SWR_ENGINE_SOXR,            /**< SoX Resampler */
-    SWR_ENGINE_NB,              ///< not part of API/ABI
+  SWR_ENGINE_SWR,  /**< SW Resampler */
+  SWR_ENGINE_SOXR, /**< SoX Resampler */
+  SWR_ENGINE_NB,   ///< not part of API/ABI
 };
 
 /** Resampling Filter Types */
 enum SwrFilterType {
-    SWR_FILTER_TYPE_CUBIC,              /**< Cubic */
-    SWR_FILTER_TYPE_BLACKMAN_NUTTALL,   /**< Blackman Nuttall windowed sinc */
-    SWR_FILTER_TYPE_KAISER,             /**< Kaiser windowed sinc */
+  SWR_FILTER_TYPE_CUBIC,            /**< Cubic */
+  SWR_FILTER_TYPE_BLACKMAN_NUTTALL, /**< Blackman Nuttall windowed sinc */
+  SWR_FILTER_TYPE_KAISER,           /**< Kaiser windowed sinc */
 };
 
 /**
@@ -247,10 +247,11 @@ int swr_is_initialized(struct SwrContext *s);
  * @see swr_init(), swr_free()
  * @return NULL on error, allocated context otherwise
  */
-struct SwrContext *swr_alloc_set_opts(struct SwrContext *s,
-                                      int64_t out_ch_layout, enum AVSampleFormat out_sample_fmt, int out_sample_rate,
-                                      int64_t  in_ch_layout, enum AVSampleFormat  in_sample_fmt, int  in_sample_rate,
-                                      int log_offset, void *log_ctx);
+struct SwrContext *
+swr_alloc_set_opts(struct SwrContext *s, int64_t out_ch_layout,
+                   enum AVSampleFormat out_sample_fmt, int out_sample_rate,
+                   int64_t in_ch_layout, enum AVSampleFormat in_sample_fmt,
+                   int in_sample_rate, int log_offset, void *log_ctx);
 
 /**
  * @}
@@ -293,28 +294,32 @@ void swr_close(struct SwrContext *s);
  * If more input is provided than output space, then the input will be buffered.
  * You can avoid this buffering by using swr_get_out_samples() to retrieve an
  * upper bound on the required number of output samples for the given number of
- * input samples. Conversion will run directly without copying whenever possible.
+ * input samples. Conversion will run directly without copying whenever
+ * possible.
  *
  * @param s         allocated Swr context, with parameters set
- * @param out       output buffers, only the first one need be set in case of packed audio
+ * @param out       output buffers, only the first one need be set in case of
+ * packed audio
  * @param out_count amount of space available for output in samples per channel
- * @param in        input buffers, only the first one need to be set in case of packed audio
+ * @param in        input buffers, only the first one need to be set in case of
+ * packed audio
  * @param in_count  number of input samples available in one channel
  *
  * @return number of samples output per channel, negative value on error
  */
 int swr_convert(struct SwrContext *s, uint8_t **out, int out_count,
-                                const uint8_t **in , int in_count);
+                const uint8_t **in, int in_count);
 
 /**
  * Convert the next timestamp from input to output
  * timestamps are in 1/(in_sample_rate * out_sample_rate) units.
  *
  * @note There are 2 slightly differently behaving modes.
- *       @li When automatic timestamp compensation is not used, (min_compensation >= FLT_MAX)
- *              in this case timestamps will be passed through with delays compensated
- *       @li When automatic timestamp compensation is used, (min_compensation < FLT_MAX)
- *              in this case the output timestamps will match output sample numbers.
+ *       @li When automatic timestamp compensation is not used,
+ * (min_compensation >= FLT_MAX) in this case timestamps will be passed through
+ * with delays compensated
+ *       @li When automatic timestamp compensation is used, (min_compensation <
+ * FLT_MAX) in this case the output timestamps will match output sample numbers.
  *              See ffmpeg-resampler(1) for the two modes of compensation.
  *
  * @param s[in]     initialized Swr context
@@ -350,7 +355,8 @@ int64_t swr_next_pts(struct SwrContext *s, int64_t pts);
  *            @li compensation unsupported by resampler, or
  *            @li swr_init() fails when called.
  */
-int swr_set_compensation(struct SwrContext *s, int sample_delta, int compensation_distance);
+int swr_set_compensation(struct SwrContext *s, int sample_delta,
+                         int compensation_distance);
 
 /**
  * Set a customized input channel mapping.
@@ -388,9 +394,8 @@ int swr_set_channel_mapping(struct SwrContext *s, const int *channel_map);
 int swr_build_matrix(uint64_t in_layout, uint64_t out_layout,
                      double center_mix_level, double surround_mix_level,
                      double lfe_mix_level, double rematrix_maxval,
-                     double rematrix_volume, double *matrix,
-                     int stride, enum AVMatrixEncoding matrix_encoding,
-                     void *log_ctx);
+                     double rematrix_volume, double *matrix, int stride,
+                     enum AVMatrixEncoding matrix_encoding, void *log_ctx);
 
 /**
  * Set a customized remix matrix.
@@ -437,7 +442,8 @@ int swr_drop_output(struct SwrContext *s, int count);
 int swr_inject_silence(struct SwrContext *s, int count);
 
 /**
- * Gets the delay the next input sample will experience relative to the next output sample.
+ * Gets the delay the next input sample will experience relative to the next
+ * output sample.
  *
  * Swresample can buffer data if more input has been provided than available
  * output space, also converting between sample rates needs a delay.
@@ -519,13 +525,15 @@ const char *swresample_license(void);
  */
 
 /**
- * Convert the samples in the input AVFrame and write them to the output AVFrame.
+ * Convert the samples in the input AVFrame and write them to the output
+ * AVFrame.
  *
- * Input and output AVFrames must have channel_layout, sample_rate and format set.
+ * Input and output AVFrames must have channel_layout, sample_rate and format
+ * set.
  *
- * If the output AVFrame does not have the data pointers allocated the nb_samples
- * field will be set using av_frame_get_buffer()
- * is called to allocate the frame.
+ * If the output AVFrame does not have the data pointers allocated the
+ * nb_samples field will be set using av_frame_get_buffer() is called to
+ * allocate the frame.
  *
  * The output AVFrame can be NULL or have fewer allocated samples than required.
  * In this case, any remaining samples not written to the output will be added
@@ -552,8 +560,7 @@ const char *swresample_license(void);
  * @return                0 on success, AVERROR on failure or nonmatching
  *                        configuration.
  */
-int swr_convert_frame(SwrContext *swr,
-                      AVFrame *output, const AVFrame *input);
+int swr_convert_frame(SwrContext *swr, AVFrame *output, const AVFrame *input);
 
 /**
  * Configure or reconfigure the SwrContext using the information

@@ -19,7 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- 
+
 #ifndef __LOGGING_UTILS_H_
 #define __LOGGING_UTILS_H_
 
@@ -113,7 +113,7 @@ public:
 	 * Usage string for command line arguments to Create()
 	 */
 	static inline const char* Usage() 			{ return LOG_USAGE_STRING; }
-	
+
 	/**
 	 * Parse command line options (see Usage() above)
 	 */
@@ -130,7 +130,7 @@ public:
 	static const char* LevelToStr( Level level );
 
 	/**
-	 * Parse a logging level from a string. 
+	 * Parse a logging level from a string.
 	 */
 	static Level LevelFromStr( const char* str );
     static void writeLogHead();
@@ -237,4 +237,3 @@ protected:
 ///@}
 
 #endif
-

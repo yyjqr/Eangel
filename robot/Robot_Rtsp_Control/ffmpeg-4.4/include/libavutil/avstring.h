@@ -21,10 +21,10 @@
 #ifndef AVUTIL_AVSTRING_H
 #define AVUTIL_AVSTRING_H
 
-#include <stddef.h>
-#include <stdint.h>
 #include "attributes.h"
 #include "version.h"
+#include <stddef.h>
+#include <stdint.h>
 
 /**
  * @addtogroup lavu_string
@@ -130,7 +130,8 @@ size_t av_strlcat(char *dst, const char *src, size_t size);
  * @return the length of the string that would have been generated
  *  if enough space had been available
  */
-size_t av_strlcatf(char *dst, size_t size, const char *fmt, ...) av_printf_format(3, 4);
+size_t av_strlcatf(char *dst, size_t size, const char *fmt, ...)
+    av_printf_format(3, 4);
 
 /**
  * Get the count of continuous non zero chars starting from the beginning.
@@ -138,12 +139,11 @@ size_t av_strlcatf(char *dst, size_t size, const char *fmt, ...) av_printf_forma
  * @param len maximum number of characters to check in the string, that
  *            is the maximum value which is returned by the function
  */
-static inline size_t av_strnlen(const char *s, size_t len)
-{
-    size_t i;
-    for (i = 0; i < len && s[i]; i++)
-        ;
-    return i;
+static inline size_t av_strnlen(const char *s, size_t len) {
+  size_t i;
+  for (i = 0; i < len && s[i]; i++)
+    ;
+  return i;
 }
 
 /**
@@ -161,8 +161,7 @@ char *av_asprintf(const char *fmt, ...) av_printf_format(1, 2);
  * Convert a number to an av_malloced string.
  * @deprecated  use av_asprintf() with "%f" or a more specific format
  */
-attribute_deprecated
-char *av_d2str(double d);
+attribute_deprecated char *av_d2str(double d);
 #endif
 
 /**
@@ -208,55 +207,45 @@ char *av_strtok(char *s, const char *delim, char **saveptr);
 /**
  * Locale-independent conversion of ASCII isdigit.
  */
-static inline av_const int av_isdigit(int c)
-{
-    return c >= '0' && c <= '9';
-}
+static inline av_const int av_isdigit(int c) { return c >= '0' && c <= '9'; }
 
 /**
  * Locale-independent conversion of ASCII isgraph.
  */
-static inline av_const int av_isgraph(int c)
-{
-    return c > 32 && c < 127;
-}
+static inline av_const int av_isgraph(int c) { return c > 32 && c < 127; }
 
 /**
  * Locale-independent conversion of ASCII isspace.
  */
-static inline av_const int av_isspace(int c)
-{
-    return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' ||
-           c == '\v';
+static inline av_const int av_isspace(int c) {
+  return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' ||
+         c == '\v';
 }
 
 /**
  * Locale-independent conversion of ASCII characters to uppercase.
  */
-static inline av_const int av_toupper(int c)
-{
-    if (c >= 'a' && c <= 'z')
-        c ^= 0x20;
-    return c;
+static inline av_const int av_toupper(int c) {
+  if (c >= 'a' && c <= 'z')
+    c ^= 0x20;
+  return c;
 }
 
 /**
  * Locale-independent conversion of ASCII characters to lowercase.
  */
-static inline av_const int av_tolower(int c)
-{
-    if (c >= 'A' && c <= 'Z')
-        c ^= 0x20;
-    return c;
+static inline av_const int av_tolower(int c) {
+  if (c >= 'A' && c <= 'Z')
+    c ^= 0x20;
+  return c;
 }
 
 /**
  * Locale-independent conversion of ASCII isxdigit.
  */
-static inline av_const int av_isxdigit(int c)
-{
-    c = av_tolower(c);
-    return av_isdigit(c) || (c >= 'a' && c <= 'f');
+static inline av_const int av_isxdigit(int c) {
+  c = av_tolower(c);
+  return av_isdigit(c) || (c >= 'a' && c <= 'f');
 }
 
 /**
@@ -279,7 +268,8 @@ char *av_strireplace(const char *str, const char *from, const char *to);
 
 /**
  * Thread safe basename.
- * @param path the string to parse, on DOS both \ and / are considered separators.
+ * @param path the string to parse, on DOS both \ and / are considered
+ * separators.
  * @return pointer to the basename substring.
  * If path does not contain a slash, the function returns a copy of path.
  * If path is a NULL pointer or points to an empty string, a pointer
@@ -289,11 +279,13 @@ const char *av_basename(const char *path);
 
 /**
  * Thread safe dirname.
- * @param path the string to parse, on DOS both \ and / are considered separators.
+ * @param path the string to parse, on DOS both \ and / are considered
+ * separators.
  * @return A pointer to a string that's the parent directory of path.
  * If path is a NULL pointer or points to an empty string, a pointer
  * to a string "." is returned.
- * @note the function may modify the contents of the path, so copies should be passed.
+ * @note the function may modify the contents of the path, so copies should be
+ * passed.
  */
 const char *av_dirname(char *path);
 
@@ -321,10 +313,10 @@ int av_match_name(const char *name, const char *names);
 char *av_append_path_component(const char *path, const char *component);
 
 enum AVEscapeMode {
-    AV_ESCAPE_MODE_AUTO,      ///< Use auto-selected escaping mode.
-    AV_ESCAPE_MODE_BACKSLASH, ///< Use backslash escaping.
-    AV_ESCAPE_MODE_QUOTE,     ///< Use single-quote escaping.
-    AV_ESCAPE_MODE_XML,       ///< Use XML non-markup character data escaping.
+  AV_ESCAPE_MODE_AUTO,      ///< Use auto-selected escaping mode.
+  AV_ESCAPE_MODE_BACKSLASH, ///< Use backslash escaping.
+  AV_ESCAPE_MODE_QUOTE,     ///< Use single-quote escaping.
+  AV_ESCAPE_MODE_XML,       ///< Use XML non-markup character data escaping.
 };
 
 /**
@@ -356,7 +348,6 @@ enum AVEscapeMode {
  */
 #define AV_ESCAPE_FLAG_XML_DOUBLE_QUOTES (1 << 3)
 
-
 /**
  * Escape string in src, and put the escaped string in an allocated
  * string in *dst, which must be freed with av_free().
@@ -366,24 +357,29 @@ enum AVEscapeMode {
  * @param special_chars string containing the special characters which
  *                      need to be escaped, can be NULL
  * @param mode          escape mode to employ, see AV_ESCAPE_MODE_* macros.
- *                      Any unknown value for mode will be considered equivalent to
- *                      AV_ESCAPE_MODE_BACKSLASH, but this behaviour can change without
- *                      notice.
- * @param flags         flags which control how to escape, see AV_ESCAPE_FLAG_ macros
- * @return the length of the allocated string, or a negative error code in case of error
+ *                      Any unknown value for mode will be considered equivalent
+ * to AV_ESCAPE_MODE_BACKSLASH, but this behaviour can change without notice.
+ * @param flags         flags which control how to escape, see AV_ESCAPE_FLAG_
+ * macros
+ * @return the length of the allocated string, or a negative error code in case
+ * of error
  * @see av_bprint_escape()
  */
-av_warn_unused_result
-int av_escape(char **dst, const char *src, const char *special_chars,
-              enum AVEscapeMode mode, int flags);
+av_warn_unused_result int av_escape(char **dst, const char *src,
+                                    const char *special_chars,
+                                    enum AVEscapeMode mode, int flags);
 
-#define AV_UTF8_FLAG_ACCEPT_INVALID_BIG_CODES          1 ///< accept codepoints over 0x10FFFF
-#define AV_UTF8_FLAG_ACCEPT_NON_CHARACTERS             2 ///< accept non-characters - 0xFFFE and 0xFFFF
-#define AV_UTF8_FLAG_ACCEPT_SURROGATES                 4 ///< accept UTF-16 surrogates codes
-#define AV_UTF8_FLAG_EXCLUDE_XML_INVALID_CONTROL_CODES 8 ///< exclude control codes not accepted by XML
+#define AV_UTF8_FLAG_ACCEPT_INVALID_BIG_CODES                                  \
+  1 ///< accept codepoints over 0x10FFFF
+#define AV_UTF8_FLAG_ACCEPT_NON_CHARACTERS                                     \
+  2 ///< accept non-characters - 0xFFFE and 0xFFFF
+#define AV_UTF8_FLAG_ACCEPT_SURROGATES 4 ///< accept UTF-16 surrogates codes
+#define AV_UTF8_FLAG_EXCLUDE_XML_INVALID_CONTROL_CODES                         \
+  8 ///< exclude control codes not accepted by XML
 
-#define AV_UTF8_FLAG_ACCEPT_ALL \
-    AV_UTF8_FLAG_ACCEPT_INVALID_BIG_CODES|AV_UTF8_FLAG_ACCEPT_NON_CHARACTERS|AV_UTF8_FLAG_ACCEPT_SURROGATES
+#define AV_UTF8_FLAG_ACCEPT_ALL                                                \
+  AV_UTF8_FLAG_ACCEPT_INVALID_BIG_CODES | AV_UTF8_FLAG_ACCEPT_NON_CHARACTERS | \
+      AV_UTF8_FLAG_ACCEPT_SURROGATES
 
 /**
  * Read and decode a single UTF-8 code point (character) from the
@@ -413,9 +409,9 @@ int av_escape(char **dst, const char *src, const char *special_chars,
  * @return >= 0 in case a sequence was successfully read, a negative
  * value in case of invalid sequence
  */
-av_warn_unused_result
-int av_utf8_decode(int32_t *codep, const uint8_t **bufp, const uint8_t *buf_end,
-                   unsigned int flags);
+av_warn_unused_result int av_utf8_decode(int32_t *codep, const uint8_t **bufp,
+                                         const uint8_t *buf_end,
+                                         unsigned int flags);
 
 /**
  * Check if a name is in a list.
