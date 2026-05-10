@@ -153,7 +153,7 @@ void MainWindow::getPicToShow() {
       assert(m_picToshow.imageBuf != nullptr);
       ShowImage(m_picToshow.imageBuf, m_imageWidth, m_imageHeight,
                 QImage::Format_RGB888); //(imread BGR格式）
-                                        //linux系统中只有Format_RGB888
+                                        // linux系统中只有Format_RGB888
       qDebug() << "\n"
                << __LINE__ << "Show frame finish,test crash error -----";
     } else {
