@@ -1,0 +1,246 @@
+🚀 科技趋势深度洞察报告 (Burst Detection + NER Enhanced)
+生成时间: 2026-01-18 11:30
+============================================================
+
+📅 【2024-01】 活跃度: 295 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Art/Design Trends: +54600% 📈
+   - Robotics/Unitree: +36600% 📈
+   - GPU/Semiconductor: +11700% 📈
+🤖 核心提及实体 (NER):
+   - [Nvidia chips]: 1 次
+   - [GPT-4]: 1 次
+🔑 关键热词: ai(0.16), 2024(0.05), ces(0.05), it(0.04), with(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 42.3
+   - 科技+经济聚合: 1.0
+📌 常态热度排行: Art/Design Trends, Robotics/Unitree, GPU/Semiconductor
+----------------------------------------
+📅 【2024-02】 活跃度: 11 篇
+🔑 关键热词: ai(0.15), getting(0.09), feature(0.06), speak(0.06), baby(0.06)
+📌 常态热度排行: AGI/Superintelligence, Robotics/Unitree, Art/Design Trends
+----------------------------------------
+📅 【2024-03】 活跃度: 49 篇
+🤖 核心提及实体 (NER):
+   - [GPT-5]: 1 次
+   - [Nvidia chip]: 1 次
+🔑 关键热词: ai(0.14), this(0.06), can(0.05), drone(0.05), will(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 7.9
+📌 常态热度排行: Art/Design Trends, GPU/Semiconductor, Robotics/Unitree
+----------------------------------------
+📅 【2024-04】 活跃度: 369 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - DeepSeek/LLM Progress: +3900% 📈
+   - AGI/Superintelligence: +473% 📈
+   - Robotics/Unitree: +253% 📈
+🤖 核心提及实体 (NER):
+   - [GPT-4]: 1 次
+   - [GPT-3]: 1 次
+🔑 关键热词: ai(0.19), with(0.05), can(0.04), it(0.04), robot(0.03)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 38.5
+   - 科技+经济聚合: 2.0
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, AGI/Superintelligence
+----------------------------------------
+📅 【2024-05】 活跃度: 280 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Economy/Tariffs: +1900% 📈
+   - DeepSeek/LLM Progress: +275% 📈
+🤖 核心提及实体 (NER):
+   - [GPT-4o]: 5 次
+   - [Gemini 1.5 Pro]: 1 次
+   - [Nvidia reports]: 1 次
+   - [Nvidia]: 1 次
+   - [Nvidia delivers]: 1 次
+🔑 关键热词: ai(0.16), openai(0.05), microsoft(0.05), with(0.05), google(0.05)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 16.7
+   - 科技+经济聚合: 2.0
+📌 常态热度排行: Art/Design Trends, DeepSeek/LLM Progress, Robotics/Unitree
+----------------------------------------
+📅 【2024-06】 活跃度: 210 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Economy/Tariffs: +85% 📈
+🤖 核心提及实体 (NER):
+   - [Nvidia]: 2 次
+   - [GPT-4o]: 2 次
+   - [Nvidia are]: 1 次
+🔑 关键热词: ai(0.18), apple(0.05), with(0.05), google(0.04), it(0.04)
+🕸️ 跨界强度:
+   - 科技+经济聚合: 4.4
+   - 科技+艺术聚合: 17.4
+📌 常态热度排行: Art/Design Trends, Robotics/Unitree, AGI/Superintelligence
+----------------------------------------
+📅 【2024-07】 活跃度: 140 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Quantum Computing: +1300% 📈
+🤖 核心提及实体 (NER):
+   - [NVIDIA and]: 1 次
+   - [GPT-4o]: 1 次
+🔑 关键热词: ai(0.15), robot(0.06), with(0.06), learning(0.05), day(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 6.1
+   - 科技+经济聚合: 0.9
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, DeepSeek/LLM Progress
+----------------------------------------
+📅 【2024-08】 活跃度: 108 篇
+🤖 核心提及实体 (NER):
+   - [NVIDIA]: 1 次
+   - [Nvidia rides]: 1 次
+   - [Nvidia shares]: 1 次
+🔑 关键热词: ai(0.15), with(0.06), google(0.05), you(0.05), can(0.05)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 4.1
+   - 科技+经济聚合: 1.7
+📌 常态热度排行: Art/Design Trends, Robotics/Unitree, AGI/Superintelligence
+----------------------------------------
+📅 【2024-09】 活跃度: 149 篇
+🤖 核心提及实体 (NER):
+   - [Nvidia]: 1 次
+🔑 关键热词: ai(0.18), with(0.07), openai(0.05), robot(0.05), can(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 8.5
+📌 常态热度排行: Art/Design Trends, Robotics/Unitree, GPU/Semiconductor
+----------------------------------------
+📅 【2024-10】 活跃度: 121 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - AGI/Superintelligence: +157% 📈
+   - DeepSeek/LLM Progress: +100% 📈
+   - Art/Design Trends: +69% 📈
+🤖 核心提及实体 (NER):
+   - [GPT-4]: 2 次
+   - [Nvidia]: 1 次
+🔑 关键热词: ai(0.18), your(0.04), with(0.04), google(0.04), apple(0.03)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 12.4
+   - 科技+经济聚合: 2.0
+📌 常态热度排行: Art/Design Trends, Robotics/Unitree, DeepSeek/LLM Progress
+----------------------------------------
+📅 【2024-11】 活跃度: 152 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Economy/Tariffs: +262% 📈
+   - Robotics/Unitree: +125% 📈
+🤖 核心提及实体 (NER):
+   - [GPT-4]: 1 次
+🔑 关键热词: ai(0.14), robot(0.06), can(0.06), with(0.05), it(0.05)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 7.1
+   - 科技+经济聚合: 4.6
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, Economy/Tariffs
+----------------------------------------
+📅 【2024-12】 活跃度: 321 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - GPU/Semiconductor: +277% 📈
+   - AGI/Superintelligence: +207% 📈
+   - Quantum Computing: +200% 📈
+🤖 核心提及实体 (NER):
+   - [DeepSeek challenges]: 1 次
+   - [GPT-4]: 1 次
+   - [Nvidia]: 1 次
+   - [NVIDIA]: 1 次
+🔑 关键热词: ai(0.15), openai(0.06), with(0.05), your(0.04), google(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 26.0
+   - 科技+经济聚合: 2.7
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, GPU/Semiconductor
+----------------------------------------
+📅 【2025-01】 活跃度: 238 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Nuclear Fusion: +400% 📈
+   - DeepSeek/LLM Progress: +358% 📈
+   - GPU/Semiconductor: +179% 📈
+🤖 核心提及实体 (NER):
+   - [DeepSeek AI]: 9 次
+   - [DeepSeek]: 4 次
+   - [Nvidia]: 3 次
+   - [NVIDIA]: 2 次
+   - [DeepSeek could]: 2 次
+🔑 关键热词: ai(0.15), with(0.05), deepseek(0.05), robot(0.04), ces(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 25.8
+   - 科技+经济聚合: 14.5
+📌 常态热度排行: Robotics/Unitree, DeepSeek/LLM Progress, Art/Design Trends
+----------------------------------------
+📅 【2025-03】 活跃度: 114 篇
+🤖 核心提及实体 (NER):
+   - [Nvidia is]: 1 次
+   - [DeepSeek]: 1 次
+🔑 关键热词: ai(0.14), from(0.05), can(0.04), google(0.04), with(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 6.5
+   - 科技+经济聚合: 3.3
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, GPU/Semiconductor
+----------------------------------------
+📅 【2025-04】 活跃度: 188 篇
+🤖 核心提及实体 (NER):
+   - [GPT-4]: 3 次
+   - [DeepSeek has]: 1 次
+   - [Nvidia commits]: 1 次
+   - [NVIDIA says]: 1 次
+   - [Nvidia expects]: 1 次
+🔑 关键热词: ai(0.14), with(0.06), it(0.05), openai(0.05), robot(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 12.8
+   - 科技+经济聚合: 7.3
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, GPU/Semiconductor
+----------------------------------------
+📅 【2025-05】 活跃度: 33 篇
+🔑 关键热词: ai(0.12), with(0.07), robot(0.05), department(0.05), from(0.04)
+🕸️ 跨界强度:
+   - 科技+经济聚合: 1.5
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, DeepSeek/LLM Progress
+----------------------------------------
+📅 【2025-06】 活跃度: 364 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Art/Design Trends: +212% 📈
+   - Economy/Tariffs: +206% 📈
+   - Robotics/Unitree: +123% 📈
+🤖 核心提及实体 (NER):
+   - [Unitree G1]: 1 次
+   - [Nvidia partnership]: 1 次
+🔑 关键热词: ai(0.17), with(0.05), your(0.04), apple(0.04), this(0.04)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 32.0
+   - 科技+经济聚合: 12.4
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, AGI/Superintelligence
+----------------------------------------
+📅 【2025-07】 活跃度: 205 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Nuclear Fusion: +123% 📈
+🤖 核心提及实体 (NER):
+   - [Nvidia becomes]: 2 次
+🔑 关键热词: ai(0.20), with(0.07), robot(0.05), it(0.03), day(0.03)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 19.9
+   - 科技+经济聚合: 8.4
+📌 常态热度排行: Robotics/Unitree, Art/Design Trends, Economy/Tariffs
+----------------------------------------
+📅 【2025-08】 活跃度: 5 篇
+🔑 关键热词: more(0.09), americans(0.09), health(0.09), turning(0.09), advice(0.09)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 2.6
+📌 常态热度排行: Art/Design Trends
+----------------------------------------
+📅 【2026-01】 活跃度: 303 篇
+🔥 爆发性增长话题 (相比历史均值):
+   - Economy/Tariffs: +457% 📈
+   - AGI/Superintelligence: +412% 📈
+   - GPU/Semiconductor: +300% 📈
+🤖 核心提及实体 (NER):
+   - [Nvidia]: 3 次
+   - [DeepSeek R1]: 1 次
+   - [Nvidia wants]: 1 次
+   - [Nvidia launches]: 1 次
+   - [RTX 5090]: 1 次
+🔑 关键热词: ai(0.12), with(0.04), it(0.04), as(0.03), from(0.03)
+🕸️ 跨界强度:
+   - 科技+艺术聚合: 48.3
+   - 科技+经济聚合: 16.7
+📌 常态热度排行: Art/Design Trends, Robotics/Unitree, Economy/Tariffs
+----------------------------------------
+
+🔮 未来技术雷达 (Next Gen Tech Prediction):
+   ✅ [信号已现] Quantum Computing - 本月热度: 4.9
+   ✅ [信号已现] Nuclear Fusion - 本月热度: 2.2
+   ✅ [信号已现] AGI/Superintelligence - 本月热度: 26.6
