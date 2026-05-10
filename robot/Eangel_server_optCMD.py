@@ -83,11 +83,11 @@ except serial.SerialException as e:
     #return None
     print("serial wrong")
     logger.warning("UNO Client connect maybe fail.")
-   
 
-def ReceiveDataThread(socket_tcp,address): 
+
+def ReceiveDataThread(socket_tcp,address):
     print ("Rev data....")
-    while True:    #add 20200311!!!    
+    while True:    #add 20200311!!!
         try:
                 #socket_tcp.settimeout(5)#500----->5s
                 data=socket_tcp.recv(8192)
@@ -109,7 +109,7 @@ def ReceiveDataThread(socket_tcp,address):
                     print("After convert bytes to str")
                     #print(data,type(data))
                     print("test:{},type{}" .format(data,type(data)))
-                            # "C" 20200301ADD            
+                            # "C" 20200301ADD
                     if data=='Cam':
                        #os.system('~/home/pi/camCap/source/cam10min/camFS10m_opt')
                        subprocess.Popen('~/camCap/source/cam1minLabel/camFS1min_label', shell = True, stdout = subprocess.PIPE)
@@ -117,16 +117,16 @@ def ReceiveDataThread(socket_tcp,address):
                        logger.info("Take picture")
                     elif data=='PlayMusic':
                        #subprocess.Popen(["mplayer", "-slave", "-quiet", "/home/pi/Music/Soundtrack - Define Dancing.mp3"], stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = False)
-                       subprocess.Popen('~/playMusic.sh', stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = True)                      
-                       print("Play music") 
+                       subprocess.Popen('~/playMusic.sh', stdin = subprocess.PIPE, stdout=open("/dev/null","w"), stderr = subprocess.PIPE, shell = True)
+                       print("Play music")
                        time.sleep(1)
-        # "Z" 20200307ADD    send Email        
+        # "Z" 20200307ADD    send Email
                     elif data=='Z':
                        subprocess.Popen('~/sendDiffNews.sh', shell = True, stdout = subprocess.PIPE)
                        print("SEND Email------ !")
-                       logger.info("SEND Email------ !")            
+                       logger.info("SEND Email------ !")
 
-                    
+
                     elif data==str('F'):
                        # GPIO.output(11,GPIO.HIGH)
 ##TypeError: unicode strings are not supported, please encode to bytes: 'P'!!! 发送的字符，需要变成字节！！20200418
@@ -151,14 +151,14 @@ def ReceiveDataThread(socket_tcp,address):
                     elif data=='S':    #slow down  add 202003
                        ser.flushInput()  #add test FLUSH many old commands!
                        ser.write(str.encode('S'))
-                       print("car SLOW DOWN!")   
+                       print("car SLOW DOWN!")
 
                     else:
                        ser.flushInput()
                        input=ser.read(1)
                        runtime=ord(input)
-                       
-                       print (" Robot running time is %d seconds ..."%runtime)  #20180625   
+
+                       print (" Robot running time is %d seconds ..."%runtime)  #20180625
                     #continue
                     if not data:
                          print("RECEIVE WRONG!")
@@ -206,6 +206,3 @@ if __name__ == '__main__':
     #thread.setDaemon(True)
     thread.start()
     #thread.join()
-
-
-

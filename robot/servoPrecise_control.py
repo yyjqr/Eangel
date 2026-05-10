@@ -20,7 +20,7 @@ def rotate(cycle):
 	realCycle=cycle
 	#DC=int(desiredPosition)+1
 	print("cycle:%f" %realCycle)
-	pwm.ChangeDutyCycle(realCycle)	
+	pwm.ChangeDutyCycle(realCycle)
 for i in range(2,13):
    for j in range(0,10):
       num=i+j/10

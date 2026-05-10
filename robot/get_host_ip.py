@@ -11,7 +11,7 @@ import netifaces
 def get_wifi_ip():
     # 获取所有网络接口
     interfaces = netifaces.interfaces()
-    
+
     for interface in interfaces:
         # 只处理无线接口，通常是以'wl'或'wlan'开头的接口名
         if interface.startswith('wl') or interface.startswith('wlan'):
@@ -21,7 +21,7 @@ def get_wifi_ip():
             if netifaces.AF_INET in addrs:
                 ip_info = addrs[netifaces.AF_INET][0]
                 return ip_info['addr']
-    
+
     return None
 
 if __name__ == "__main__":

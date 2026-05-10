@@ -44,36 +44,36 @@
  * av_videotoolbox_alloc_context() and freed with av_free().
  */
 typedef struct AVVideotoolboxContext {
-    /**
-     * Videotoolbox decompression session object.
-     * Created and freed the caller.
-     */
-    VTDecompressionSessionRef session;
+  /**
+   * Videotoolbox decompression session object.
+   * Created and freed the caller.
+   */
+  VTDecompressionSessionRef session;
 
-    /**
-     * The output callback that must be passed to the session.
-     * Set by av_videottoolbox_default_init()
-     */
-    VTDecompressionOutputCallback output_callback;
+  /**
+   * The output callback that must be passed to the session.
+   * Set by av_videottoolbox_default_init()
+   */
+  VTDecompressionOutputCallback output_callback;
 
-    /**
-     * CVPixelBuffer Format Type that Videotoolbox will use for decoded frames.
-     * set by the caller. If this is set to 0, then no specific format is
-     * requested from the decoder, and its native format is output.
-     */
-    OSType cv_pix_fmt_type;
+  /**
+   * CVPixelBuffer Format Type that Videotoolbox will use for decoded frames.
+   * set by the caller. If this is set to 0, then no specific format is
+   * requested from the decoder, and its native format is output.
+   */
+  OSType cv_pix_fmt_type;
 
-    /**
-     * CoreMedia Format Description that Videotoolbox will use to create the decompression session.
-     * Set by the caller.
-     */
-    CMVideoFormatDescriptionRef cm_fmt_desc;
+  /**
+   * CoreMedia Format Description that Videotoolbox will use to create the
+   * decompression session. Set by the caller.
+   */
+  CMVideoFormatDescriptionRef cm_fmt_desc;
 
-    /**
-     * CoreMedia codec type that Videotoolbox will use to create the decompression session.
-     * Set by the caller.
-     */
-    int cm_codec_type;
+  /**
+   * CoreMedia codec type that Videotoolbox will use to create the decompression
+   * session. Set by the caller.
+   */
+  int cm_codec_type;
 } AVVideotoolboxContext;
 
 /**
@@ -84,16 +84,16 @@ typedef struct AVVideotoolboxContext {
  * the decoder object (using the output callback provided by libavcodec) that
  * will be used for Videotoolbox-accelerated decoding.
  *
- * When decoding with Videotoolbox is finished, the caller must destroy the decoder
- * object and free the Videotoolbox context using av_free().
+ * When decoding with Videotoolbox is finished, the caller must destroy the
+ * decoder object and free the Videotoolbox context using av_free().
  *
  * @return the newly allocated context or NULL on failure
  */
 AVVideotoolboxContext *av_videotoolbox_alloc_context(void);
 
 /**
- * This is a convenience function that creates and sets up the Videotoolbox context using
- * an internal implementation.
+ * This is a convenience function that creates and sets up the Videotoolbox
+ * context using an internal implementation.
  *
  * @param avctx the corresponding codec context
  *
@@ -102,19 +102,20 @@ AVVideotoolboxContext *av_videotoolbox_alloc_context(void);
 int av_videotoolbox_default_init(AVCodecContext *avctx);
 
 /**
- * This is a convenience function that creates and sets up the Videotoolbox context using
- * an internal implementation.
+ * This is a convenience function that creates and sets up the Videotoolbox
+ * context using an internal implementation.
  *
  * @param avctx the corresponding codec context
  * @param vtctx the Videotoolbox context to use
  *
  * @return >= 0 on success, a negative AVERROR code on failure
  */
-int av_videotoolbox_default_init2(AVCodecContext *avctx, AVVideotoolboxContext *vtctx);
+int av_videotoolbox_default_init2(AVCodecContext *avctx,
+                                  AVVideotoolboxContext *vtctx);
 
 /**
- * This function must be called to free the Videotoolbox context initialized with
- * av_videotoolbox_default_init().
+ * This function must be called to free the Videotoolbox context initialized
+ * with av_videotoolbox_default_init().
  *
  * @param avctx the corresponding codec context
  */

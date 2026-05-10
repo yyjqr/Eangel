@@ -90,7 +90,7 @@ while True:
         currentTime=datetime.datetime.now().strftime('%H:%M:%S')
         print(currentTime+":")
         print("has send %d" %has_sent)
-        picCount+=1 
+        picCount+=1
         print("sent pic %d" %picCount)
         cv2.waitKey(100)
         #cv2.imshow('RobotCam', framed)
@@ -99,4 +99,3 @@ while True:
 cap.release()
 
 #到这里完成了TCPserver的部分，接下来在Qt中完成TCPClient的部分
-

@@ -1,7 +1,7 @@
 ## -*- coding: UTF-8 -*-
 #拼接字符串并换行
 
-#@author: JACK YANG 
+#@author: JACK YANG
 #@date:201902-->10 --->
       #202006-->202101--->202210
       #202301
@@ -57,7 +57,7 @@ dev_alert_info="树莓派存储分析"
 
 def make_img_msg(fn):
     #msg = MIMEMultipart('alternative')
-    
+
     f=open(fn,'rb') # r--->rb read+binary 0603
     data=f.read()
     f.close()
@@ -103,7 +103,7 @@ arrayKEYWORDS_EN=['5G','Robot','robot','COVID','Digital','AI','IOT','ML','APPLE'
 def findKeyWordInNews(str):
    #print(str)
    for i in range(14):
-       
+
        if array[i] in str:
            #print("test")
            return True
@@ -114,7 +114,7 @@ def findValuedInfoInNews(str,keyWords):
    #print(len(keyWords))
    #print(keyWords)
    for i in range(len(keyWords)):
-       
+
        if keyWords[i] in str:
            #print("test")
            return True
@@ -132,7 +132,7 @@ class GrabNews():
         for news in soup.select('.post-block__title  a'):
             if findValuedInfoInNews(news.text,arrayKEYWORDS_EN):
                 tittle=news.text
-                print(news.text) 
+                print(news.text)
                 for string in news.stripped_strings:
                     newsUrl=news.attrs['href']
                 #article.append(url.strip())
@@ -147,7 +147,7 @@ class GrabNews2():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.tech-news li  a'):
            if findValuedInfoInNews(news.text,arrayKEYWORDS_CN):
                tittle=news.text
@@ -158,7 +158,7 @@ class GrabNews2():
                 #article.append(url.strip())
                    print(newsUrl)
                    self.NewsList.append({string:newsUrl})
-   
+
 class GrabNewsAI():
     def __init__(self):
         self.NewsList = []
@@ -168,7 +168,7 @@ class GrabNewsAI():
         r2.encoding = 'utf-8'
 
         soup = BeautifulSoup(r2.text, "html.parser")
-        
+
         for news in soup.select('.searchtitle   a'):
             if findValuedInfoInNews(news.text,array):
                tittle=news.text
@@ -212,7 +212,7 @@ class GrabNewsTechnet():
 def writeNewsTechNet():
     grabNews = GrabNewsTechnet()
     grabNews.getNews()
-  
+
     #fp = codecs.open('news%s.html' % date , 'a', 'utf-8')
     with codecs.open(newsFullPath,'a', 'utf-8') as fp:
         for news in grabNews.NewsList:
@@ -223,7 +223,7 @@ def writeNewsTechNet():
 
 
 
-#adopt techCrunch 
+#adopt techCrunch
 def writeNews():
     grabNews = GrabNews()
     grabNews.getNews()
@@ -287,8 +287,8 @@ def mail(data):
        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
        print('Send IMG is "%s" ' %imgPath)
        msg.attach(make_img_msg(imgPath))
-    else: 
-        print("no pic capture!")     
+    else:
+        print("no pic capture!")
     msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     msg['Subject']="设备状态通知 %s" %year_month  #邮件的主题，也可以说是标题
@@ -330,8 +330,8 @@ def mail(data, deviceName):
        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
        print('Send IMG is "%s" ' %imgPath)
        msg.attach(make_img_msg(imgPath))
-    else: 
-        print("no pic capture!")     
+    else:
+        print("no pic capture!")
     msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     #msg['Subject']="设备状态通知 %s" %year_month  #邮件的主题，也可以说是标题
@@ -370,8 +370,8 @@ def mailAlert():
        imgPath=listN[-1]  #取列表的最后一个文件，即倒数第一个20190218
        print('Send IMG is "%s" ' %imgPath)
        #msg.attach(make_img_msg(imgPath))
-    else: 
-        print("no pic capture!")     
+    else:
+        print("no pic capture!")
     msg['From']=formataddr(["Eangel Robot",my_sender])  #括号里的对应发件人邮箱昵称、发件人邮箱账号
     msg['To']=formataddr(["亲爱的玩家",receiver])  #括号里的对应收件人邮箱昵称、收件人邮箱账号
     msg['Subject']="设备状态通知 %s" %year_month  #邮件的主题，也可以说是标题
@@ -389,4 +389,3 @@ def mailAlert():
 
 if __name__ == '__main__':
   mail("test")
-        

@@ -7,18 +7,12 @@
 // const int IMAGESIZE=921600;
 const int CAM_ResolutionRatio = 3;
 const int MAX_LEN = 2764800;
-enum CAM_TYPE
-{
-    Common_Type720p,
-    Small_480p = 1,
-    Common_Type1080p
-};
-struct camInfo
-{
-    uint8_t *imageBuf = NULL;
-    int imageWidth;
-    int imageHeight;
-    int type;
+enum CAM_TYPE { Common_Type720p, Small_480p = 1, Common_Type1080p };
+struct camInfo {
+  uint8_t *imageBuf = NULL;
+  int imageWidth;
+  int imageHeight;
+  int type;
 };
 
 #endif // CAMSOCKETPARAM_H

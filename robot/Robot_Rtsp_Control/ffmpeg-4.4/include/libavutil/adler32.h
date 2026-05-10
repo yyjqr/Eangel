@@ -27,10 +27,10 @@
 #ifndef AVUTIL_ADLER32_H
 #define AVUTIL_ADLER32_H
 
-#include <stddef.h>
-#include <stdint.h>
 #include "attributes.h"
 #include "version.h"
+#include <stddef.h>
+#include <stdint.h>
 
 /**
  * @defgroup lavu_adler32 Adler-32

@@ -8,48 +8,45 @@
  * @addr  yyjqr789@sina.com
  */
 
-
-#include <QApplication>
-#include <QTextcodec>
-#include <QDateTime>
-#include <qdir.h>
-#include <string>
 #include "logging.h"
 #include "mainwindow.h"
+#include <QApplication>
+#include <QDateTime>
+#include <QTextcodec>
+#include <qdir.h>
+#include <string>
 using std::string;
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    QTextCodec *codec = QTextCodec::codecForName("UTF-8");  //中文字符支持
-    QTextCodec::setCodecForLocale(codec);
+int main(int argc, char *argv[]) {
+  QApplication a(argc, argv);
+  QTextCodec *codec = QTextCodec::codecForName("UTF-8"); // 中文字符支持
+  QTextCodec::setCodecForLocale(codec);
 
-    QDateTime datetime;
-    Log camlog;
+  QDateTime datetime;
+  Log camlog;
 
-    QString timestr=datetime.currentDateTime().toString("yyyyMMdd_HHmmss");  //
-    string log_path=".\\robotLog"; //日志在打开之前创建,相对路径。
-    std::string log_file="./robotLog/";   //日志在打开cam之前创建。
-    QDir q_dir;
-    string command;
-    q_dir.setPath(QString::fromStdString(log_path));
-    if(!q_dir.exists())
-    {
-        command = "mkdir " + log_path;
-        system(command.c_str());
-    }
-    log_file+=timestr.toStdString();
-    log_file+=".log";
-    camlog.SetFile(log_file.c_str());
-    MainWindow w;
-    w.show();
-    // 将QString转换为字节数组
-    QString originalString = "机器人交互控制—v1.2";
-    QByteArray byteArray = codec->fromUnicode(originalString);
+  QString timestr = datetime.currentDateTime().toString("yyyyMMdd_HHmmss"); //
+  string log_path = ".\\robotLog"; // 日志在打开之前创建,相对路径。
+  std::string log_file = "./robotLog/"; // 日志在打开cam之前创建。
+  QDir q_dir;
+  string command;
+  q_dir.setPath(QString::fromStdString(log_path));
+  if (!q_dir.exists()) {
+    command = "mkdir " + log_path;
+    system(command.c_str());
+  }
+  log_file += timestr.toStdString();
+  log_file += ".log";
+  camlog.SetFile(log_file.c_str());
+  MainWindow w;
+  w.show();
+  // 将QString转换为字节数组
+  QString originalString = "机器人交互控制—v1.2";
+  QByteArray byteArray = codec->fromUnicode(originalString);
 
-    // 将字节数组转换为QString
-    QString convertedString = codec->toUnicode(byteArray);
+  // 将字节数组转换为QString
+  QString convertedString = codec->toUnicode(byteArray);
 
-    w.setWindowTitle(convertedString); //
-    return a.exec();
+  w.setWindowTitle(convertedString); //
+  return a.exec();
 }

@@ -31,12 +31,12 @@
  */
 
 enum AVHMACType {
-    AV_HMAC_MD5,
-    AV_HMAC_SHA1,
-    AV_HMAC_SHA224,
-    AV_HMAC_SHA256,
-    AV_HMAC_SHA384,
-    AV_HMAC_SHA512,
+  AV_HMAC_MD5,
+  AV_HMAC_SHA1,
+  AV_HMAC_SHA224,
+  AV_HMAC_SHA256,
+  AV_HMAC_SHA384,
+  AV_HMAC_SHA512,
 };
 
 typedef struct AVHMAC AVHMAC;
@@ -90,8 +90,8 @@ int av_hmac_final(AVHMAC *ctx, uint8_t *out, unsigned int outlen);
  * @return       The number of bytes written to out, or a negative error code.
  */
 int av_hmac_calc(AVHMAC *ctx, const uint8_t *data, unsigned int len,
-                 const uint8_t *key, unsigned int keylen,
-                 uint8_t *out, unsigned int outlen);
+                 const uint8_t *key, unsigned int keylen, uint8_t *out,
+                 unsigned int outlen);
 
 /**
  * @}

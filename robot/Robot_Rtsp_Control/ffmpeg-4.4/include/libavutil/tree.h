@@ -41,7 +41,6 @@
  * @{
  */
 
-
 struct AVTreeNode;
 extern const int av_tree_node_size;
 
@@ -58,9 +57,9 @@ struct AVTreeNode *av_tree_node_alloc(void);
  *             then the corresponding entry in next is unchanged.
  * @param cmp compare function used to compare elements in the tree,
  *            API identical to that of Standard C's qsort
- *            It is guaranteed that the first and only the first argument to cmp()
- *            will be the key parameter to av_tree_find(), thus it could if the
- *            user wants, be a different type (like an opaque context).
+ *            It is guaranteed that the first and only the first argument to
+ * cmp() will be the key parameter to av_tree_find(), thus it could if the user
+ * wants, be a different type (like an opaque context).
  * @return An element with cmp(key, elem) == 0 or NULL if no such element
  *         exists in the tree.
  */
@@ -98,14 +97,15 @@ void *av_tree_find(const struct AVTreeNode *root, void *key,
  *                 return av_tree_insert(rootp, key, cmp, next);
  *             }
  *             void *tree_remove(struct AVTreeNode **rootp, void *key,
- *                               int (*cmp)(void *key, const void *b, AVTreeNode **next))
+ *                               int (*cmp)(void *key, const void *b, AVTreeNode
+ * **next))
  *             {
  *                 av_freep(next);
  *                 return av_tree_insert(rootp, key, cmp, next);
  *             }
  *             @endcode
- * @param cmp compare function used to compare elements in the tree, API identical
- *            to that of Standard C's qsort
+ * @param cmp compare function used to compare elements in the tree, API
+ * identical to that of Standard C's qsort
  * @return If no insertion happened, the found element; if an insertion or
  *         removal happened, then either key or NULL will be returned.
  *         Which one it is depends on the tree state and the implementation. You

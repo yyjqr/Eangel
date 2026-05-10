@@ -1,5 +1,5 @@
 ### -*- coding: UTF-8 -*-
-## 
+##
 ## 2020--->2021.06--->2021.08 jack
 import socketserver
 import socket
@@ -92,7 +92,7 @@ while True:
         currentTime=datetime.datetime.now().strftime('%H:%M:%S')
         print(currentTime+":")
         print("has send %d" %has_sent)
-        picCount+=1 
+        picCount+=1
         print("sent pic %d" %picCount)
         cv2.waitKey(100)
         framed = cv2.cvtColor(framed, cv2.COLOR_BGR2RGB)
@@ -103,4 +103,3 @@ while True:
 cap.release()
 
 #到这里完成了TCPserver的部分，接下来在Qt中完成TCPClient的部分
-

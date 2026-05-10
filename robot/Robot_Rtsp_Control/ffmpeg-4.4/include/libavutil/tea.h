@@ -37,9 +37,9 @@ extern const int av_tea_size;
 struct AVTEA;
 
 /**
-  * Allocate an AVTEA context
-  * To free the struct: av_free(ptr)
-  */
+ * Allocate an AVTEA context
+ * To free the struct: av_free(ptr)
+ */
 struct AVTEA *av_tea_alloc(void);
 
 /**

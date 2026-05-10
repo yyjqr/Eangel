@@ -33,8 +33,8 @@
 #define AV_BF_ROUNDS 16
 
 typedef struct AVBlowfish {
-    uint32_t p[AV_BF_ROUNDS + 2];
-    uint32_t s[4][256];
+  uint32_t p[AV_BF_ROUNDS + 2];
+  uint32_t s[4][256];
 } AVBlowfish;
 
 /**

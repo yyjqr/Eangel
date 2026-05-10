@@ -68,7 +68,7 @@ def disk_stat(path):
     return percent
 print ("disk space :%f" %disk_stat('.'))
 #print ("disk space :%f" %disk_stat('/boot'))
-    
+
 def sendAlert():
     from datetime import datetime
     num =disk_stat('.')
@@ -99,4 +99,3 @@ def getDeviceCpuOrOsInfo():
 getDeviceCpuOrOsInfo()
 
 sendAlert()
-

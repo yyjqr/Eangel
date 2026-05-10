@@ -47,88 +47,88 @@ typedef struct AVBSFInternal AVBSFInternal;
  * immutable otherwise.
  */
 typedef struct AVBSFContext {
-    /**
-     * A class for logging and AVOptions
-     */
-    const AVClass *av_class;
+  /**
+   * A class for logging and AVOptions
+   */
+  const AVClass *av_class;
 
-    /**
-     * The bitstream filter this context is an instance of.
-     */
-    const struct AVBitStreamFilter *filter;
+  /**
+   * The bitstream filter this context is an instance of.
+   */
+  const struct AVBitStreamFilter *filter;
 
-    /**
-     * Opaque libavcodec internal data. Must not be touched by the caller in any
-     * way.
-     */
-    AVBSFInternal *internal;
+  /**
+   * Opaque libavcodec internal data. Must not be touched by the caller in any
+   * way.
+   */
+  AVBSFInternal *internal;
 
-    /**
-     * Opaque filter-specific private data. If filter->priv_class is non-NULL,
-     * this is an AVOptions-enabled struct.
-     */
-    void *priv_data;
+  /**
+   * Opaque filter-specific private data. If filter->priv_class is non-NULL,
+   * this is an AVOptions-enabled struct.
+   */
+  void *priv_data;
 
-    /**
-     * Parameters of the input stream. This field is allocated in
-     * av_bsf_alloc(), it needs to be filled by the caller before
-     * av_bsf_init().
-     */
-    AVCodecParameters *par_in;
+  /**
+   * Parameters of the input stream. This field is allocated in
+   * av_bsf_alloc(), it needs to be filled by the caller before
+   * av_bsf_init().
+   */
+  AVCodecParameters *par_in;
 
-    /**
-     * Parameters of the output stream. This field is allocated in
-     * av_bsf_alloc(), it is set by the filter in av_bsf_init().
-     */
-    AVCodecParameters *par_out;
+  /**
+   * Parameters of the output stream. This field is allocated in
+   * av_bsf_alloc(), it is set by the filter in av_bsf_init().
+   */
+  AVCodecParameters *par_out;
 
-    /**
-     * The timebase used for the timestamps of the input packets. Set by the
-     * caller before av_bsf_init().
-     */
-    AVRational time_base_in;
+  /**
+   * The timebase used for the timestamps of the input packets. Set by the
+   * caller before av_bsf_init().
+   */
+  AVRational time_base_in;
 
-    /**
-     * The timebase used for the timestamps of the output packets. Set by the
-     * filter in av_bsf_init().
-     */
-    AVRational time_base_out;
+  /**
+   * The timebase used for the timestamps of the output packets. Set by the
+   * filter in av_bsf_init().
+   */
+  AVRational time_base_out;
 } AVBSFContext;
 
 typedef struct AVBitStreamFilter {
-    const char *name;
+  const char *name;
 
-    /**
-     * A list of codec ids supported by the filter, terminated by
-     * AV_CODEC_ID_NONE.
-     * May be NULL, in that case the bitstream filter works with any codec id.
-     */
-    const enum AVCodecID *codec_ids;
+  /**
+   * A list of codec ids supported by the filter, terminated by
+   * AV_CODEC_ID_NONE.
+   * May be NULL, in that case the bitstream filter works with any codec id.
+   */
+  const enum AVCodecID *codec_ids;
 
-    /**
-     * A class for the private data, used to declare bitstream filter private
-     * AVOptions. This field is NULL for bitstream filters that do not declare
-     * any options.
-     *
-     * If this field is non-NULL, the first member of the filter private data
-     * must be a pointer to AVClass, which will be set by libavcodec generic
-     * code to this class.
-     */
-    const AVClass *priv_class;
+  /**
+   * A class for the private data, used to declare bitstream filter private
+   * AVOptions. This field is NULL for bitstream filters that do not declare
+   * any options.
+   *
+   * If this field is non-NULL, the first member of the filter private data
+   * must be a pointer to AVClass, which will be set by libavcodec generic
+   * code to this class.
+   */
+  const AVClass *priv_class;
 
-    /*****************************************************************
-     * No fields below this line are part of the public API. They
-     * may not be used outside of libavcodec and can be changed and
-     * removed at will.
-     * New public fields should be added right above.
-     *****************************************************************
-     */
+  /*****************************************************************
+   * No fields below this line are part of the public API. They
+   * may not be used outside of libavcodec and can be changed and
+   * removed at will.
+   * New public fields should be added right above.
+   *****************************************************************
+   */
 
-    int priv_data_size;
-    int (*init)(AVBSFContext *ctx);
-    int (*filter)(AVBSFContext *ctx, AVPacket *pkt);
-    void (*close)(AVBSFContext *ctx);
-    void (*flush)(AVBSFContext *ctx);
+  int priv_data_size;
+  int (*init)(AVBSFContext *ctx);
+  int (*filter)(AVBSFContext *ctx, AVPacket *pkt);
+  void (*close)(AVBSFContext *ctx);
+  void (*flush)(AVBSFContext *ctx);
 } AVBitStreamFilter;
 
 /**
@@ -176,15 +176,15 @@ int av_bsf_init(AVBSFContext *ctx);
  * AVERROR_EOF.
  *
  * @param pkt the packet to filter. The bitstream filter will take ownership of
- * the packet and reset the contents of pkt. pkt is not touched if an error occurs.
- * If pkt is empty (i.e. NULL, or pkt->data is NULL and pkt->side_data_elems zero),
- * it signals the end of the stream (i.e. no more non-empty packets will be sent;
- * sending more empty packets does nothing) and will cause the filter to output
- * any packets it may have buffered internally.
+ * the packet and reset the contents of pkt. pkt is not touched if an error
+ * occurs. If pkt is empty (i.e. NULL, or pkt->data is NULL and
+ * pkt->side_data_elems zero), it signals the end of the stream (i.e. no more
+ * non-empty packets will be sent; sending more empty packets does nothing) and
+ * will cause the filter to output any packets it may have buffered internally.
  *
- * @return 0 on success. AVERROR(EAGAIN) if packets need to be retrieved from the
- * filter (using av_bsf_receive_packet()) before new input can be consumed. Another
- * negative AVERROR value if an error occurs.
+ * @return 0 on success. AVERROR(EAGAIN) if packets need to be retrieved from
+ * the filter (using av_bsf_receive_packet()) before new input can be consumed.
+ * Another negative AVERROR value if an error occurs.
  */
 int av_bsf_send_packet(AVBSFContext *ctx, AVPacket *pkt);
 
@@ -215,7 +215,8 @@ int av_bsf_send_packet(AVBSFContext *ctx, AVPacket *pkt);
 int av_bsf_receive_packet(AVBSFContext *ctx, AVPacket *pkt);
 
 /**
- * Reset the internal bitstream filter state. Should be called e.g. when seeking.
+ * Reset the internal bitstream filter state. Should be called e.g. when
+ * seeking.
  */
 void av_bsf_flush(AVBSFContext *ctx);
 
@@ -275,7 +276,8 @@ int av_bsf_list_append(AVBSFList *lst, AVBSFContext *bsf);
  *
  * @return >=0 on success, negative AVERROR in case of failure
  */
-int av_bsf_list_append2(AVBSFList *lst, const char * bsf_name, AVDictionary **options);
+int av_bsf_list_append2(AVBSFList *lst, const char *bsf_name,
+                        AVDictionary **options);
 /**
  * Finalize list of bitstream filters.
  *
@@ -287,8 +289,8 @@ int av_bsf_list_append2(AVBSFList *lst, const char * bsf_name, AVDictionary **op
  * freeing the structure by av_bsf_list_free()
  *
  * @param      lst Filter list structure to be transformed
- * @param[out] bsf Pointer to be set to newly created @ref AVBSFContext structure
- *                 representing the chain of bitstream filters
+ * @param[out] bsf Pointer to be set to newly created @ref AVBSFContext
+ * structure representing the chain of bitstream filters
  *
  * @return >=0 on success, negative AVERROR in case of failure
  */
@@ -297,13 +299,13 @@ int av_bsf_list_finalize(AVBSFList **lst, AVBSFContext **bsf);
 /**
  * Parse string describing list of bitstream filters and create single
  * @ref AVBSFContext describing the whole chain of bitstream filters.
- * Resulting @ref AVBSFContext can be treated as any other @ref AVBSFContext freshly
- * allocated by av_bsf_alloc().
+ * Resulting @ref AVBSFContext can be treated as any other @ref AVBSFContext
+ * freshly allocated by av_bsf_alloc().
  *
  * @param      str String describing chain of bitstream filters in format
  *                 `bsf1[=opt1=val1:opt2=val2][,bsf2]`
- * @param[out] bsf Pointer to be set to newly created @ref AVBSFContext structure
- *                 representing the chain of bitstream filters
+ * @param[out] bsf Pointer to be set to newly created @ref AVBSFContext
+ * structure representing the chain of bitstream filters
  *
  * @return >=0 on success, negative AVERROR in case of failure
  */
@@ -312,7 +314,8 @@ int av_bsf_list_parse_str(const char *str, AVBSFContext **bsf);
 /**
  * Get null/pass-through bitstream filter.
  *
- * @param[out] bsf Pointer to be set to new instance of pass-through bitstream filter
+ * @param[out] bsf Pointer to be set to new instance of pass-through bitstream
+ * filter
  *
  * @return
  */
