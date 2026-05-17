@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 <<<<<<< HEAD
   // videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
 =======
-  //videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
+  // videoCapturer.get(CAP_PROP_FRAME_HEIGHT)));
 >>>>>>> 3c6c89b (opt robot code format)
   // X,V,I,D --- H264   DIVX -mp4
   VideoWriter writer(pVideoFileName, VideoWriter::fourcc('H', '2', '6', '4'),
@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
 <<<<<<< HEAD
            "mem,test bCapture:%d\n",
 =======
-                      "mem,test bCapture:%d\n",
+           "mem,test bCapture:%d\n",
 >>>>>>> 3c6c89b (opt robot code format)
            __LINE__, bCapture);
   // namedWindow("RobotCam", WINDOW_NORMAL);
@@ -192,7 +192,7 @@ int main(int argc, char **argv) {
 <<<<<<< HEAD
            "mem,test videoCapturer.isOpened():%d\n",
 =======
-                      "mem,test videoCapturer.isOpened():%d\n",
+           "mem,test videoCapturer.isOpened():%d\n",
 >>>>>>> 3c6c89b (opt robot code format)
            __LINE__, videoCapturer.isOpened());
   while (videoCapturer.isOpened()) {

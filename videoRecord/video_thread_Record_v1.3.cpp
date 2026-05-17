@@ -8,14 +8,14 @@ yyjqr789@sina.com 原创，如有bug，联系上述邮箱。
 <<<<<<< HEAD
 #include <opencv2/core.hpp> //change to the first order
 =======
+#include <opencv2/core.hpp> //change to the first order
 #include <stdio.h>
-#include <opencv2/core.hpp>  //change to the first order
->>>>>>> 3c6c89b (opt robot code format)
+    >>>>>>> 3c6c89b (opt robot code format)
 #include <opencv2/opencv.hpp>
 #include <opencv2/videoio.hpp>
 #include <stdio.h>
 
-<<<<<<< HEAD
+    <<<<<<< HEAD
 =======
 #include <time.h>
 >>>>>>> 3c6c89b (opt robot code format)

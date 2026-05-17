@@ -826,8 +826,9 @@ enum AVStreamParseType {
   AVSTREAM_PARSE_FULL_RAW,   /**< full parsing and repack with timestamp and
                                 position generation by parser for raw   this
                                 assumes   that each packet in the file contains no
-                                demuxer   level headers and   just codec level data,
-                                otherwise   position generation would fail */
+                                demuxer   level headers and   just codec level
+                                data,   otherwise   position generation would fail
+                              */
 };
 
 typedef struct AVIndexEntry {

@@ -1,7 +1,7 @@
 #ifndef __HI_SPI_H__
 #define __HI_SPI_H__
 
-#include <linux/fb.h>   //add
+#include <linux/fb.h> //add
 /* User space versions of kernel symbols for SPI clocking modes,
  * matching <linux/spi/spi.h>
  */
