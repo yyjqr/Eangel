@@ -840,15 +840,13 @@ typedef enum {
 /* Register masks for SPI0_CS */
 #define BCM2835_SPI0_CS_LEN_LONG                                               \
   0x02000000 /*!< Enable Long data word in Lossi mode if DMA_LEN is set */
-#define BCM2835_SPI0_CS_DMA_LEN                                                \
-  0x01000000                              /*!< Enable DMA mode in Lossi mode   \
-                                           */
-#define BCM2835_SPI0_CS_CSPOL2 0x00800000 /*!< Chip Select 2 Polarity */
-#define BCM2835_SPI0_CS_CSPOL1 0x00400000 /*!< Chip Select 1 Polarity */
-#define BCM2835_SPI0_CS_CSPOL0 0x00200000 /*!< Chip Select 0 Polarity */
-#define BCM2835_SPI0_CS_RXF 0x00100000    /*!< RXF - RX FIFO Full */
-#define BCM2835_SPI0_CS_RXR                                                    \
-  0x00080000                             /*!< RXR RX FIFO needs Reading (full) \
+#define BCM2835_SPI0_CS_DMA_LEN 0x01000000 /*!< Enable DMA mode in Lossi mode  \
+                                            */
+#define BCM2835_SPI0_CS_CSPOL2 0x00800000  /*!< Chip Select 2 Polarity */
+#define BCM2835_SPI0_CS_CSPOL1 0x00400000  /*!< Chip Select 1 Polarity */
+#define BCM2835_SPI0_CS_CSPOL0 0x00200000  /*!< Chip Select 0 Polarity */
+#define BCM2835_SPI0_CS_RXF 0x00100000     /*!< RXF - RX FIFO Full */
+#define BCM2835_SPI0_CS_RXR 0x00080000   /*!< RXR RX FIFO needs Reading (full) \
                                           */
 #define BCM2835_SPI0_CS_TXD 0x00040000   /*!< TXD TX FIFO can accept Data */
 #define BCM2835_SPI0_CS_RXD 0x00020000   /*!< RXD RX FIFO contains Data */
