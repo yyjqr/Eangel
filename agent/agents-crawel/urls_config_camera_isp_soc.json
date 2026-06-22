@@ -1,0 +1,131 @@
+{
+    "_description": "相机SOC/ISP科技信息检索配置 — 覆盖IPC/NVR安防芯片、图像信号处理、音视频编解码标准（H.265/H.266）、ONVIF/RTSP协议及安防供应链分析",
+    "_category": "camera_isp_soc",
+    "_chip_keywords": [
+        "Hi3519DV500", "Hi3516CV610", "Hi3516EV300", "Hi3531DV200",
+        "RV1126", "RV1109", "RK3588", "RK3568",
+        "FH8856", "FH8852", "FH8858",
+        "CV25", "CV28", "S6LM", "H22",
+        "GC4663", "IMX415", "IMX335", "IMX678", "IMX585",
+        "SC4336P", "SC500AI"
+    ],
+    "_tech_stack": [
+        "ISP", "3A算法", "AE", "AWB", "AF", "HDR", "WDR", "TNR",
+        "H.265", "HEVC", "H.266", "VVC", "H.264", "AVC",
+        "ONVIF Profile S/T/G", "RTSP", "RTP", "gSOAP", "WS-Discovery",
+        "MIPI CSI-2", "DVP", "I2C", "SPI",
+        "HiMPP", "RKMPI", "RKNPU", "RKNN",
+        "VI", "VPSS", "VENC", "VB", "VGS",
+        "live555", "ffmpeg", "OpenCV",
+        "NVR", "IPC", "PoE", "DeepStream"
+    ],
+    "_disabled_urls": [
+        "说明: 以下 URL 已验证无法有效抓取，保留记录供参考",
+        "已屏蔽 — ONVIF官网反爬: https://www.onvif.org/profiles/",
+        "已屏蔽 — ONVIF官网反爬: https://www.onvif.org/specs/",
+        "已屏蔽 — ONVIF官网反爬: https://www.onvif.org/news/",
+        "0条 — IETF静态RFC文档非新闻流: https://datatracker.ietf.org/doc/html/rfc6184",
+        "0条 — IETF静态RFC文档非新闻流: https://datatracker.ietf.org/doc/html/rfc7798",
+        "0条 — IETF静态RFC文档非新闻流: https://datatracker.ietf.org/doc/html/rfc7826",
+        "0条 — SDK文档Wiki非新闻流: https://wiki.rock-chips.com/index.php/Main_Page",
+        "0条 — 反爬JS渲染失败: https://www.ambarella.com/iot/",
+        "0条 — 反爬JS渲染失败: https://www.ambarella.com/blog/",
+        "0条 — 反爬JS渲染失败: https://www.eefocus.com/mcu-dsp/",
+        "0条 — 反爬JS渲染失败: https://www.eefocus.com/article/tag/ISP",
+        "0条 — 反爬JS渲染失败: https://www.eefocus.com/article/tag/H265",
+        "0条 — 反爬JS渲染失败: https://www.21ic.com/t-camera.html",
+        "0条 — 反爬JS渲染失败: https://www.elecfans.com/tags/soc/",
+        "0条 — 反爬JS渲染失败: https://www.elecfans.com/tags/isp/",
+        "0条 — 反爬JS渲染失败: https://www.elecfans.com/tags/h265/",
+        "0条 — ISP关系不大: https://www.afzhan.com/news/",
+        "0条 — 反爬付费墙: https://www.eetimes.com/category/imaging-sensors/",
+        "0条 — 反爬付费墙: https://www.eetimes.com/category/embedded/",
+        "0条 — 无新闻内容: https://safe.zol.com.cn/",
+        "0条 — 学术组织无新闻流: https://jvet.hhi.fraunhofer.de/",
+        "0条 — 付费研究报告: https://www.idc.com/cn",
+        "0条 — 付费研究报告: https://www.gartner.com/en/information-technology/topics/iot-security-cameras",
+        "SKIP爬取失败React渲染: https://github.com/search?q=H265+RTP+packetization&type=repositories&sort=updated",
+        "React渲染可能失败: https://github.com/search?q=Hi3516+MPP+ISP&type=repositories&sort=updated",
+        "React渲染可能失败: https://github.com/search?q=RV1126+rkaiq+isp&type=repositories&sort=updated",
+        "React渲染可能失败: https://github.com/search?q=gSOAP+ONVIF+profile+T&type=repositories&sort=updated",
+        "React渲染可能失败: https://github.com/search?q=NVR+IPC+RTSP+C%2B%2B&type=repositories&sort=updated"
+    ],
+    "_url_groups": {
+        "github_topics_SSR稳定": [
+            "https://github.com/topics/onvif",
+            "https://github.com/topics/rtsp",
+            "https://github.com/topics/h265",
+            "https://github.com/topics/isp-image-processing",
+            "https://github.com/topics/hisilicon",
+            "https://github.com/topics/rockchip",
+            "https://github.com/topics/ffmpeg",
+            "https://github.com/topics/live555",
+            "https://github.com/topics/video-codec",
+            "https://github.com/topics/camera"
+        ],
+        "cnx_software_嵌入式新闻纯HTML": [
+            "https://www.cnx-software.com/tag/rockchip/",
+            "https://www.cnx-software.com/tag/ambarella/",
+            "https://www.cnx-software.com/tag/hisilicon/",
+            "https://www.cnx-software.com/category/video-codec/"
+        ],
+        "嵌入式Linux专业媒体": [
+            "https://linuxgizmos.com/",
+            "https://www.embedded.com/",
+            "https://www.electronicdesign.com/technologies/embedded"
+        ],
+        "流媒体_编解码行业媒体": [
+            "https://www.streamingmedia.com/Articles/News/",
+            "https://hevc.info/"
+        ],
+        "国内芯片_半导体行业媒体": [
+            "https://www.leiphone.com/cat/17",
+            "https://www.ithome.com/tag/soc/",
+            "https://www.ofweek.com/elec/news/",
+            "https://www.ofweek.com/semiconductor/news/",
+            "https://www.eet-china.com/news/list-6.html"
+        ],
+        "安防行业媒体_已验证可抓取": [
+            "https://security.ofweek.com/",
+            "https://www.afzhan.com/news/",
+            "https://www.hczx.com/"
+        ],
+        "芯片厂商新闻页": [
+            "https://www.fullhan.com/en/product.html",
+            "https://www.ambarella.com/news/",
+            "https://www.rockchip.com/news7/list.html"
+        ]
+    },
+    "urls": [
+        "https://github.com/topics/onvif",
+        "https://github.com/topics/rtsp",
+        "https://github.com/topics/h265",
+        "https://github.com/topics/isp-image-processing",
+        "https://github.com/topics/hisilicon",
+        "https://github.com/topics/rockchip",
+        "https://github.com/topics/ffmpeg",
+        "https://github.com/topics/live555",
+        "https://github.com/topics/video-codec",
+        "https://github.com/topics/camera",
+        "https://www.cnx-software.com/tag/rockchip/",
+        "https://www.cnx-software.com/tag/ambarella/",
+        "https://www.cnx-software.com/tag/hisilicon/",
+        "https://www.cnx-software.com/category/video-codec/",
+        "https://linuxgizmos.com/",
+        "https://www.embedded.com/",
+        "https://www.electronicdesign.com/technologies/embedded",
+        "https://www.streamingmedia.com/Articles/News/",
+        "https://hevc.info/",
+        "https://www.leiphone.com/cat/17",
+        "https://www.ithome.com/tag/soc/",
+        "https://www.ofweek.com/elec/news/",
+        "https://www.ofweek.com/semiconductor/news/",
+        "https://www.eet-china.com/news/list-6.html",
+        "https://security.ofweek.com/",
+
+        "https://www.hczx.com/",
+        "https://www.fullhan.com/en/product.html",
+        "https://www.ambarella.com/news/",
+        "https://www.rockchip.com/news7/list.html"
+    ]
+}
