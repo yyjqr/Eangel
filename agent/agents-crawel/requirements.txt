@@ -1,0 +1,4 @@
+ 1208  pip install -U crawl4ai
+ 1243  pip install --upgrade requests urllib3 chardet charset_normalizer
+ 1295  pip install langchain-openai
+ 1297  pip install langgraph
