@@ -1,0 +1,75 @@
+{
+  "system": {
+    "os_baseline_mb": 24,
+    "linux_version": "Linux 4.19 / 5.4 Tailored (-tiny)",
+    "description": "极度裁剪的 Linux内核，包含精简驱动根文件系统，保留少量 CMA 缓冲池"
+  },
+  "ddr_config": {
+    "type": "DDR2/DDR3 SIP",
+    "capacity_mb": 64,
+    "bus_width_bits": 16,
+    "description": "低成本 IPC 摄像机常采用内部合封（SIP）的 64MB 或 128MB DDR"
+  },
+  "sensors": [
+    {
+      "name": "sensor_1080p",
+      "width": 1920,
+      "height": 1080,
+      "format": "RAW10",
+      "count": 1,
+      "vi_buffers": 2
+    }
+  ],
+  "post_processing": [
+    {
+      "input_source": "sensor_1080p",
+      "description": "经 ISP 及 PP(Post-Processing) 处理后分出多路通道用于不同目的",
+      "channels": [
+        {
+          "name": "ch0_main_stream",
+          "width": 1920,
+          "height": 1080,
+          "format": "YUV420",
+          "buffers": 2,
+          "usage": "主码流编码"
+        },
+        {
+          "name": "ch1_sub_stream",
+          "width": 640,
+          "height": 480,
+          "format": "YUV420",
+          "buffers": 2,
+          "usage": "子码流网络预览"
+        },
+        {
+          "name": "ch2_third_stream",
+          "width": 320,
+          "height": 240,
+          "format": "YUV420",
+          "buffers": 2,
+          "usage": "CV视觉算法/人形检测输入"
+        }
+      ]
+    }
+  ],
+  "venc": [
+    {
+      "name": "venc_1080p_h265",
+      "width": 1920,
+      "height": 1080,
+      "format": "YUV420",
+      "count": 1,
+      "buffers": 3,
+      "description": "主码流 H.265 编码，带少量参考帧"
+    },
+    {
+      "name": "venc_VGA_h264",
+      "width": 640,
+      "height": 480,
+      "format": "YUV420",
+      "count": 1,
+      "buffers": 2,
+      "description": "子码流轻量编码"
+    }
+  ]
+}
