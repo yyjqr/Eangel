@@ -1,8 +1,10 @@
-requests==2.31.0
+## fix security
+requests>=2.33.0
 beautifulsoup4==4.12.2
-lxml==4.9.3
+lxml>=6.1.0
 feedparser==6.0.10
 python-dateutil==2.8.2
 fake-useragent==1.4.0
-crawl4ai==0.8.5
+## fix security
+crawl4ai>=0.9.0
 playwright==1.58.0
