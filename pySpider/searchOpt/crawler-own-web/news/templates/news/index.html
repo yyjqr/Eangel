@@ -1347,12 +1347,12 @@
                 <div class="column-content">
                     {% for article in original_articles %}
                     <div class="column-content-item">
-                            <a href="{% if article.url %}{{ article.url }}{% else %}javascript:void(0){% endif %}"{% if article.url %} target="_blank"{% endif %}>
+                            <a href="{{ article.display_url }}"{% if article.url %} target="_blank" rel="noopener noreferrer"{% endif %}>
                             {{ article.title }}
                         </a>
-                        {% if article.summary %}
+                        {% if article.display_summary %}
                         <div style="font-size: 0.85rem; color: #555; margin-top: 4px; line-height: 1.5;">{{
-                            article.summary }}</div>
+                            article.display_summary }}</div>
                         {% endif %}
                         <div class="meta">
                             <span
