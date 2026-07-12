@@ -1,4 +1,8 @@
+import re
+
 from django.db import models
+from django.utils.html import strip_tags
+from django.utils.text import Truncator
 
 class TechNews(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id')
@@ -203,6 +207,17 @@ class OriginalArticle(models.Model):
         verbose_name = '原创文章'
         verbose_name_plural = '原创文章'
         ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if not (self.summary or '').strip():
+            plain_text = strip_tags((self.content or '').strip())
+            plain_text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', ' ', plain_text)
+            plain_text = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', plain_text)
+            plain_text = re.sub(r'(^|\n)\s{0,3}#{1,6}\s*', ' ', plain_text)
+            plain_text = re.sub(r'[`>*_~-]+', ' ', plain_text)
+            plain_text = re.sub(r'\s+', ' ', plain_text).strip()
+            self.summary = Truncator(plain_text).chars(140) if plain_text else ''
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"[{self.get_source_type_display()}] {self.title}"

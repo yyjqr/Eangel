@@ -1,9 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.db.models import Q, Count, Avg, Sum
 from django.db import transaction
 from .models import TechNews, UserComment, DailyStats, UserIPLog, HotProduct, FeaturedSelection, OriginalArticle
 from django.contrib import messages
+from django.urls import reverse
+from django.utils.html import strip_tags
+from django.utils.text import Truncator
 import logging
 import re
 from collections import Counter, defaultdict
@@ -297,6 +300,31 @@ def is_blocked_in_china(url):
     url_lower = url.lower()
     return any(domain in url_lower for domain in BLOCKED_DOMAINS)
 
+
+def _build_original_article_summary(article):
+    summary = (getattr(article, 'summary', '') or '').strip()
+    if summary:
+        return summary
+
+    content = (getattr(article, 'content', '') or '').strip()
+    if not content:
+        return ''
+
+    plain_text = strip_tags(content)
+    plain_text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', ' ', plain_text)
+    plain_text = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', plain_text)
+    plain_text = re.sub(r'(^|\n)\s{0,3}#{1,6}\s*', ' ', plain_text)
+    plain_text = re.sub(r'[`>*_~-]+', ' ', plain_text)
+    plain_text = re.sub(r'\s+', ' ', plain_text).strip()
+    return Truncator(plain_text).chars(140)
+
+
+def _prepare_original_articles(articles):
+    for article in articles:
+        article.display_summary = _build_original_article_summary(article)
+        article.display_url = (getattr(article, 'url', '') or '').strip() or reverse('original_article_detail', args=[article.id])
+    return articles
+
 def news_list(request):
     # 记录访问
     record_visit(request)
@@ -506,7 +534,7 @@ def news_list(request):
         hot_product.category = normalize_category_label(hot_product.category)
 
     # 原创专栏
-    original_articles = list(OriginalArticle.objects.filter(is_published=True)[:10])
+    original_articles = _prepare_original_articles(list(OriginalArticle.objects.filter(is_published=True)[:10]))
 
     context = {
         'accessible_news': accessible_news,
@@ -534,6 +562,14 @@ def news_list(request):
     }
 
     return render(request, 'news/index.html', context)
+
+
+def original_article_detail(request, article_id):
+    article = get_object_or_404(OriginalArticle, id=article_id, is_published=True)
+    article.display_summary = _build_original_article_summary(article)
+    return render(request, 'news/original_article_detail.html', {
+        'article': article,
+    })
 
 
 def submit_comment(request):
