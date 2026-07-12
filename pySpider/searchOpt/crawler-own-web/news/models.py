@@ -59,8 +59,8 @@ class FeaturedSelection(models.Model):
 class UserComment(models.Model):
     """用户评论建议模型"""
     id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=100, verbose_name='用户名', default='匿名')
-    email = models.EmailField(max_length=200, verbose_name='邮箱', blank=True)
+    username = models.CharField(max_length=100, verbose_name='用户名')
+    email = models.EmailField(max_length=200, verbose_name='邮箱')
     comment = models.TextField(verbose_name='评论内容')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     is_approved = models.BooleanField(default=True, verbose_name='已审核')

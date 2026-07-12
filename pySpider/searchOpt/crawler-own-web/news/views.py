@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db.models import Q, Count, Avg, Sum
 from django.db import transaction
+from django.core.validators import validate_email
 from .models import TechNews, UserComment, DailyStats, UserIPLog, HotProduct, FeaturedSelection, OriginalArticle
 from django.contrib import messages
 from django.urls import reverse
@@ -575,22 +577,33 @@ def original_article_detail(request, article_id):
 def submit_comment(request):
     """提交用户评论"""
     if request.method == 'POST':
-        username = request.POST.get('username', '匿名').strip() or '匿名'
+        username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
         comment = request.POST.get('comment', '').strip()
+        website = request.POST.get('website', '').strip()
 
-        if comment:
+        if website:
+            return redirect('news_list')
+
+        if not username:
+            messages.error(request, '用户名不能为空！')
+        elif not email:
+            messages.error(request, '邮箱不能为空！')
+        elif not comment:
+            messages.error(request, '评论内容不能为空！')
+        else:
             try:
+                validate_email(email)
                 UserComment.objects.create(
                     username=username,
                     email=email,
                     comment=comment
                 )
                 messages.success(request, '感谢您的反馈！')
+            except ValidationError:
+                messages.error(request, '请输入有效的邮箱地址！')
             except Exception as e:
                 messages.error(request, f'提交失败：{str(e)}')
-        else:
-            messages.error(request, '评论内容不能为空！')
 
     return redirect('news_list')
 
