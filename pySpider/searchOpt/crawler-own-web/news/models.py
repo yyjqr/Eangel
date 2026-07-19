@@ -60,6 +60,7 @@ class FeaturedSelection(models.Model):
 class UserComment(models.Model):
     """用户评论建议模型"""
     id = models.AutoField(primary_key=True)
+    article = models.ForeignKey('OriginalArticle', null=True, blank=True, on_delete=models.CASCADE, related_name='comments', verbose_name='关联原创文章')
     username = models.CharField(max_length=100, verbose_name='用户名')
     email = models.EmailField(max_length=200, verbose_name='邮箱')
     comment = models.TextField(verbose_name='评论内容')

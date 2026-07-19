@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, Count, Avg, Sum
 from django.db import transaction
 from django.core.validators import validate_email
+from django.utils.html import escape
 from .models import TechNews, UserComment, DailyStats, UserIPLog, HotProduct, FeaturedSelection, OriginalArticle
 from django.contrib import messages
 import logging
@@ -422,7 +423,7 @@ def news_list(request):
     word_cloud = Counter(keywords).most_common(20)
 
     # 4. 获取最新的评论
-    recent_comments = UserComment.objects.filter(is_approved=True).order_by('-created_at')[:10]
+    recent_comments = UserComment.objects.filter(is_approved=True, article__isnull=True).order_by('-created_at')[:10]
 
     # 5. 读取趋势分析数据
     trend_data = {}
@@ -548,15 +549,23 @@ def news_list(request):
 
 def original_article_detail(request, article_id):
     article = get_object_or_404(OriginalArticle, id=article_id, is_published=True)
+    article_comments = UserComment.objects.filter(is_approved=True, article=article).order_by('-created_at')[:20]
 
-    import markdown as md_lib
-    content_html = md_lib.markdown(
-        article.content or '',
-        extensions=['fenced_code', 'codehilite', 'tables', 'nl2br']
-    )
+    article_content = article.content or ''
+    try:
+        import markdown as md_lib
+
+        content_html = md_lib.markdown(
+            article_content,
+            extensions=['fenced_code', 'codehilite', 'tables', 'nl2br']
+        )
+    except ModuleNotFoundError:
+        logger.warning('python-markdown is not installed; falling back to escaped article content')
+        content_html = '<p>' + escape(article_content).replace('\n', '<br>') + '</p>' if article_content else ''
 
     return render(request, 'news/original_article_detail.html', {
         'article': article,
+        'article_comments': article_comments,
         'content_html': content_html,
     })
 
@@ -568,9 +577,20 @@ def submit_comment(request):
         email = request.POST.get('email', '').strip()
         comment = request.POST.get('comment', '').strip()
         website = request.POST.get('website', '').strip()
+        article_id = request.POST.get('article_id', '').strip()
+        article = None
+
+        if article_id:
+            article = OriginalArticle.objects.filter(id=article_id, is_published=True).first()
+
+        redirect_name = 'news_list'
+        redirect_kwargs = {}
+        if article:
+            redirect_name = 'original_article_detail'
+            redirect_kwargs = {'article_id': article.id}
 
         if website:
-            return redirect('news_list')
+            return redirect(redirect_name, **redirect_kwargs)
 
         if not username:
             messages.error(request, '用户名不能为空！')
@@ -578,10 +598,13 @@ def submit_comment(request):
             messages.error(request, '邮箱不能为空！')
         elif not comment:
             messages.error(request, '评论内容不能为空！')
+        elif article_id and not article:
+            messages.error(request, '评论关联的文章不存在或未发布！')
         else:
             try:
                 validate_email(email)
                 UserComment.objects.create(
+                    article=article,
                     username=username,
                     email=email,
                     comment=comment
@@ -592,7 +615,7 @@ def submit_comment(request):
             except Exception as e:
                 messages.error(request, f'提交失败：{str(e)}')
 
-    return redirect('news_list')
+    return redirect(redirect_name, **redirect_kwargs)
 
 
 # ─────────────────────────────────────────────

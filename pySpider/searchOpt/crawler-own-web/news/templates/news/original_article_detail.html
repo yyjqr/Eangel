@@ -88,6 +88,116 @@
         .article-content pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
         .article-content img { max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0; }
 
+        .comment-section {
+            margin-top: 36px;
+            padding-top: 26px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .comment-section h2,
+        .comment-section h3 {
+            color: #111827;
+            margin: 0 0 16px;
+        }
+
+        .comment-form {
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            background: #0366d6;
+            color: #fff;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-submit:hover {
+            background: #0254b3;
+        }
+
+        .comment-honeypot {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        .message {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .comment-item {
+            padding: 14px 16px;
+            border-left: 3px solid #0366d6;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 14px;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 0.92rem;
+        }
+
+        .comment-author {
+            color: #0366d6;
+            font-weight: 600;
+        }
+
+        .comment-date {
+            color: #9ca3af;
+        }
+
+        .comment-text {
+            color: #374151;
+            line-height: 1.7;
+        }
+
         @media (max-width: 640px) {
             .page {
                 padding: 18px 12px 36px;
@@ -125,6 +235,56 @@
             {% endif %}
 
             <div class="article-content">{{ content_html|safe }}</div>
+
+            <div class="comment-section">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+
+                <div class="comment-form">
+                    <h2>💬 评论这篇文章</h2>
+                    <form method="post" action="{% url 'submit_comment' %}" accept-charset="UTF-8">
+                        {% csrf_token %}
+                        <input type="hidden" name="article_id" value="{{ article.id }}">
+                        <div class="form-group">
+                            <label for="username">姓名 *</label>
+                            <input type="text" id="username" name="username" placeholder="请输入您的姓名" required maxlength="100" autocomplete="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">邮箱 *</label>
+                            <input type="email" id="email" name="email" placeholder="请输入您的邮箱（不会公开显示）" required maxlength="200" autocomplete="email">
+                        </div>
+                        <div class="comment-honeypot" aria-hidden="true">
+                            <label for="website">Website</label>
+                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">评论内容 *</label>
+                            <textarea id="comment" name="comment" placeholder="欢迎补充观点、纠错或交流使用经验..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">提交评论</button>
+                    </form>
+                </div>
+
+                <div class="comments-list">
+                    <h3>📝 这篇文章的最新评论</h3>
+                    {% if article_comments %}
+                    {% for comment in article_comments %}
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">{{ comment.username }}</span>
+                            <span class="comment-date">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
+                        </div>
+                        <div class="comment-text">{{ comment.comment }}</div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="color: #9ca3af;">这篇文章还没有评论，欢迎留下第一条反馈。</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </body>
