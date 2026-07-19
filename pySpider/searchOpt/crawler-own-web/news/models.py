@@ -3,6 +3,7 @@ import re
 from django.db import models
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
+from django.urls import reverse
 
 class TechNews(models.Model):
     id = models.AutoField(primary_key=True, db_column='Id')
@@ -208,15 +209,42 @@ class OriginalArticle(models.Model):
         verbose_name_plural = '原创文章'
         ordering = ['-created_at']
 
+    @property
+    def source_label(self):
+        return dict(self.SOURCE_CHOICES).get(self.source_type, '转载')
+
+    @property
+    def source_color(self):
+        return {
+            'original': '#28a745',
+            'wechat': '#07c160',
+            'reprint': '#6c757d',
+        }.get(self.source_type, '#6c757d')
+
+    @property
+    def display_summary(self):
+        summary = (self.summary or '').strip()
+        if summary:
+            return summary
+
+        plain_text = strip_tags((self.content or '').strip())
+        plain_text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', ' ', plain_text)
+        plain_text = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', plain_text)
+        plain_text = re.sub(r'(^|\n)\s{0,3}#{1,6}\s*', ' ', plain_text)
+        plain_text = re.sub(r'[`>*_~-]+', ' ', plain_text)
+        plain_text = re.sub(r'\s+', ' ', plain_text).strip()
+        return Truncator(plain_text).chars(140) if plain_text else ''
+
+    def get_absolute_url(self):
+        return reverse('original_article_detail', args=[self.id])
+
+    @property
+    def display_url(self):
+        return (self.url or '').strip() or self.get_absolute_url()
+
     def save(self, *args, **kwargs):
         if not (self.summary or '').strip():
-            plain_text = strip_tags((self.content or '').strip())
-            plain_text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', ' ', plain_text)
-            plain_text = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', plain_text)
-            plain_text = re.sub(r'(^|\n)\s{0,3}#{1,6}\s*', ' ', plain_text)
-            plain_text = re.sub(r'[`>*_~-]+', ' ', plain_text)
-            plain_text = re.sub(r'\s+', ' ', plain_text).strip()
-            self.summary = Truncator(plain_text).chars(140) if plain_text else ''
+            self.summary = self.display_summary
         super().save(*args, **kwargs)
 
     def __str__(self):

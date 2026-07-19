@@ -1,45 +1,130 @@
-{% extends 'news/base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
 
-{% block title %}{{ article.title }} - 智慧林{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} - 智慧林</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
 
-{% block content %}
-<div class="article-detail-container" style="max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 16px 56px;
+        }
 
-    <div style="margin-bottom: 20px;">
-        <a href="/" style="color: #0366d6; text-decoration: none;">&larr; 返回首页</a>
+        .article-detail-container {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px 30px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            line-height: 1.4;
+            color: #111827;
+            margin: 0 0 10px;
+        }
+
+        .article-meta {
+            color: #667085;
+            font-size: 0.92rem;
+            margin-bottom: 22px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .category-chip {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .article-summary {
+            margin: 0 0 20px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #475467;
+            line-height: 1.7;
+        }
+
+        .article-content {
+            font-size: 1.02rem;
+            line-height: 1.85;
+            color: #333;
+        }
+
+        .article-content h2 { font-size: 1.4em; margin-top: 25px; margin-bottom: 10px; color: #222; }
+        .article-content h3 { font-size: 1.2em; margin-top: 20px; margin-bottom: 8px; color: #333; }
+        .article-content p { margin-bottom: 12px; }
+        .article-content ul, .article-content ol { margin-bottom: 12px; padding-left: 20px; }
+        .article-content li { margin-bottom: 6px; }
+        .article-content hr { margin: 20px 0; border: none; border-top: 1px solid #eee; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .article-content th, .article-content td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+        .article-content th { background: #f5f5f5; font-weight: bold; }
+        .article-content blockquote { border-left: 4px solid #0366d6; margin: 10px 0; padding: 10px 15px; background: #f8f9fa; color: #555; }
+        .article-content code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+        .article-content img { max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0; }
+
+        @media (max-width: 640px) {
+            .page {
+                padding: 18px 12px 36px;
+            }
+
+            .article-detail-container {
+                padding: 22px 18px;
+                border-radius: 12px;
+            }
+
+            h1 {
+                font-size: 1.55rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <div class="article-detail-container">
+            <a class="back-link" href="/">&larr; 返回首页</a>
+
+            <h1>{{ article.title }}</h1>
+
+            <div class="article-meta">
+                <span style="color: {{ article.source_color }}; font-weight: bold;">[{{ article.source_label }}]</span>
+                {{ article.author }} · {{ article.created_at|date:"Y-m-d H:i" }}
+                {% if article.category %}
+                · <span class="category-chip">{{ article.category }}</span>
+                {% endif %}
+            </div>
+
+            {% if article.display_summary %}
+            <div class="article-summary">{{ article.display_summary }}</div>
+            {% endif %}
+
+            <div class="article-content">{{ article.content|safe }}</div>
+        </div>
     </div>
+</body>
 
-    <h1 style="font-size: 1.8em; color: #333; margin-bottom: 10px;">{{ article.title }}</h1>
-
-    <div style="color: #666; font-size: 0.9em; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-        <span style="color: {% if article.source_type == 'original' %}#28a745{% elif article.source_type == 'wechat' %}#07c160{% else %}#6c757d{% endif %}; font-weight: bold;">
-            [{% if article.source_type == 'original' %}原创{% elif article.source_type == 'wechat' %}微信{% else %}转载{% endif %}]
-        </span>
-        {{ article.author }} · {{ article.created_at|date:"Y-m-d H:i" }}
-        {% if article.category %}
-        · <span style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px;">{{ article.category }}</span>
-        {% endif %}
-    </div>
-
-    <div class="article-content" style="font-size: 1.05em; line-height: 1.8; color: #333;">
-        {{ article.content|safe }}
-    </div>
-
-</div>
-
-<style>
-    .article-content h2 { font-size: 1.4em; margin-top: 25px; margin-bottom: 10px; color: #222; }
-    .article-content h3 { font-size: 1.2em; margin-top: 20px; margin-bottom: 8px; color: #333; }
-    .article-content p { margin-bottom: 12px; }
-    .article-content ul, .article-content ol { margin-bottom: 12px; padding-left: 20px; }
-    .article-content li { margin-bottom: 6px; }
-    .article-content hr { margin: 20px 0; border: none; border-top: 1px solid #eee; }
-    .article-content table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    .article-content th, .article-content td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
-    .article-content th { background: #f5f5f5; font-weight: bold; }
-    .article-content blockquote { border-left: 4px solid #0366d6; margin: 10px 0; padding: 10px 15px; background: #f8f9fa; color: #555; }
-    .article-content code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
-    .article-content img { max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0; }
-</style>
-{% endblock %}
+</html>

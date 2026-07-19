@@ -6,9 +6,6 @@ from django.db import transaction
 from django.core.validators import validate_email
 from .models import TechNews, UserComment, DailyStats, UserIPLog, HotProduct, FeaturedSelection, OriginalArticle
 from django.contrib import messages
-from django.urls import reverse
-from django.utils.html import strip_tags
-from django.utils.text import Truncator
 import logging
 import re
 from collections import Counter, defaultdict
@@ -304,27 +301,10 @@ def is_blocked_in_china(url):
 
 
 def _build_original_article_summary(article):
-    summary = (getattr(article, 'summary', '') or '').strip()
-    if summary:
-        return summary
-
-    content = (getattr(article, 'content', '') or '').strip()
-    if not content:
-        return ''
-
-    plain_text = strip_tags(content)
-    plain_text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', ' ', plain_text)
-    plain_text = re.sub(r'\[([^\]]+)\]\([^\)]*\)', r'\1', plain_text)
-    plain_text = re.sub(r'(^|\n)\s{0,3}#{1,6}\s*', ' ', plain_text)
-    plain_text = re.sub(r'[`>*_~-]+', ' ', plain_text)
-    plain_text = re.sub(r'\s+', ' ', plain_text).strip()
-    return Truncator(plain_text).chars(140)
+    return article.display_summary
 
 
 def _prepare_original_articles(articles):
-    for article in articles:
-        article.display_summary = _build_original_article_summary(article)
-        article.display_url = (getattr(article, 'url', '') or '').strip() or reverse('original_article_detail', args=[article.id])
     return articles
 
 def news_list(request):
@@ -568,7 +548,6 @@ def news_list(request):
 
 def original_article_detail(request, article_id):
     article = get_object_or_404(OriginalArticle, id=article_id, is_published=True)
-    article.display_summary = _build_original_article_summary(article)
     return render(request, 'news/original_article_detail.html', {
         'article': article,
     })

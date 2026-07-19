@@ -2,6 +2,8 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智慧林 - 科技·生活·感悟</title>
     <style>
         body {
@@ -458,6 +460,14 @@
 
         .btn-submit:hover {
             background: #0056b3;
+        }
+
+        .comment-honeypot {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
         }
 
         .comments-list {
@@ -1347,17 +1357,15 @@
                 <div class="column-content">
                     {% for article in original_articles %}
                     <div class="column-content-item">
-                            <a href="{{ article.display_url }}"{% if article.url %} target="_blank" rel="noopener noreferrer"{% endif %}>
+                        <a href="{{ article.display_url }}"{% if article.url %} target="_blank" rel="noopener noreferrer"{% endif %}>
                             {{ article.title }}
                         </a>
                         {% if article.display_summary %}
-                        <div style="font-size: 0.85rem; color: #555; margin-top: 4px; line-height: 1.5;">{{
-                            article.display_summary }}</div>
+                        <div style="font-size: 0.85rem; color: #555; margin-top: 4px; line-height: 1.5;">{{ article.display_summary }}</div>
                         {% endif %}
                         <div class="meta">
-                            <span
-                                style="color: {% if article.source_type == 'original' %}#28a745{% elif article.source_type == 'wechat' %}#07c160{% else %}#6c757d{% endif %}; font-weight: bold;">
-                                [{% if article.source_type == 'original' %}原创{% elif article.source_type == 'wechat' %}微信{% else %}转载{% endif %}]
+                            <span style="color: {{ article.source_color }}; font-weight: bold;">
+                                [{{ article.source_label }}]
                             </span>
                             {{ article.author }} · {{ article.created_at|date:"Y-m-d" }}
                         </div>
@@ -1617,15 +1625,19 @@
             <!-- Comment Form -->
             <div class="comment-form">
                 <h2>💬 用户建议与反馈</h2>
-                <form method="post" action="{% url 'submit_comment' %}">
+                <form method="post" action="{% url 'submit_comment' %}" accept-charset="UTF-8">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="username">姓名（可选）</label>
-                        <input type="text" id="username" name="username" placeholder="输入您的姓名，留空则为匿名">
+                        <label for="username">姓名 *</label>
+                        <input type="text" id="username" name="username" placeholder="请输入您的姓名" required maxlength="100" autocomplete="name">
                     </div>
                     <div class="form-group">
-                        <label for="email">邮箱（可选）</label>
-                        <input type="email" id="email" name="email" placeholder="输入您的邮箱（不会公开显示）">
+                        <label for="email">邮箱 *</label>
+                        <input type="email" id="email" name="email" placeholder="请输入您的邮箱（不会公开显示）" required maxlength="200" autocomplete="email">
+                    </div>
+                    <div class="comment-honeypot" aria-hidden="true">
+                        <label for="website">Website</label>
+                        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="comment">评论内容 *</label>
