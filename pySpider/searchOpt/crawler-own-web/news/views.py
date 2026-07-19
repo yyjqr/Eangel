@@ -548,8 +548,16 @@ def news_list(request):
 
 def original_article_detail(request, article_id):
     article = get_object_or_404(OriginalArticle, id=article_id, is_published=True)
+
+    import markdown as md_lib
+    content_html = md_lib.markdown(
+        article.content or '',
+        extensions=['fenced_code', 'codehilite', 'tables', 'nl2br']
+    )
+
     return render(request, 'news/original_article_detail.html', {
         'article': article,
+        'content_html': content_html,
     })
 
 
