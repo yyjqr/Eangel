@@ -84,6 +84,8 @@
         .article-content th { background: #f5f5f5; font-weight: bold; }
         .article-content blockquote { border-left: 4px solid #0366d6; margin: 10px 0; padding: 10px 15px; background: #f8f9fa; color: #555; }
         .article-content code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+        .article-content pre { background: #1e1e1e; color: #d4d4d4; padding: 16px 18px; border-radius: 8px; overflow-x: auto; font-size: 0.88em; line-height: 1.55; margin: 14px 0; }
+        .article-content pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
         .article-content img { max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0; }
 
         @media (max-width: 640px) {
@@ -122,7 +124,7 @@
             <div class="article-summary">{{ article.display_summary }}</div>
             {% endif %}
 
-            <div class="article-content">{{ article.content|safe }}</div>
+            <div class="article-content">{{ content_html|safe }}</div>
         </div>
     </div>
 </body>
