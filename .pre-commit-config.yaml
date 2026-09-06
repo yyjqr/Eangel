@@ -1,14 +1,3 @@
-repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
-    hooks:
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
--   repo: https://github.com/psf/black
-    rev: 22.10.0
-    hooks:
-    -   id: black
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -35,6 +24,7 @@ repos:
         entry: cppcheck
         language: system
         args: [
+          "--quiet",
           "--error-exitcode=1",
           "--enable=all",
           "--std=c++17",                    # 显式指定C++标准
@@ -43,7 +33,8 @@ repos:
           "--max-configs=1",
           "--suppress=preprocessorErrorDirective", # 即使预处理报错也不中断对业务代码的分析
           "--suppress=toomanyconfigs",      # 屏蔽配置过多的警告提示
-          "--suppress=missingIncludeSystem" # 屏蔽找不到系统标准库头文件的警告
+          "--suppress=missingIncludeSystem", # 屏蔽找不到系统标准库头文件的警告
+          "--suppress=missingInclude"        # 屏蔽找不到项目/系统 include 的警告
         ]
         # 🛠️ 关键一步：在检查时彻底过滤掉 json.hpp 所在的目录或文件，防止其卡死
         exclude: '.*videoRecordH264/json\.hpp'

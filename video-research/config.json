@@ -1,0 +1,260 @@
+{
+  "server": {
+    "ip": "192.168.1.200",
+    "base_port": 9000
+  },
+  "duts": [
+    {
+      "name": "DUT-A",
+      "ip": "192.168.1.100",
+      "user": "root",
+      "password": "",
+      "port": 23,
+      "protocol": "telnet",
+      "chip": "Hi3516DV300",
+      "sdk": "HiMPP",
+      "memory_mb": 128,
+      "cores": 2,
+      "sample_bin_dir": "/userdata/sample",
+      "cameras": [
+        {"id": 0, "dev": "/dev/video0", "sensor": "IMX307",  "width": 1920, "height": 1080, "max_fps": 30},
+        {"id": 1, "dev": "/dev/video1", "sensor": "OV2710",  "width": 1920, "height": 1080, "max_fps": 30}
+      ],
+      "audio": {"alsa_dev": "hw:0,0", "sample_rate": 16000, "channels": 1}
+    }
+  ],
+  "thresholds": {
+    "video": {
+      "variance_min": 5.0,
+      "bad_pixel_ratio": 0.03,
+      "fps_tolerance": 0.05,
+      "frame_drop_max": 0.01,
+      "first_frame_ms": 3000,
+      "psnr_min": 30.0,
+      "sync_diff_ms": 2.0
+    },
+    "audio": {
+      "snr_min_db": 30.0,
+      "thd_max_pct": 1.0,
+      "freq_tolerance": 50,
+      "av_sync_ms": 100
+    },
+    "encode": {
+      "bitrate_tol_pct": 10.0,
+      "idr_interval_max": 2.5
+    },
+    "system": {
+      "cpu_max_pct": 90.0,
+      "mem_free_min_mb": 10,
+      "temp_max_celsius": 85
+    }
+  },
+  "report_dir": "./reports",
+  "ai_diag": {
+    "enabled": false,
+    "provider": "claude",
+    "model": "claude-3-5-sonnet-20241022",
+    "api_key_env": "ANTHROPIC_API_KEY"
+  },
+  "test_cases": [
+    {
+      "id": "TC_VI_01", "group": "VI", "enabled": true,
+      "name": "单目 2MP@30fps VI 采集与帧质量",
+      "type": "vi", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 30, "duration_s": 3,
+      "sdk_cmd": "{bin}/sample_vi 0 1920 1080 30 /tmp/vi_tc01.yuv",
+      "assert_fn": "assert_yuv_quality",
+      "tags": ["smoke", "vi"]
+    },
+    {
+      "id": "TC_VI_02", "group": "VI", "enabled": true,
+      "name": "单目 5MP@15fps 高分辨率 VI",
+      "type": "vi", "camera_id": 0,
+      "width": 2592, "height": 1944, "fps": 15, "duration_s": 3,
+      "sdk_cmd": "{bin}/sample_vi 0 2592 1944 15 /tmp/vi_tc02.yuv",
+      "assert_fn": "assert_yuv_quality",
+      "tags": ["vi", "highres"]
+    },
+    {
+      "id": "TC_VI_03", "group": "VI", "enabled": true,
+      "name": "单目 1080P@60fps 高帧率 VI",
+      "type": "vi", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 60, "duration_s": 3,
+      "sdk_cmd": "{bin}/sample_vi 0 1920 1080 60 /tmp/vi_tc03.yuv",
+      "assert_fn": "assert_yuv_quality",
+      "tags": ["vi", "highfps"]
+    },
+    {
+      "id": "TC_VENC_01", "group": "VENC", "enabled": true,
+      "name": "H.264 CBR 编码 码率精度校验",
+      "type": "venc", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 30,
+      "codec": "h264", "bitrate_kbps": 4000, "duration_s": 10,
+      "sdk_cmd": "{bin}/sample_venc 0 h264 1920 1080 30 4000 /tmp/venc_tc01.h264",
+      "assert_fn": "assert_encoded_stream",
+      "tags": ["venc", "h264", "smoke"]
+    },
+    {
+      "id": "TC_VENC_02", "group": "VENC", "enabled": true,
+      "name": "H.265 VBR 编码质量校验",
+      "type": "venc", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 30,
+      "codec": "h265", "bitrate_kbps": 2000, "duration_s": 10,
+      "sdk_cmd": "{bin}/sample_venc 0 h265 1920 1080 30 2000 /tmp/venc_tc02.h265",
+      "assert_fn": "assert_encoded_stream",
+      "tags": ["venc", "h265"]
+    },
+    {
+      "id": "TC_VENC_03", "group": "VENC", "enabled": true,
+      "name": "MJPEG 编码截图质量",
+      "type": "venc", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 1,
+      "codec": "mjpeg", "bitrate_kbps": 8000, "duration_s": 3,
+      "sdk_cmd": "{bin}/sample_venc 0 mjpeg 1920 1080 1 8000 /tmp/venc_tc03.jpg",
+      "assert_fn": "assert_encoded_stream",
+      "tags": ["venc", "jpeg"]
+    },
+    {
+      "id": "TC_VIDEO_01", "group": "VIDEO", "enabled": true,
+      "name": "VI→VENC 全链路 H.264 流畅度",
+      "type": "video", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 30,
+      "codec": "h264", "bitrate_kbps": 4000, "duration_s": 15,
+      "sdk_cmd": "{bin}/sample_video 0 1920 1080 30 h264 4000 /tmp/video_tc01.mp4",
+      "assert_fn": "assert_video_stream",
+      "tags": ["video", "fullpipeline", "smoke"]
+    },
+    {
+      "id": "TC_VIDEO_02", "group": "VIDEO", "enabled": true,
+      "name": "首帧出图延迟 < 3s",
+      "type": "video", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 30, "duration_s": 5,
+      "sdk_cmd": "{bin}/sample_video_firstframe 0 /tmp/video_tc02_firstframe.txt",
+      "assert_fn": "assert_first_frame_latency",
+      "tags": ["video", "latency"]
+    },
+    {
+      "id": "TC_VIDEO_03", "group": "VIDEO", "enabled": true,
+      "name": "低码率 360P 编码（弱网/低功耗场景）",
+      "type": "video", "camera_id": 0,
+      "width": 640, "height": 360, "fps": 15,
+      "codec": "h264", "bitrate_kbps": 512, "duration_s": 10,
+      "sdk_cmd": "{bin}/sample_video 0 640 360 15 h264 512 /tmp/video_tc03.mp4",
+      "assert_fn": "assert_video_stream",
+      "tags": ["video", "lowbitrate"]
+    },
+    {
+      "id": "TC_AUDIO_01", "group": "AUDIO", "enabled": true,
+      "name": "Line-in 1kHz 正弦波 SNR/THD",
+      "type": "audio",
+      "alsa_dev": "hw:0,0", "sample_rate": 16000, "channels": 1,
+      "duration_s": 3, "expected_freq": 1000,
+      "sdk_cmd": "{bin}/sample_audio_cap hw:0,0 16000 1 3 /tmp/audio_tc01.wav",
+      "assert_fn": "assert_audio_sine",
+      "tags": ["audio", "smoke"]
+    },
+    {
+      "id": "TC_AUDIO_02", "group": "AUDIO", "enabled": true,
+      "name": "AAC 编码码流音质验证",
+      "type": "audio",
+      "alsa_dev": "hw:0,0", "sample_rate": 48000, "channels": 2,
+      "duration_s": 5, "expected_freq": 1000,
+      "sdk_cmd": "{bin}/sample_audio_aac hw:0,0 48000 2 5 /tmp/audio_tc02.aac",
+      "assert_fn": "assert_audio_sine",
+      "tags": ["audio", "aac"]
+    },
+    {
+      "id": "TC_AUDIO_03", "group": "AUDIO", "enabled": true,
+      "name": "A/V Sync 同步误差 < 100ms",
+      "type": "av_sync", "camera_id": 0,
+      "alsa_dev": "hw:0,0",
+      "width": 1920, "height": 1080, "fps": 30, "duration_s": 10,
+      "sdk_cmd": "{bin}/sample_av_sync 0 hw:0,0 /tmp/audio_tc03_av.mp4",
+      "assert_fn": "assert_av_sync",
+      "tags": ["audio", "avsync"]
+    },
+    {
+      "id": "TC_MCAM_01", "group": "MultiCAM", "enabled": true,
+      "name": "双目帧同步误差 < 2ms",
+      "type": "multicam", "camera_ids": [0, 1],
+      "width": 1920, "height": 1080, "fps": 30, "duration_s": 5,
+      "sdk_cmd": "{bin}/sample_multicam 2 1920 1080 30 /tmp/mcam_tc01",
+      "assert_fn": "assert_multicam_sync",
+      "tags": ["multicam", "stereo"]
+    },
+    {
+      "id": "TC_MCAM_02", "group": "MultiCAM", "enabled": false,
+      "name": "四目高负载 5MP@30fps 带宽",
+      "type": "multicam", "camera_ids": [0, 1, 2, 3],
+      "width": 2592, "height": 1944, "fps": 30, "duration_s": 10,
+      "sdk_cmd": "{bin}/sample_multicam 4 2592 1944 30 /tmp/mcam_tc02",
+      "assert_fn": "assert_multicam_sync",
+      "tags": ["multicam", "stress", "bandwidth"]
+    },
+    {
+      "id": "TC_AI_01", "group": "AI", "enabled": true,
+      "name": "人脸检测推理帧率 >= 15fps",
+      "type": "ai", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 25, "duration_s": 10,
+      "sdk_cmd": "{bin}/sample_ai_detect 0 face /tmp/ai_tc01_result.json",
+      "assert_fn": "assert_ai_perf",
+      "expected_fps": 15.0,
+      "tags": ["ai", "face", "npu"]
+    },
+    {
+      "id": "TC_AI_02", "group": "AI", "enabled": true,
+      "name": "目标检测推理延迟 < 100ms",
+      "type": "ai", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 25, "duration_s": 10,
+      "sdk_cmd": "{bin}/sample_ai_detect 0 person /tmp/ai_tc02_result.json",
+      "assert_fn": "assert_ai_latency",
+      "expected_latency_ms": 100,
+      "tags": ["ai", "detection"]
+    },
+    {
+      "id": "TC_AI_03", "group": "AI", "enabled": true,
+      "name": "VI→ISP→AI 全链路不丢帧",
+      "type": "ai", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 25, "duration_s": 15,
+      "sdk_cmd": "{bin}/sample_ai_pipeline 0 /tmp/ai_tc03_log.txt",
+      "assert_fn": "assert_ai_pipeline",
+      "tags": ["ai", "pipeline", "smoke"]
+    },
+    {
+      "id": "TC_SVP_01", "group": "SVP", "enabled": true,
+      "name": "SVP 图像缩放 Bilinear 精度",
+      "type": "svp",
+      "width": 1920, "height": 1080, "duration_s": 5,
+      "sdk_cmd": "{bin}/sample_svp_resize /tmp/input_1080p.yuv 1920 1080 960 540 /tmp/svp_tc01_out.yuv",
+      "assert_fn": "assert_svp_output",
+      "tags": ["svp", "resize"]
+    },
+    {
+      "id": "TC_SVP_02", "group": "SVP", "enabled": true,
+      "name": "SVP IVE 运动检测（背景建模）",
+      "type": "svp", "camera_id": 0,
+      "width": 1280, "height": 720, "fps": 25, "duration_s": 10,
+      "sdk_cmd": "{bin}/sample_svp_ive 0 1280 720 /tmp/svp_tc02_result.json",
+      "assert_fn": "assert_svp_ive",
+      "tags": ["svp", "ive", "motion"]
+    },
+    {
+      "id": "TC_ROBUST_01", "group": "Robustness", "enabled": true,
+      "name": "CIS 热插拔自恢复（MIPI 断流）",
+      "type": "robustness", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 30, "duration_s": 30,
+      "sdk_cmd": "{bin}/sample_vi_hotplug 0 30 /tmp/robust_tc01_log.txt",
+      "assert_fn": "assert_self_healing",
+      "tags": ["robustness", "hotplug"]
+    },
+    {
+      "id": "TC_ROBUST_02", "group": "Robustness", "enabled": false,
+      "name": "长稳 10min 内存泄漏检测",
+      "type": "stress", "camera_id": 0,
+      "width": 1920, "height": 1080, "fps": 30, "duration_s": 600,
+      "sdk_cmd": "{bin}/sample_vi 0 1920 1080 30 /dev/null",
+      "assert_fn": "assert_no_memory_leak",
+      "tags": ["stress", "memcheck"]
+    }
+  ]
+}
