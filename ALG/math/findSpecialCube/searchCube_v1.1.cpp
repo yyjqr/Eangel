@@ -1,8 +1,13 @@
 #include <cmath>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <mutex>
+#include <string>
+#include <thread>
 using namespace std;
 ofstream finCube;
+mutex g_time_mutex;
 
 bool is_perfect_square(long long n) {
   long long sqrt_n = static_cast<long long>(std::sqrt(n));

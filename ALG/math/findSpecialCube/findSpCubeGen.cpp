@@ -13,15 +13,14 @@ using namespace std;
 using u64 = uint64_t;
 using u128 = __uint128_t;
 
-constexpr u64 EDGE_MIN = 6000000000000ULL;  // 1E12 -->3E12
-constexpr u64 EDGE_MAX = 10000000000000ULL; // 1E13
+constexpr u64 EDGE_MIN =
+    9000000000000ULL; // 1E12 -->3E12--->（1011  6E12--->9E12)
+constexpr u64 EDGE_MAX = 100000000000000ULL; // 1E13---》1E14
 constexpr char OUTPUT_FILE[] = "PerfectCuboid_GenResults.txt";
 
 mutex io_mutex;
 ofstream result_file;
 atomic<u64> global_u_checked(0);
-
-u64 floor_sqrt_u64(u64 x) { return std::sqrt(static_cast<double>(x)); }
 
 u64 floor_sqrt_u128(u128 value) {
   if (value == 0)
@@ -43,23 +42,112 @@ bool is_perfect_square(u128 value, u64 *root = nullptr) {
   return true;
 }
 
+// ── Miller–Rabin + Pollard–Rho 快速因数分解 ──────────────────────────────────
+
+// 128 位模乘，避免 64 位乘法溢出
+inline u64 mulmod64(u64 a, u64 b, u64 m) {
+  return static_cast<u128>(a) * b % m;
+}
+
+// 快速模幂
+static u64 powmod64(u64 a, u64 b, u64 m) {
+  u64 res = 1 % m;
+  for (a %= m; b; b >>= 1, a = mulmod64(a, a, m))
+    if (b & 1)
+      res = mulmod64(res, a, m);
+  return res;
+}
+
+// 确定性 Miller–Rabin：对所有 64 位整数无误判
+// 底数集合 {2,3,5,7,11,13,17,19,23,29,31,37} 覆盖 n < 3.3×10^24
+static bool is_prime64(u64 n) {
+  if (n < 2)
+    return false;
+  if (n == 2 || n == 3 || n == 5 || n == 7)
+    return true;
+  if (n % 2 == 0 || n % 3 == 0 || n % 5 == 0)
+    return false;
+  u64 d = n - 1;
+  int r = 0;
+  while (!(d & 1)) {
+    d >>= 1;
+    ++r;
+  }
+  for (u64 a : {2ULL, 3ULL, 5ULL, 7ULL, 11ULL, 13ULL, 17ULL, 19ULL, 23ULL,
+                29ULL, 31ULL, 37ULL}) {
+    if (a >= n)
+      continue;
+    u64 x = powmod64(a, d, n);
+    if (x == 1 || x == n - 1)
+      continue;
+    bool composite = true;
+    for (int i = 0; i < r - 1; ++i) {
+      x = mulmod64(x, x, n);
+      if (x == n - 1) {
+        composite = false;
+        break;
+      }
+    }
+    if (composite)
+      return false;
+  }
+  return true;
+}
+
+// Pollard–Rho（Floyd 判圈）；n 必须是合数
+// 返回 n 的一个非平凡因子，或 n（判圈失败，调用方换 c 重试）
+static u64 pollard_rho(u64 n, u64 c) {
+  auto f = [&](u64 x) { return (mulmod64(x, x, n) + c) % n; };
+  u64 x = 2, y = 2, d = 1;
+  while (d == 1) {
+    x = f(x);
+    y = f(f(y));
+    u64 diff = x > y ? x - y : y - x;
+    d = std::gcd(diff, n);
+    if (x == y)
+      return n; // 进入循环，换参数重试
+  }
+  return d;
+}
+
+// 递归分解：将 n 的所有素因子累积到 out
+static void factorize_impl(u64 n, vector<pair<u64, int>> &out) {
+  if (n == 1)
+    return;
+  if (is_prime64(n)) {
+    auto it = find_if(out.begin(), out.end(),
+                      [n](const pair<u64, int> &p) { return p.first == n; });
+    if (it != out.end()) {
+      ++it->second;
+    } else {
+      out.push_back({n, 1});
+    }
+    return;
+  }
+  // 寻找非平凡因子，失败时递增 c
+  u64 d = n;
+  for (u64 c = 1; d == n || d <= 1; ++c)
+    d = pollard_rho(n, c);
+  factorize_impl(d, out);
+  factorize_impl(n / d, out);
+}
+
+// 公开接口：先用小素数试除加速，再调用 Pollard–Rho 处理大因子
 vector<pair<u64, int>> factorize(u64 n) {
   if (n == 0)
     return {};
   vector<pair<u64, int>> factors;
-  for (u64 d = 2; d * d <= n; ++d) {
-    if (n % d == 0) {
-      int exponent = 0;
-      while (n % d == 0) {
-        ++exponent;
-        n /= d;
+  for (u64 p : {2ULL, 3ULL, 5ULL, 7ULL, 11ULL, 13ULL, 17ULL, 19ULL}) {
+    if (n % p == 0) {
+      int e = 0;
+      while (n % p == 0) {
+        n /= p;
+        ++e;
       }
-      factors.push_back({d, exponent});
+      factors.push_back({p, e});
     }
   }
-  if (n > 1) {
-    factors.push_back({n, 1});
-  }
+  factorize_impl(n, factors);
   return factors;
 }
 
@@ -81,7 +169,7 @@ vector<pair<u64, int>> merge_factors(const vector<pair<u64, int>> &f1,
 
 void get_divisors(const vector<pair<u64, int>> &factors, int idx, u128 current,
                   vector<u128> &div) {
-  if (idx == factors.size()) {
+  if (idx == static_cast<int>(factors.size())) {
     div.push_back(current);
     return;
   }
@@ -115,13 +203,11 @@ void worker(u64 u_start, u64 u_end) {
       u64 k_min = (EDGE_MIN + y - 1) / y;
       u64 k_max = EDGE_MAX / y;
 
-      // 核心修复: 截断大 k 导致的性能黑洞！
-      // 如果生成的基础边 y 极小 (比如 4)，k 会高达万亿级，在对大 k
-      // 循环并质因数分解时会彻底卡死。
-      // 事实上，如果某个完美长方体是大倍数缩放而来的，它对应的本原极小完美长方体早就被前人发现了。
-      // 既然我们要找 1E12 以上的未知解，我们只能（也只需）搜索全新的本原解！
-      // 严格限制 k_max 最多为 10（稍微冗余），拒绝把小三角放大千亿倍！
-      k_max = min(k_max, 10UL);
+      // k 的范围完全由边长区间 [EDGE_MIN, EDGE_MAX] 推导，不加任意上限。
+      // 本原性判断在所有平方检验通过后通过 gcd(a,b,c)==1 完成，
+      // 而非用单个面的缩放因子 k 作为代理（k 仅约束面 (a,b,m)，不约束 c）。
+      // 注意：若 y 极小（如 4），k_max 可达万亿级，性能开销极大；
+      // 如需加速可设置 K_CAP，但结果将不完整，需在输出中注明。
 
       if (k_min > k_max)
         continue;
@@ -158,7 +244,6 @@ void worker(u64 u_start, u64 u_end) {
           if ((d1 % 2) != (d2 % 2))
             continue; // n, o must be integer
 
-          u128 o = (d2 - d1) / 2;
           u128 n = (d1 + d2) / 2;
 
           if (n <= b)
@@ -174,9 +259,17 @@ void worker(u64 u_start, u64 u_end) {
           u64 c = 0;
           if (!is_perfect_square(c2, &c))
             continue;
-          // cout <<"test c2" << c2<<"\n";
-          cout << "2nd test k:" << k << "a|b|c:" << a << "," << b << "," << c
-               << endl;
+          // 本原长方体检验：gcd(a,b,c)==1
+          // k 只约束面 (a,b,m)，不能代替对整体的本原性判断
+          if (std::gcd(std::gcd(a, b), c) != 1)
+            continue;
+          {
+            lock_guard<mutex> lock(io_mutex);
+            cout << "2nd test k:" << k << "a|b|c:" << a << "," << b << "," << c
+                 << endl;
+            result_file << "maybe k:" << k << "a|b|c:" << a << "," << b << ","
+                        << c << endl;
+          }
           // Final check: space diagonal
           u128 p2 = (u128)m * m + c2;
           u64 p = 0;
@@ -194,18 +287,26 @@ void worker(u64 u_start, u64 u_end) {
 
 int main() {
   result_file.open(OUTPUT_FILE, ios::app);
-  u64 max_u = std::sqrt(EDGE_MAX) + 1;
-  cout << "Start Gen Strategy, max_u=" << max_u << "\n";
+  if (!result_file.is_open()) {
+    cerr << "Failed to open output file: " << OUTPUT_FILE << "\n";
+    return 1;
+  }
+  // u 的正确上界：面斜边 m <= sqrt(2)*EDGE_MAX，且 u^2 < m，
+  // 故 u < sqrt(sqrt(2)*EDGE_MAX)，用 ceil 保证不漏边界点
+  const long double max_m =
+      std::sqrt(2.0L) * static_cast<long double>(EDGE_MAX);
+  const u64 u_end = static_cast<u64>(ceill(sqrtl(max_m)));
+  cout << "Start Gen Strategy, u_end=" << u_end << "\n";
 
   int num_threads = thread::hardware_concurrency();
   if (num_threads == 0)
     num_threads = 16;
   vector<thread> workers;
 
-  u64 chunk = (max_u - 1) / num_threads + 1;
+  u64 chunk = (u_end - 2 + num_threads - 1) / num_threads;
   for (int i = 0; i < num_threads; ++i) {
     u64 start = 2 + i * chunk;
-    u64 end = min(max_u + 1, start + chunk);
+    u64 end = min(u_end, start + chunk);
     if (start < end) {
       workers.emplace_back(worker, start, end);
     }

@@ -34,7 +34,10 @@ repos:
           "--suppress=preprocessorErrorDirective", # 即使预处理报错也不中断对业务代码的分析
           "--suppress=toomanyconfigs",      # 屏蔽配置过多的警告提示
           "--suppress=missingIncludeSystem", # 屏蔽找不到系统标准库头文件的警告
-          "--suppress=missingInclude"        # 屏蔽找不到项目/系统 include 的警告
+          "--suppress=missingInclude",      # 屏蔽找不到项目/系统 include 的警告
+          "--suppress=unmatchedSuppression" # 屏蔽「未被触发的 suppress」提示（部分文件运行时
+                                            # 上面几条 suppress 不会命中，cppcheck 2.7 会把它
+                                            # 计入 --error-exitcode 导致误报失败）
         ]
         # 🛠️ 关键一步：在检查时彻底过滤掉 json.hpp 所在的目录或文件，防止其卡死
         exclude: '.*videoRecordH264/json\.hpp'
