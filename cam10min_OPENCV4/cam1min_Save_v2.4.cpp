@@ -1,10 +1,12 @@
 /****定时拍摄1分钟的图片，并以当前时间+字符的形式命名***by
- * YJ20170908----》201907 ---》202003 */
+ * YJ20170908----》201907 ---》202003  (2026-08 增加左上角日期时间水印)
+ */
 // 基于opencv3,4 c++的函数写法，重写摄像头拍摄图片的程序。硬件基于树莓派。
 
 #include "iostream"
 #include <opencv2/core/core.hpp> //writer 0306
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,23 +18,20 @@ using namespace cv;
 int main(int argc, char **argv) {
   /* init camera */
   VideoCapture pCapture;
-  pCapture.open(
-      -1); // 从摄像头读入视频 0表示从摄像头读入  -1表示任意摄像头 202003
+  pCapture.open(-1); // 从摄像头读入 0表示从摄像头读入  -1表示任意摄像头 202003
   // double rate=25.0;//fps
 
   pCapture.set(CAP_PROP_FRAME_WIDTH, 1280);
   pCapture.set(CAP_PROP_FRAME_HEIGHT, 960);
 
-  string str[200] = {
-      "cam0"}; // 数组设置过小，导致只能拍摄100张图片，现已修改为2000
-  string strTemp = "/tmp/"; // 间隔一段时间缓存到tmp目录下一张图片 20190217 ！！
+  // 临时文件名缓冲
+  string strTemp; // 在循环内构造完整路径
   // stringstream ss;
   time_t timep, t;
   tm *local;
   char buf[1000] = {0};
   unsigned int timeDuration = 1; // 18--->10min 不需要保存过多的图片  20190613
   Mat frame;
-  unsigned int j;
 
   if (!pCapture.isOpened()) {
     cout << "can not open";
@@ -42,7 +41,6 @@ int main(int argc, char **argv) {
   cout << "Video capture time(minutes)拍摄时间（分钟）:10分钟" << endl;
   // cin >>timeDuration;
   // cvNamedWindow("Eangel cam",0);  //chuanjian  0 window can be changed!0312
-  int count = 0; // add 0807
   const char *pImageFileName;
   for (unsigned int i = 0; i < timeDuration * 42;
        i++) //*60/5*4  (20180807yj)------------>*60/5.5*4 (1121)
@@ -51,7 +49,7 @@ int main(int argc, char **argv) {
     // writer  <<frame;
     // imshow("Eangel cam",frame);
     waitKey(1000); // 延时1s
-    j = i % 4;
+    unsigned int j = i % 4;
 
     strTemp = "/tmp/";
     memset(buf, 0, sizeof(buf));
@@ -66,6 +64,18 @@ int main(int argc, char **argv) {
       cout << strTemp << endl;
 
       strTemp += ".jpg"; // gmtime
+
+      // ===== 在画面左上角叠加日期时间水印 (2026-08-15 新增) =====
+      if (!frame.empty()) {
+        char timeText[100] = {0};
+        strftime(timeText, sizeof(timeText), "%Y-%m-%d %H:%M:%S", local);
+        // 黑色描边 + 白色文字，增强可读性
+        putText(frame, timeText, Point(12, 40), FONT_HERSHEY_SIMPLEX, 1.0,
+                Scalar(0, 0, 0), 4, LINE_AA); // 黑色底
+        putText(frame, timeText, Point(12, 40), FONT_HERSHEY_SIMPLEX, 1.0,
+                Scalar(255, 255, 255), 2, LINE_AA); // 白色字
+      }
+      // ===== 水印结束 =====
 
       pImageFileName = strTemp.c_str();
 
